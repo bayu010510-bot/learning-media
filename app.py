@@ -15,7 +15,7 @@ st.sidebar.title("🧭 Navigasi Menu")
 menu = st.sidebar.radio("Pilih Halaman:", ["🏠 Beranda", "📤 Upload Materi", "📖 Lihat Materi"])
 
 st.sidebar.markdown("---")
-st.sidebar.info("💡 Tips: Desain banner, aset grafis, atau elemen presentasi yang dibuat dari Canva bisa langsung diunggah ke sini agar web lebih menarik.")
+st.sidebar.info("💡 Tips: Belajarlah dengan sungguh sungguh agar kau berhasil.")
 
 # --- HALAMAN BERANDA ---
 if menu == "🏠 Beranda":
