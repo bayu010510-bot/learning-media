@@ -181,5 +181,3 @@ TOKO_AKSESORIS = {
     "🎓 Topi Kelulusan": {"harga": 40, "url": "https://img.icons8.com/isometric/100/mortarboard.png"},
     "🥽 Kacamata Google": {"harga": 50, "url": "https://img.icons8.com/isometric/100/safety-goggles.png"}
 }
-    "👑 Mahkota Emas": {"harga": 100, "url": "https://img.icons8.com/isometric/100/crown.png"},
-    "🎧 Headphone Neon": {"harga": 60, "url": "https://img.icons8.com/isometric/100/headphones.
