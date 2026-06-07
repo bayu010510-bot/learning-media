@@ -15,7 +15,13 @@ DAFTAR_PELAJARAN = [
     "Biologi (Ekologi)", 
     "Matematika", 
     "Prakarya & Kewirausahaan", 
-    "Seni Budaya"
+    "Seni Budaya",
+    "Sosiologi",
+    "Geografi",
+    "Ekonomi",
+    "Sejarah",
+    "Bahasa Indonesia",
+    "Bahasa Inggris"
 ]
 
 # --- SIDEBAR ---
