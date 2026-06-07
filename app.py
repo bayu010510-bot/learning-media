@@ -1,10 +1,3 @@
-import os
-
-# 1. Install semua kebutuhan sistem
-pip install -q streamlit pandas openpyxl pillow
-
-# 2. Membuat file aplikasi (Learning Media)
-kode_app = """
 import streamlit as st
 import pandas as pd
 from PIL import Image
@@ -59,8 +52,11 @@ elif menu == "📖 Lihat Materi":
             
             # Preview Gambar
             if file_ext in ['jpg', 'png', 'jpeg']:
-                img = Image.open(file_path)
-                st.image(img, use_column_width=True)
+                try:
+                    img = Image.open(file_path)
+                    st.image(img, use_column_width=True)
+                except Exception:
+                    st.write("(Gambar tidak dapat dimuat)")
             
             # Preview Excel
             elif file_ext in ['xlsx', 'xls']:
@@ -74,22 +70,3 @@ elif menu == "📖 Lihat Materi":
             with open(file_path, "rb") as f:
                 st.download_button(label=f"⬇️ Download {file}", data=f, file_name=file)
             st.markdown("---")
-"""
-
-# Menyimpan file kode di atas
-with open("app.py", "w", encoding="utf-8") as f:
-    f.write(kode_app)
-
-# 3. Mendapatkan IP dan Menjalankan Web
-import urllib.request
-ip = urllib.request.urlopen('https://ipv4.icanhazip.com').read().decode('utf8').strip('\n')
-
-print("\n" + "🔥"*25)
-print(f"1️⃣ COPY ANGKA IP INI: {ip}")
-print(f"2️⃣ KLIK LINK LOCA.LT DI BAWAH INI")
-print(f"3️⃣ PASTE ANGKA IP DI WEB YANG TERBUKA")
-print("🔥"*25 + "\n")
-
-# Menjalankan Streamlit dan Localtunnel
-!streamlit run app.py &>/content/logs.txt &
-!npx localtunnel --port 8501
