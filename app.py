@@ -1,7 +1,7 @@
 import os
 
 # 1. Install semua kebutuhan sistem
-!pip install -q streamlit pandas openpyxl pillow
+pip install -q streamlit pandas openpyxl pillow
 
 # 2. Membuat file aplikasi (Learning Media)
 kode_app = """
