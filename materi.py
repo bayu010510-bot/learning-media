@@ -61,6 +61,7 @@ DATA_MATERI = {
         },
         "Bab 3: Norma dan Nilai Sosial": {
             "sub_bab": ["3.1 Akar Konflik di Masyarakat", "3.2 Resolusi Konflik", "3.3 Sosialisasi"],
+            "rangkuman": "• **Konflik**: Proses sosial antara dua orang atau lebih yang berusaha menyingkirkan pihak lain.\n• **Integrasi**: Proses penyesuaian unsur-unsur yang berbeda dalam masyarakat sehingga menjadi satu kesatuan."
         },
     },
     "Geografi": {
