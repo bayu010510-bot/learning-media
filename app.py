@@ -50,8 +50,11 @@ DAFTAR_GELAR = {
 }
 
 # --- KATA SANDI RAHASIA ADMIN ---
-# Kata sandi telah diubah sesuai permintaan
 PASSWORD_ADMIN = "LEARNWITHLM"
+
+# --- FUNGSI PEMBERSIH NAMA FOLDER (INI YANG TADI HILANG!) ---
+def bersihkan_nama(teks):
+    return re.sub(r'[\\/*?:"<>|]', "", teks)
 
 # --- KUSTOMISASI CSS HOLOGRAFIS & NEON ---
 st.markdown(f"""
