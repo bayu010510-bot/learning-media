@@ -3,345 +3,270 @@ import pandas as pd
 from PIL import Image
 import os
 import re
-from materi import DATA_MATERI
+
+# Sistem anti-error untuk grafik canggih
+try:
+    import plotly.graph_objects as go
+    HAS_PLOTLY = True
+except ImportError:
+    HAS_PLOTLY = False
 
 # --- KONFIGURASI HALAMAN ---
-st.set_page_config(page_title="Learning Media Pro", page_icon="🎓", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(page_title="Learning Media Pro | Edisi Mythic", page_icon="🌌", layout="wide", initial_sidebar_state="expanded")
 
-# --- INISIALISASI MEMORI USER (GAMIFICATION ENGINE) ---
+# --- INISIALISASI MEMORI (ENGINE RPG & ANALITIK) ---
 if "user_points" not in st.session_state: st.session_state.user_points = 0
 if "learned_chapters" not in st.session_state: st.session_state.learned_chapters = set()
 if "avatar_name" not in st.session_state: st.session_state.avatar_name = "Geni Us"
-if "user_title" not in st.session_state: st.session_state.user_title = "🏅 Pelajar Pemula"
-if "unlocked_titles" not in st.session_state: st.session_state.unlocked_titles = ["🏅 Pelajar Pemula"]
-if "daily_streak" not in st.session_state: st.session_state.daily_streak = 3
+if "user_title" not in st.session_state: st.session_state.user_title = "Pemula"
+if "unlocked_titles" not in st.session_state: st.session_state.unlocked_titles = ["Pemula"]
+if "daily_streak" not in st.session_state: st.session_state.daily_streak = 5
+if "mastery" not in st.session_state: 
+    # Poin kecerdasan dasar tiap mapel untuk grafik Radar
+    st.session_state.mastery = {"Matematika": 10, "Fisika": 10, "Kimia": 10, "Biologi": 10, "Sejarah": 10, "Ekonomi": 10, "Sosiologi": 10}
 
-# Konversi Poin ke Level
+# --- SISTEM KALKULASI RANK (KASTA TIER) ---
 st.session_state.user_level = (st.session_state.user_points // 100) + 1
 
-# --- DATABASE KUIS INTERAKTIF UTBK ---
-DATABASE_KUIS = {
-    "Matematika": {
-        "soal": "Jika $2^{x+1} = 16$, berapakah nilai dari $x$?",
-        "opsi": ["A. 2", "B. 3", "C. 4", "D. 5"],
-        "jawaban": "B. 3",
-        "pembahasan": "Sederhanakan persamaan eksponen menjadi basis yang sama:\n\n$2^{x+1} = 2^4$\n\nKarena basisnya sudah sama (2), kita bisa menyamakan pangkatnya:\n\n$x + 1 = 4$\n\n$x = 4 - 1 = 3$.\n\nJadi, nilai $x$ adalah **3**."
-    },
-    "Fisika": {
-        "soal": "Sebuah benda bermassa 2 kg jatuh bebas dari ketinggian 10 meter. Berapakah energi potensial awal benda tersebut jika percepatan gravitasi $g = 10 \\text{ m/s}^2$?",
-        "opsi": ["A. 50 Joule", "B. 100 Joule", "C. 200 Joule", "D. 400 Joule"],
-        "jawaban": "C. 200 Joule",
-        "pembahasan": "Energi Potensial ($Ep$) dihitung menggunakan rumus:\n\n$$Ep = m \\cdot g \\cdot h$$\n\nDiketahui: $m = 2 \\text{ kg}$, $g = 10 \\text{ m/s}^2$, $h = 10 \\text{ m}$.\n\n$$Ep = 2 \\cdot 10 \\cdot 10 = 200 \\text{ Joule}$$\n\nJadi, energi potensial awal benda adalah **200 Joule**."
-    },
-    "Kimia": {
-        "soal": "Manakah di bawah ini yang merupakan salah satu dari 12 prinsip utama Kimia Hijau (Green Chemistry)?",
-        "opsi": ["A. Memaksimalkan penggunaan energi fosil", "B. Mencegah timbulnya limbah sejak awal proses", "C. Membuang limbah cair langsung ke sungai", "D. Meningkatkan proses pembakaran terbuka"],
-        "jawaban": "B. Mencegah timbulnya limbah sejak awal proses",
-        "pembahasan": "Salah satu prinsip utama Kimia Hijau adalah **Mencegah Limbah (Prevention)**. Lebih baik mencegah terbentuknya limbah daripada mengolah atau membersihkan limbah setelah diproduksi."
-    },
-    "Biologi": {
-        "soal": "Garis khayal yang memisahkan wilayah persebaran fauna Indonesia bagian Barat (Asiatis) dengan wilayah bagian Tengah (Peralihan) disebut...",
-        "opsi": ["A. Garis Weber", "B. Garis Wallace", "C. Garis Khatulistiwa", "D. Garis Meridian"],
-        "jawaban": "B. Garis Wallace",
-        "pembahasan": "• **Garis Wallace** memisahkan tipe fauna Asiatis (Barat) dengan tipe Peralihan (Tengah).\n• **Garis Weber** memisahkan tipe fauna Peralihan (Tengah) dengan tipe Australis (Timur)."
-    },
-    "Sejarah": {
-        "soal": "Peristiwa penculikan Ir. Soekarno dan Drs. Moh. Hatta oleh golongan muda ke luar kota menjelang Proklamasi Kemerdekaan dikenal dengan nama peristiwa...",
-        "opsi": ["A. Peristiwa Ambarawa", "B. Peristiwa Tiga Daerah", "C. Peristiwa Rengasdengklok", "D. Peristiwa Malari"],
-        "jawaban": "C. Peristiwa Rengasdengklok",
-        "pembahasan": "Peristiwa **Rengasdengklok** terjadi pada 16 Agustus 1945, di mana golongan muda mengamankan Soekarno dan Hatta agar tidak terpengaruh oleh janji-janji Jepang dan segera memproklamasikan kemerdekaan Indonesia."
-    },
-    "Ekonomi": {
-        "soal": "Kondisi di mana kebutuhan manusia tidak terbatas, sedangkan alat pemuas kebutuhan jumlahnya sangat terbatas dinamakan...",
-        "opsi": ["A. Inflasi", "B. Deflasi", "C. Kelangkaan (Scarcity)", "D. Distribusi"],
-        "jawaban": "C. Kelangkaan (Scarcity)",
-        "pembahasan": "Inti masalah ekonomi modern adalah **Kelangkaan (Scarcity)**, yaitu kesenjangan antara sumber daya ekonomi yang terbatas dengan kebutuhan manusia yang tidak terbatas."
-    },
-    "Sosiologi": {
-        "soal": "Pengelompokan masyarakat secara horizontal atau sejajar berdasarkan ras, suku bangsa, profesi, dan agama tanpa tingkatan vertikal dinamakan...",
-        "opsi": ["A. Stratifikasi Sosial", "B. Diferensiasi Sosial", "C. Mobilitas Sosial", "D. Konflik Sosial"],
-        "jawaban": "B. Diferensiasi Sosial",
-        "pembahasan": "• **Diferensiasi Sosial**: Pengelompokan masyarakat secara horizontal/setara (Suku, Agama, Ras).\n• **Stratifikasi Sosial**: Pelapisan masyarakat secara vertikal/bertingkat (Kekayaan, Jabatan)."
-    }
-}
+def get_tier(level):
+    if level < 3: return "🥉 Bronze", "#CD7F32"
+    elif level < 6: return "🥈 Silver", "#C0C0C0"
+    elif level < 10: return "🥇 Gold", "#FFD700"
+    elif level < 15: return "💎 Platinum", "#00EDFF"
+    else: return "🌌 Mythic", "#9D00FF"
 
-# --- STORE SHOP JULUKAN ELIT ---
-DAFTAR_GELAR = {
-    "👑 Raja Eksponen": 80,
-    "⚡ Speedrunner Fisika": 120,
-    "🧪 Alkemis Ulung": 160,
-    "🧬 Master Genetika": 200,
-    "📈 Begawan Ekonomi": 240
-}
+tier_name, tier_color = get_tier(st.session_state.user_level)
 
-# --- KUSTOMISASI CSS PREMIUM ---
-st.markdown("""
+# --- KUSTOMISASI CSS ANIMASI & GLASSMORPHISM ---
+st.markdown(f"""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
-    html, body, [class*="css"] { font-family: 'Plus Jakarta Sans', sans-serif; }
-    .stApp { background-color: #F8FAFC; }
+    html, body, [class*="css"] {{ font-family: 'Plus Jakarta Sans', sans-serif; }}
+    .stApp {{ background-color: #0F172A; background-image: radial-gradient(circle at 50% 0%, #1E293B 0%, #0F172A 100%); color: white; }}
     
-    h1 { color: #0F172A; font-weight: 800; letter-spacing: -0.5px; }
-    h2, h3 { color: #1E293B; font-weight: 600; }
+    h1, h2, h3, h4, h5, p, span, div {{ color: #F8FAFC; }}
     
-    /* Tombol Premium */
-    .stButton>button { 
-        background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
-        color: white; border-radius: 12px; border: none; padding: 12px 24px; font-weight: 600; width: 100%; 
-        transition: all 0.3s ease; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
-    }
-    .stButton>button:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3); }
+    /* Animasi Melayang untuk Avatar */
+    @keyframes float {{
+        0% {{ transform: translateY(0px); }}
+        50% {{ transform: translateY(-10px); }}
+        100% {{ transform: translateY(0px); }}
+    }}
+    .floating-avatar {{ animation: float 4s ease-in-out infinite; }}
     
-    /* Desain UI Komponen Game */
-    .dashboard-card { background-color: white; padding: 24px; border-radius: 16px; border: 1px solid #E2E8F0; text-align: center; height: 100%; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
-    .podium-box { background: linear-gradient(180deg, #FFFFFF 0%, #F1F5F9 100%); border: 2px solid #CBD5E1; padding: 15px; border-radius: 16px; text-align: center; }
-    .materi-box { background-color: white; padding: 24px; border-radius: 12px; border-left: 5px solid #3B82F6; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
-    .kuis-box { background-color: #FFFFFF; padding: 25px; border-radius: 16px; border: 2px solid #E2E8F0; margin-top: 20px; }
-    .pembahasan-box { background-color: #F8FAFC; padding: 20px; border-radius: 12px; border-left: 4px solid #64748B; margin-top: 15px; }
-    .title-badge { background-color: #EFF6FF; color: #1E40AF; padding: 4px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; display: inline-block; margin-top: 5px; }
+    /* Efek Kaca (Glassmorphism) & Glow */
+    .glass-card {{
+        background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px);
+        border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 24px; text-align: center; transition: all 0.3s ease;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    }}
+    .glass-card:hover {{ transform: translateY(-5px); border: 1px solid rgba(59, 130, 246, 0.5); box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }}
+    
+    /* Tombol Super Premium */
+    .stButton>button {{ 
+        background: linear-gradient(135deg, #00C6FF 0%, #0072FF 100%);
+        color: white; border-radius: 12px; border: none; padding: 12px 24px; font-weight: 800; 
+        text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s ease;
+    }}
+    .stButton>button:hover {{ box-shadow: 0 0 20px rgba(0, 198, 255, 0.6); transform: scale(1.02); }}
+    
+    /* Label Tier */
+    .tier-badge {{ background: {tier_color}40; color: {tier_color}; padding: 6px 15px; border-radius: 20px; font-weight: 800; border: 1px solid {tier_color}; display: inline-block; box-shadow: 0 0 10px {tier_color}40; }}
+    
+    /* Sidebar Styling Override */
+    [data-testid="stSidebar"] {{ background-color: #1E293B !important; border-right: 1px solid #334155; }}
     </style>
     """, unsafe_allow_html=True)
 
-# --- FUNGSI ASISTEN VISUAL ---
-def bersihkan_nama(teks):
-    return re.sub(r'[\\/*?:"<>|]', "", teks)
+from materi import DATA_MATERI
 
-def tampilkan_avatar(keyword, fallback_emoji):
+# Database Kuis Ringkas
+DATABASE_KUIS = {
+    "Matematika": {"soal": "Jika $2^{x+1} = 16$, nilai $x$ adalah?", "opsi": ["2", "3", "4", "5"], "jaw": "3", "pem": "Sederhanakan jadi $2^{x+1} = 2^4$. Maka $x+1=4 \\Rightarrow x=3$."},
+    "Fisika": {"soal": "Energi potensial benda 2 kg di ketinggian 10 m (g=10)?", "opsi": ["100 J", "200 J", "300 J", "400 J"], "jaw": "200 J", "pem": "Ep = m.g.h = $2 \\times 10 \\times 10 = 200$ Joule."},
+    "Kimia": {"soal": "Kondisi di mana laju reaksi ke kanan dan kiri sama disebut?", "opsi": ["Katalis", "Kesetimbangan Dinamis", "Reaksi Eksoterm", "Redoks"], "jaw": "Kesetimbangan Dinamis", "pem": "Kesetimbangan tercapai saat V1 (kanan) = V2 (kiri)."},
+    "Biologi": {"soal": "Pemisah fauna Asiatis dan Peralihan adalah garis?", "opsi": ["Khatulistiwa", "Wallace", "Weber", "Bujur"], "jaw": "Wallace", "pem": "Garis Wallace memisahkan tipe Asiatis dan Peralihan."},
+    "Sejarah": {"soal": "Pengamanan Soekarno-Hatta ke luar Jakarta disebut peristiwa?", "opsi": ["Bandung Lautan Api", "Rengasdengklok", "Ambarawa", "Madiun"], "jaw": "Rengasdengklok", "pem": "Golongan muda menculik ke Rengasdengklok pada 16 Agustus 1945."},
+    "Ekonomi": {"soal": "Inti masalah ekonomi adalah...", "opsi": ["Inflasi", "Kelangkaan (Scarcity)", "Deflasi", "Monopoli"], "jaw": "Kelangkaan (Scarcity)", "pem": "Kelangkaan: kebutuhan tak terbatas vs alat pemuas terbatas."},
+    "Sosiologi": {"soal": "Pengelompokan masyarakat yang sejajar/horizontal disebut...", "opsi": ["Stratifikasi", "Diferensiasi", "Mobilitas", "Konflik"], "jaw": "Diferensiasi", "pem": "Diferensiasi = setara (Suku, Agama). Stratifikasi = bertingkat (Harta)."}
+}
+
+# Fungsi Pembaca Avatar Anti-Error
+def tampilkan_avatar(keyword):
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    gambar_ditemukan = False
     try:
         for f in os.listdir(current_dir):
             if keyword in f.lower() and f.lower().endswith(('.png', '.jpg', '.jpeg')):
-                img = Image.open(os.path.join(current_dir, f))
-                st.image(img, use_column_width=True)
-                gambar_ditemukan = True
-                break
+                st.markdown(f"""<div class="floating-avatar" style="display:flex; justify-content:center;"><img src="data:image/png;base64,{base64.b64encode(open(os.path.join(current_dir, f), 'rb').read()).decode()}" style="width:150px; filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.5));"></div>""", unsafe_allow_html=True)
+                return True
     except: pass
-    if not gambar_ditemukan:
-        st.markdown(f"<div style='text-align:center; font-size:80px;'>{fallback_emoji}</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='floating-avatar' style='text-align:center; font-size:100px;'>{'👨‍🎓' if keyword=='genius' else '👩‍🎓'}</div>", unsafe_allow_html=True)
 
-# --- SIDEBAR NAVIGASI PERMAINAN ---
+import base64
+
+# --- SIDEBAR: KOKPIT PEMAIN ---
 with st.sidebar:
-    st.markdown("<h3 style='text-align:center; color:#0F172A; margin-bottom: 10px;'>🎮 Ksatria Pelajar</h3>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align:center; color:#00C6FF; font-weight:800;'>⚡ BATTLE STATS</h2>", unsafe_allow_html=True)
+    st.write("<br>", unsafe_allow_html=True)
     
-    col_img1, col_img2, col_img3 = st.columns([1, 4, 1])
-    with col_img2:
-        if st.session_state.avatar_name == "Geni Us": tampilkan_avatar("genius", "👨‍🎓")
-        else: tampilkan_avatar("smart", "👩‍🎓")
+    tampilkan_avatar("genius" if st.session_state.avatar_name == "Geni Us" else "smart")
             
-    st.markdown(f"<h3 style='text-align:center; margin-top: 5px; margin-bottom: 0; color:#1E293B;'>{st.session_state.avatar_name}</h3>", unsafe_allow_html=True)
+    st.markdown(f"<h2 style='text-align:center; margin-top: 15px; margin-bottom: 5px;'>{st.session_state.avatar_name}</h2>", unsafe_allow_html=True)
+    st.markdown(f"<div style='text-align:center; margin-bottom: 20px;'><span class='tier-badge'>{tier_name}</span></div>", unsafe_allow_html=True)
     
-    # Label Gelar Aktif
-    st.markdown(f"<div style='text-align:center;'><span class='title-badge'>{st.session_state.user_title}</span></div>", unsafe_allow_html=True)
-    
-    # Indikator Streak Harian
-    st.markdown(f"<div style='text-align:center; margin-top:10px; font-size:15px;'>🔥 <b>{st.session_state.daily_streak} Hari Beruntun</b></div>", unsafe_allow_html=True)
-    
-    # XP Progress Bar
+    # Progress Bar Neon
     progress_val = st.session_state.user_points % 100
     st.markdown(f"""
-        <div style='background-color: #E2E8F0; border-radius: 999px; height: 8px; margin: 15px 0;'>
-            <div style='background: linear-gradient(90deg, #3B82F6 0%, #2563EB 100%); width: {progress_val}%; height: 100%; border-radius: 999px;'></div>
+        <div style='background-color: #334155; border-radius: 999px; height: 10px; margin: 15px 0; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);'>
+            <div style='background: linear-gradient(90deg, #00C6FF 0%, #0072FF 100%); width: {progress_val}%; height: 100%; border-radius: 999px; box-shadow: 0 0 10px #00C6FF;'></div>
         </div>
-        <div style='display: flex; justify-content: space-between; font-size: 14px; color: #64748B;'>
-            <span>Level {st.session_state.user_level}</span>
-            <span style='font-weight: 600; color: #2563EB;'>⭐ {st.session_state.user_points} XP</span>
+        <div style='display: flex; justify-content: space-between; font-size: 14px; font-weight: bold;'>
+            <span style='color:#94A3B8;'>Lvl {st.session_state.user_level}</span>
+            <span style='color: #00C6FF; text-shadow: 0 0 5px #00C6FF;'>⭐ {st.session_state.user_points} XP</span>
         </div>
     """, unsafe_allow_html=True)
     
-    st.markdown("<hr style='border:1px dashed #CBD5E1; margin: 20px 0;'>", unsafe_allow_html=True)
-    menu = st.radio("Menu Arena", ["🏠 Dashboard Utama", "📖 Arena Belajar & Kuis", "📤 Kontribusi Berkas", "🎭 Sanggar Avatar & Gelar"], label_visibility="collapsed")
+    st.markdown("<hr style='border:1px solid #334155;'>", unsafe_allow_html=True)
+    menu = st.radio("SISTEM NAVIGASI", ["🏠 Command Center", "⚔️ Arena Pelatihan", "📊 Analitik Kemampuan", "🎭 Ganti Karakter"])
 
-# --- HALAMAN BERANDA & PAPAN PERINGKAT LIVE ---
-if menu == "🏠 Dashboard Utama":
-    st.markdown("<h1>Dashboard Ksatria Belajar 🚀</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='font-size:16px; color:#64748B;'>Pantau peringkat kompetisimu dan selesaikan misi harian untuk bonus XP besar.</p>", unsafe_allow_html=True)
+# --- HALAMAN BERANDA ---
+if menu == "🏠 Command Center":
+    st.markdown("<h1>COMMAND CENTER 🚀</h1>", unsafe_allow_html=True)
+    st.markdown("<p style='font-size:18px; color:#94A3B8;'>Selesaikan misi belajarmu, taklukkan kuis, dan capai tingkat Mythic!</p>", unsafe_allow_html=True)
     
-    # --- KOTAK LIVE LEADERBOARD (PODIUM JUARA) ---
-    st.markdown("### 🏆 Papan Peringkat Live Pekan Ini")
-    
-    # Sistem Kalkulasi Ranking Otomatis Mengikuti Skor Player
-    data_kompetitor = {"Geni Us": 110, "Smar T": 70, "Eka Cendekia": 180, "Budi Master": 140, "Siti Juara": 50}
-    data_kompetitor[st.session_state.avatar_name] = st.session_state.user_points
-    ranking_sorted = sorted(data_kompetitor.items(), key=lambda x: x[1], reverse=True)
-    
-    col_p1, col_p2, col_p3 = st.columns(3)
-    with col_p1:
-        st.markdown(f"""<div class='podium-box' style='border-color:#CBD5E1;'>
-            <h4 style='color:#64748B; margin:0;'>🥈 Peringkat 2</h4>
-            <h3 style='margin:10px 0;'>{ranking_sorted[1][0]}</h3>
-            <span class='title-badge' style='background-color:#F1F5F9; color:#475569;'>⭐ {ranking_sorted[1][1]} XP</span>
-        </div>""", unsafe_allow_html=True)
-    with col_p2:
-        st.markdown(f"""<div class='podium-box' style='border-color:#F59E0B; background: linear-gradient(180deg, #FFFDF5 0%, #FEF3C7 100%); transform: translateY(-10px);'>
-            <h4 style='color:#D97706; margin:0;'>🥇 Peringkat 1</h4>
-            <h2 style='margin:10px 0; color:#92400E;'>{ranking_sorted[0][0]}</h2>
-            <span class='title-badge' style='background-color:#FEF3C7; color:#92400E;'>⭐ {ranking_sorted[0][1]} XP</span>
-        </div>""", unsafe_allow_html=True)
-    with col_p3:
-        st.markdown(f"""<div class='podium-box' style='border-color:#B45309;'>
-            <h4 style='color:#B45309; margin:0;'>🥉 Peringkat 3</h4>
-            <h3 style='margin:10px 0;'>{ranking_sorted[2][0]}</h3>
-            <span class='title-badge' style='background-color:#FFEDD5; color:#B45309;'>⭐ {ranking_sorted[2][1]} XP</span>
-        </div>""", unsafe_allow_html=True)
+    # KARTU STATUS
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.markdown(f"<div class='glass-card'><div style='font-size:40px;'>🔥</div><h3>{st.session_state.daily_streak} Days</h3><p style='color:#94A3B8;'>Login Streak</p></div>", unsafe_allow_html=True)
+    with col2:
+        st.markdown(f"<div class='glass-card'><div style='font-size:40px;'>📚</div><h3>{len(st.session_state.learned_chapters)}</h3><p style='color:#94A3B8;'>Materi Diselesaikan</p></div>", unsafe_allow_html=True)
+    with col3:
+        st.markdown(f"<div class='glass-card' style='border-color:{tier_color}; box-shadow: 0 0 20px {tier_color}40;'><div style='font-size:40px;'>🏆</div><h3 style='color:{tier_color};'>{tier_name.split()[1]}</h3><p style='color:#94A3B8;'>Kasta Saat Ini</p></div>", unsafe_allow_html=True)
         
     st.write("<br>", unsafe_allow_html=True)
     
-    # --- QUEST HARIAN TRACKER ---
-    st.markdown("### 🎯 Misi Harian Kamu")
-    col_q1, col_q2 = st.columns(2)
-    with col_q1:
-        st.checkbox("📖 Selesaikan 1 Tantangan Kuis Arena (Hadiah +40 XP)", value=len(st.session_state.learned_chapters) > 0, disabled=True)
-        st.checkbox("🔥 Pertahankan Streak Belajar di atas 2 hari", value=st.session_state.daily_streak >= 2, disabled=True)
-    with col_q2:
-        st.checkbox("🎭 Klaim Julukan Elit Pertama di Sanggar Gelar", value=len(st.session_state.unlocked_titles) > 1, disabled=True)
-        st.caption("Misi harian akan otomatis tercentang jika kamu melakukan aksi belajarmu!")
+    # LEADERBOARD CYBERPUNK
+    st.markdown("<h3>📊 TOP 3 GLOBAL RANKING</h3>", unsafe_allow_html=True)
+    data_rank = {"Geni Us": 110, "Smar T": 70, "Eka Bot": 180, "Siti Bot": 50}
+    data_rank[st.session_state.avatar_name] = st.session_state.user_points
+    ranking = sorted(data_rank.items(), key=lambda x: x[1], reverse=True)[:3]
+    
+    for i, (nama, skor) in enumerate(ranking):
+        medali = "🥇" if i == 0 else "🥈" if i == 1 else "🥉"
+        warna = "rgba(255, 215, 0, 0.1)" if i==0 else "rgba(192, 192, 192, 0.1)" if i==1 else "rgba(205, 127, 50, 0.1)"
+        st.markdown(f"""
+        <div style='background: {warna}; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;'>
+            <h3 style='margin:0;'>{medali} {nama}</h3>
+            <h3 style='margin:0; color:#00C6FF; text-shadow: 0 0 10px #00C6FF;'>⭐ {skor} XP</h3>
+        </div>
+        """, unsafe_allow_html=True)
 
-# --- HALAMAN ARENA BELAJAR & KUIS INTERAKTIF ---
-elif menu == "📖 Arena Belajar & Kuis":
-    st.markdown("<h1>📖 Arena Belajar & Kuis Eksklusif</h1>", unsafe_allow_html=True)
+# --- HALAMAN ARENA (BATTLE MODE) ---
+elif menu == "⚔️ Arena Pelatihan":
+    st.markdown("<h1>⚔️ BATTLE ARENA & MATERI</h1>", unsafe_allow_html=True)
     
-    st.markdown("<div style='background-color: white; padding: 20px; border-radius: 16px; border: 1px solid #E2E8F0; margin-bottom: 24px;'>", unsafe_allow_html=True)
-    col1, col2 = st.columns(2)
-    with col1: lihat_pelajaran = st.selectbox("📚 Pilih Mata Pelajaran:", list(DATA_MATERI.keys()))
-    with col2: lihat_kelas = st.selectbox("🎓 Pilih Tingkatan Kelas:", list(DATA_MATERI[lihat_pelajaran].keys()))
-    col3, col4 = st.columns(2)
-    with col3: lihat_bab = st.selectbox("📑 Pilih Bab Pembahasan:", list(DATA_MATERI[lihat_pelajaran][lihat_kelas].keys()))
-    with col4: lihat_subbab = st.selectbox("🔖 Detail Sub-bab:", DATA_MATERI[lihat_pelajaran][lihat_kelas][lihat_bab]["sub_bab"])
-    st.markdown("</div>", unsafe_allow_html=True)
+    with st.container():
+        st.markdown("<div class='glass-card' style='text-align:left;'>", unsafe_allow_html=True)
+        col1, col2 = st.columns(2)
+        with col1: lihat_pelajaran = st.selectbox("Pilih Mata Pelajaran:", list(DATA_MATERI.keys()))
+        with col2: lihat_kelas = st.selectbox("Pilih Tingkat Kelas:", list(DATA_MATERI[lihat_pelajaran].keys()))
+        col3, col4 = st.columns(2)
+        with col3: lihat_bab = st.selectbox("Pilih Sektor Bab:", list(DATA_MATERI[lihat_pelajaran][lihat_kelas].keys()))
+        with col4: lihat_subbab = st.selectbox("Target Sub-bab:", DATA_MATERI[lihat_pelajaran][lihat_kelas][lihat_bab]["sub_bab"])
+        st.markdown("</div>", unsafe_allow_html=True)
         
-    tab1, tab2 = st.tabs(["📌 Rangkuman & Kuis Terintegrasi", "📂 Bank Berkas Sekolah"])
+    st.markdown(f"### 📜 Intisari: {lihat_bab}")
+    st.markdown(f"<div class='glass-card' style='text-align:left; border-left: 5px solid #00C6FF;'>{DATA_MATERI[lihat_pelajaran][lihat_kelas][lihat_bab]['rangkuman']}</div>", unsafe_allow_html=True)
+        
+    st.write("<br>", unsafe_allow_html=True)
+    st.markdown("### 🎯 UJI KOMPETENSI (BOSS BATTLE)")
     
-    with tab1:
-        st.markdown(f"### 📝 Intisari: {lihat_bab}")
-        st.markdown(f"<div class='materi-box'>{DATA_MATERI[lihat_pelajaran][lihat_kelas][lihat_bab]['rangkuman']}</div>", unsafe_allow_html=True)
+    id_kuis = f"q_{lihat_pelajaran}_{lihat_kelas}_{lihat_bab}"
+    
+    if lihat_pelajaran in DATABASE_KUIS:
+        ds = DATABASE_KUIS[lihat_pelajaran]
+        st.markdown("<div class='glass-card' style='text-align:left;'>", unsafe_allow_html=True)
+        st.write(f"**Misi Soal:**\n{ds['soal']}")
         
-        # KUBAH KUIS ENGINE AUTOMATION
-        st.write("<br>", unsafe_allow_html=True)
-        st.markdown("### 🎯 Uji Pemahaman Kompetensi (Instan Feedback)")
-        
-        id_kuis = f"quiz_{lihat_pelajaran}_{lihat_kelas}_{lihat_bab}"
-        
-        if lihat_pelajaran in DATABASE_KUIS:
-            data_soal = DATABASE_KUIS[lihat_pelajaran]
-            st.markdown("<div class='kuis-box'>", unsafe_allow_html=True)
-            st.write(data_soal['soal'])
+        jawaban_user = st.radio("Pilih Eksekusi Jawaban:", ds["opsi"], key=f"r_{id_kuis}")
+        kunci = f"sub_{id_kuis}"
+        if kunci not in st.session_state: st.session_state[kunci] = False
             
-            pilihan_siswa = st.radio("Klik pada bulatan opsi jawaban:", data_soal["opsi"], key=f"r_{id_kuis}")
-            
-            key_submit = f"sub_{id_kuis}"
-            if key_submit not in st.session_state: st.session_state[key_submit] = False
+        if st.button("⚡ SERANG JAWABAN", key=f"b_{id_kuis}"):
+            st.session_state[kunci] = True
                 
-            if st.button("🚀 Koreksi Hasil Jawaban", key=f"b_{id_kuis}"):
-                st.session_state[key_submit] = True
-                    
-            if st.session_state[key_submit]:
-                if pilihan_siswa == data_soal["jawaban"]:
-                    st.success("🎉 **Jawabanmu Benar Sempurna!** Anda berhak mendapatkan bonus XP.")
-                    if id_kuis not in st.session_state.learned_chapters:
-                        st.session_state.learned_chapters.add(id_kuis)
-                        st.session_state.user_points += 40
-                        st.rerun()
-                else:
-                    st.error("❌ **Jawabanmu Masih Keliru.** Pelajari letak kesalahannya pada pembahasan di bawah ini.")
-                
-                st.markdown("<div class='pembahasan-box'>", unsafe_allow_html=True)
-                st.markdown("#### 🧠 Kotak Pembahasan:")
-                st.markdown(data_soal["pembahasan"])
-                st.markdown("</div>", unsafe_allow_html=True)
-            st.markdown("</div>", unsafe_allow_html=True)
-        else:
-            st.info("💡 Klik tombol di bawah untuk mengambil bonus poin membaca dari materi ini.")
-            if id_kuis in st.session_state.learned_chapters:
-                st.success("✅ Poin dari materi ini sudah diklaim.")
-            else:
-                if st.button("🏁 Ambil Bonus +40 XP", key=f"f_{id_kuis}"):
+        if st.session_state[kunci]:
+            if jawaban_user == ds["jaw"]:
+                st.success("💥 CRITICAL HIT! Jawabanmu Benar!")
+                if id_kuis not in st.session_state.learned_chapters:
                     st.session_state.learned_chapters.add(id_kuis)
-                    st.session_state.user_points += 40
+                    st.session_state.user_points += 50
+                    # Trik Analitik: Menambah keahlian spesifik mapel!
+                    st.session_state.mastery[lihat_pelajaran] += 20
                     st.rerun()
-                
-    with tab2:
-        folder_target = os.path.join("uploads", bersihkan_nama(lihat_pelajaran), bersihkan_nama(lihat_kelas), bersihkan_nama(lihat_bab), bersihkan_nama(lihat_subbab))
-        if not os.path.exists(folder_target) or len(os.listdir(folder_target)) == 0:
-            st.info("📭 Belum ada dokumen PDF/PPT tambahan untuk sub-bab spesifik ini.")
-        else:
-            for file in os.listdir(folder_target):
-                file_path = os.path.join(folder_target, file)
-                with st.expander(f"📄 Berkas Pendukung: {file}"):
-                    try:
-                        with open(file_path, "rb") as f:
-                            st.download_button("⬇️ Unduh Berkas", data=f.read(), file_name=file, key=file_path)
-                    except: st.error("Gagal memuat tombol dokumen.")
+            else:
+                st.error("🛡️ ATTACK BLOCKED! Jawaban keliru. Cek analisis taktik di bawah.")
+            
+            st.markdown(f"<div style='background:rgba(255,255,255,0.1); padding:15px; border-radius:10px; margin-top:15px;'><b>🧠 Analisis Taktik:</b><br>{ds['pem']}</div>", unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
+    else:
+        st.info("Sistem belum mendeteksi bos di sektor ini. Klaim poin eksplorasi!")
+        if st.button("🏁 Klaim +40 XP Eksplorasi"):
+            if id_kuis not in st.session_state.learned_chapters:
+                st.session_state.learned_chapters.add(id_kuis)
+                st.session_state.user_points += 40
+                st.session_state.mastery[lihat_pelajaran] += 10
+                st.rerun()
 
-# --- HALAMAN UPLOAD ---
-elif menu == "📤 Kontribusi Berkas":
-    st.markdown("<h1>📤 Pusat Unggah Berkas Berbagi</h1>", unsafe_allow_html=True)
+# --- HALAMAN ANALITIK SPIDER-WEB ---
+elif menu == "📊 Analitik Kemampuan":
+    st.markdown("<h1>📊 PEMETAAN OTAK (SKILL MATRIX)</h1>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#94A3B8;'>Lihat dominasi kecerdasanmu berdasarkan kuis dan materi yang telah diselesaikan.</p>", unsafe_allow_html=True)
+    
+    if HAS_PLOTLY:
+        # Menyiapkan Data untuk Grafik Radar
+        kategori = list(st.session_state.mastery.keys())
+        nilai = list(st.session_state.mastery.values())
+        kategori.append(kategori[0]) # Tutup loop grafik
+        nilai.append(nilai[0])
+        
+        fig = go.Figure(data=go.Scatterpolar(
+            r=nilai, theta=kategori, fill='toself',
+            line_color='#00C6FF', fillcolor='rgba(0, 198, 255, 0.4)',
+            marker=dict(color='white', size=8)
+        ))
+        fig.update_layout(
+            polar=dict(
+                radialaxis=dict(visible=True, range=[0, max(nilai)+20], color="rgba(255,255,255,0.3)", gridcolor="rgba(255,255,255,0.2)"),
+                angularaxis=dict(color="white", gridcolor="rgba(255,255,255,0.2)")
+            ),
+            showlegend=False, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+            margin=dict(l=40, r=40, t=40, b=40)
+        )
+        st.plotly_chart(fig, use_container_width=True)
+        st.info("💡 **Petunjuk:** Jawab kuis dengan benar di *Arena Pelatihan* untuk memperluas jaring kemampuan pada mata pelajaran tertentu!")
+    else:
+        # Fallback jika Plotly belum terinstall di server
+        st.bar_chart(pd.DataFrame.from_dict(st.session_state.mastery, orient='index', columns=['XP Penguasaan']))
+
+# --- HALAMAN AVATAR ---
+elif menu == "🎭 Ganti Karakter":
+    st.markdown("<h1>🎭 SANGGAR KLONING KARAKTER</h1>", unsafe_allow_html=True)
     
     col1, col2 = st.columns(2)
-    with col1: pilih_pelajaran = st.selectbox("📚 Pilihan Mapel:", list(DATA_MATERI.keys()))
-    with col2: pilih_kelas = st.selectbox("🎓 Kelas Sasaran:", list(DATA_MATERI[pilih_pelajaran].keys()))
-    col3, col4 = st.columns(2)
-    with col3: pilih_bab = st.selectbox("📑 Pilihan Bab:", list(DATA_MATERI[pilih_pelajaran][pilih_kelas].keys()))
-    with col4: pilih_subbab = st.selectbox("🔖 Sub-bab Sasaran:", DATA_MATERI[pilih_pelajaran][pilih_kelas][pilih_bab]["sub_bab"])
+    with col1:
+        st.markdown("<div class='glass-card'><h2>Geni Us</h2>", unsafe_allow_html=True)
+        tampilkan_avatar("genius")
+        if st.button("AKTIFKAN PROTOKOL GENI US"):
+            st.session_state.avatar_name = "Geni Us"
+            st.rerun()
+        st.markdown("</div>", unsafe_allow_html=True)
         
-    st.write("<br>", unsafe_allow_html=True)
-    uploaded_file = st.file_uploader("Seret lembar tugas ke kotak ini", type=['jpg', 'png', 'pdf', 'docx', 'xlsx', 'pptx'])
-    
-    if uploaded_file is not None:
-        st.info(f"Berkas '{uploaded_file.name}' siap diproses.")
-        if st.button("🚀 Unggah Ke Perpustakaan Cloud"):
-            folder_tujuan = os.path.join("uploads", bersihkan_nama(pilih_pelajaran), bersihkan_nama(pilih_kelas), bersihkan_nama(pilih_bab), bersihkan_nama(pilih_subbab))
-            if not os.path.exists(folder_tujuan): os.makedirs(folder_tujuan)
-            with open(os.path.join(folder_tujuan, uploaded_file.name), "wb") as f: f.write(uploaded_file.getbuffer())
-            st.success("🎉 Sukses! Materi kontribusimu berhasil dipublikasikan untuk semua siswa.")
-
-# --- HALAMAN PERALIHAN KARAKTER & PASAR GELAR ---
-elif menu == "🎭 Sanggar Avatar & Gelar":
-    st.markdown("<h1>🎭 Sanggar Karakter & Pasar Gelar</h1>", unsafe_allow_html=True)
-    
-    tab_av, tab_gl = st.tabs(["👤 Alih Karakter Utama", "👑 Pasar Julukan Elit"])
-    
-    with tab_av:
-        col_av1, col_av2 = st.columns(2)
-        with col_av1:
-            st.markdown("<div class='dashboard-card'><h2>Geni Us</h2>", unsafe_allow_html=True)
-            tampilkan_avatar("genius", "👨‍🎓")
-            if st.button("GUNAKAN GENI US", key="s_gen"):
-                st.session_state.avatar_name = "Geni Us"
-                st.rerun()
-            st.markdown("</div>", unsafe_allow_html=True)
-        with col_av2:
-            st.markdown("<div class='dashboard-card'><h2>Smar T</h2>", unsafe_allow_html=True)
-            tampilkan_avatar("smart", "👩‍🎓")
-            if st.button("GUNAKAN SMAR T", key="s_sma"):
-                st.session_state.avatar_name = "Smar T"
-                st.rerun()
-            st.markdown("</div>", unsafe_allow_html=True)
-            
-    with tab_gl:
-        st.subheader("Tukarkan Poin Belajarmu dengan Gelar Kehormatan")
-        st.write(f"Tabungan Poinmu saat ini: ⭐ **{st.session_state.user_points} XP**")
-        st.markdown("---")
-        
-        for gelar, harga in DAFTAR_GELAR.items():
-            c_g1, c_g2, c_g3 = st.columns([3, 1, 1])
-            with c_g1: st.markdown(f"### {gelar}")
-            with c_g2: st.write(f"💰 {harga} XP")
-            with c_g3:
-                if gelar in st.session_state.unlocked_titles:
-                    if st.session_state.user_title == gelar:
-                        st.button("⚙️ Aktif", key=f"ak_{gelar}", disabled=True)
-                    else:
-                        if st.button("Gunakan", key=f"gk_{gelar}"):
-                            st.session_state.user_title = gelar
-                            st.rerun()
-                else:
-                    if st.button("🛒 Beli", key=f"by_{gelar}"):
-                        if st.session_state.user_points >= harga:
-                            st.session_state.user_points -= harga
-                            st.session_state.unlocked_titles.append(gelar)
-                            st.session_state.user_title = gelar
-                            st.success(f"Sukses membuka julukan {gelar}!")
-                            st.rerun()
-                        else:
-                            st.error("Skor XP belum cukup!")
+    with col2:
+        st.markdown("<div class='glass-card'><h2>Smar T</h2>", unsafe_allow_html=True)
+        tampilkan_avatar("smart")
+        if st.button("AKTIFKAN PROTOKOL SMAR T"):
+            st.session_state.avatar_name = "Smar T"
+            st.rerun()
+        st.markdown("</div>", unsafe_allow_html=True)
