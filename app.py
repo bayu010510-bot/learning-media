@@ -3,62 +3,46 @@ import pandas as pd
 from PIL import Image
 import os
 import re
-from materi import DATA_MATERI  # Memuat data mata pelajaran dari file terpisah
+import base64
+from materi import DATA_MATERI
 
 # --- KONFIGURASI HALAMAN ---
-st.set_page_config(page_title="Learning Media", page_icon="📚", layout="wide")
+st.set_page_config(page_title="Learning Media Pro", page_icon="📚", layout="wide")
 
-# --- INISIALISASI MEMORI USER (SESSION STATE) ---
-if "user_points" not in st.session_state:
-    st.session_state.user_points = 0
-if "user_level" not in st.session_state:
-    st.session_state.user_level = 1
-if "learned_chapters" not in st.session_state:
-    st.session_state.learned_chapters = set()
+# --- INISIALISASI MEMORI USER ---
+if "user_points" not in st.session_state: st.session_state.user_points = 0
+if "learned_chapters" not in st.session_state: st.session_state.learned_chapters = set()
+if "avatar_hat" not in st.session_state: st.session_state.avatar_hat = ""
+if "unlocked_accessories" not in st.session_state: st.session_state.unlocked_accessories = ["Tanpa Aksesoris"]
+
+# --- SISTEM PEMBACA AVATAR LOKAL AMAN (ANTI ERROR) ---
+def get_base64_image(image_path, fallback_url):
+    if os.path.exists(image_path):
+        with open(image_path, "rb") as img_file:
+            return f"data:image/png;base64,{base64.b64encode(img_file.read()).decode()}"
+    return fallback_url
+
+# Membaca gambar yang kamu upload (siswa.png dan siswi.png)
+AVATAR_LAKI = get_base64_image("siswa.png", "https://img.icons8.com/illustrations/external-pack-flat-symbols-tanah-basah/200/external-student-back-to-school-pack-flat-symbols-tanah-basah.png")
+AVATAR_PEREMPUAN = get_base64_image("siswi.png", "https://img.icons8.com/illustrations/flat-round/200/female-student--v1.png")
+
 if "avatar_base" not in st.session_state:
-    st.session_state.avatar_base = "https://img.icons8.com/illustrations/external-pack-flat-symbols-tanah-basah/200/external-student-back-to-school-pack-flat-symbols-tanah-basah.png"
-if "avatar_hat" not in st.session_state:
-    st.session_state.avatar_hat = ""
-if "unlocked_accessories" not in st.session_state:
-    st.session_state.unlocked_accessories = ["Tanpa Aksesoris"]
+    st.session_state.avatar_base = AVATAR_LAKI # Default
 
-# --- KUSTOMISASI CSS (Arsitektur Grafis Tumpukan Avatar & UI/UX) ---
+# --- KUSTOMISASI CSS ---
 st.markdown("""
     <style>
     .stApp { background-color: #FAFAFA; }
     h1, h2, h3 { color: #1E3A8A; font-family: 'Segoe UI', sans-serif; }
-    
-    .stButton>button {
-        background-color: #2563EB; color: white; border-radius: 8px; border: none;
-        padding: 10px 24px; font-weight: bold; transition: all 0.3s ease; width: 100%;
-    }
+    .stButton>button { background-color: #2563EB; color: white; border-radius: 8px; border: none; padding: 10px 24px; font-weight: bold; width: 100%; }
     .stButton>button:hover { background-color: #1D4ED8; transform: scale(1.02); }
     
-    /* === DESAIN GRAFIS PROFIL GAME === */
-    .profile-card {
-        background-color: white; border-radius: 16px; padding: 20px;
-        border: 2px solid #E5E7EB; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
-        text-align: center; margin-bottom: 20px;
-    }
+    .profile-card { background-color: white; border-radius: 16px; padding: 20px; border: 2px solid #E5E7EB; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); text-align: center; margin-bottom: 20px; }
+    .avatar-container { width: 140px; height: 140px; margin: 0 auto 15px auto; position: relative; background: radial-gradient(circle, #EFF6FF 0%, #DBEAFE 100%); border-radius: 50%; border: 4px solid #3B82F6; display: flex; align-items: center; justify-content: center; }
+    .avatar-base-img { width: 100px; height: 100px; object-fit: contain; position: absolute; bottom: 10px; z-index: 1; }
+    .avatar-hat-img { width: 65px; height: 65px; object-fit: contain; position: absolute; top: -12px; z-index: 2; }
     
-    .avatar-container {
-        width: 140px; height: 140px; margin: 0 auto 15px auto;
-        position: relative; background: radial-gradient(circle, #EFF6FF 0%, #DBEAFE 100%);
-        border-radius: 50%; border: 4px solid #3B82F6; display: flex; align-items: center; justify-content: center;
-    }
-    
-    .avatar-base-img {
-        width: 100px; height: 100px; object-fit: contain; position: absolute; bottom: 10px; z-index: 1;
-    }
-    
-    .avatar-hat-img {
-        width: 65px; height: 65px; object-fit: contain; position: absolute; top: -12px; z-index: 2;
-    }
-    
-    div[data-testid="stExpander"] {
-        background-color: white; border-radius: 10px; border: 1px solid #E5E7EB;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); margin-bottom: 10px;
-    }
+    div[data-testid="stExpander"] { background-color: white; border-radius: 10px; border: 1px solid #E5E7EB; margin-bottom: 10px; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -66,12 +50,10 @@ st.markdown("""
 def bersihkan_nama(teks):
     return re.sub(r'[\\/*?:"<>|]', "", teks)
 
-# --- REFRESH LEVEL OTOMATIS ---
+# Konversi Poin ke Level
 st.session_state.user_level = (st.session_state.user_points // 100) + 1
 
-DAFTAR_KELAS = ["Kelas 10", "Kelas 11", "Kelas 12"]
-
-# --- DATABASE GRAFIS TOKO AKSESORIS ---
+# --- DATABASE GRAFIS TOKO ---
 TOKO_AKSESORIS = {
     "👑 Mahkota Emas": {"harga": 100, "url": "https://img.icons8.com/isometric/100/crown.png"},
     "🎧 Headphone Neon": {"harga": 60, "url": "https://img.icons8.com/isometric/100/headphones.png"},
@@ -79,10 +61,9 @@ TOKO_AKSESORIS = {
     "🥽 Kacamata Google": {"harga": 50, "url": "https://img.icons8.com/isometric/100/safety-goggles.png"}
 }
 
-# --- SIDEBAR NAVIGASI & STATS USER ---
+# --- SIDEBAR & NAVIGASI ---
 with st.sidebar:
     hat_element = f"<img class='avatar-hat-img' src='{st.session_state.avatar_hat}'>" if st.session_state.avatar_hat else ""
-    
     st.markdown(f"""
     <div class='profile-card'>
         <div class='avatar-container'>
@@ -94,64 +75,63 @@ with st.sidebar:
     </div>
     """, unsafe_allow_html=True)
     
-    progress_persen = st.session_state.user_points % 100
-    st.progress(progress_persen / 100)
-    st.caption(f"ℹ️ {100 - progress_persen} PTS lagi menuju Level {st.session_state.user_level + 1}")
+    prog = st.session_state.user_points % 100
+    st.progress(prog / 100)
+    st.caption(f"ℹ️ {100 - prog} PTS lagi menuju Level {st.session_state.user_level + 1}")
     st.markdown("---")
-    
-    st.title("🧭 Menu Utama")
     menu = st.radio("Pilih Halaman:", ["🏠 Beranda", "📤 Upload Materi", "📖 Ruang Belajar", "🎭 Kustom Avatar & Toko"])
 
 # --- HALAMAN BERANDA ---
 if menu == "🏠 Beranda":
-    st.title("📚 Portal Learning Media")
-    st.markdown("### Platform Edukasi Lengkap, Terstruktur, dan Menarik.")
+    st.title("📚 Portal Learning Media Pro")
+    st.markdown("### Platform Edukasi Lengkap Kurikulum Merdeka (Kelas 10-12).")
     st.image("https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80", use_column_width=True)
-    st.info("💡 **Ayo Belajar!** Pilih menu 'Ruang Belajar' untuk membaca intisari materi dan klaim poin hadiah guna mendesain avatarmu.")
+    st.info("💡 **Petunjuk:** Pilih Ruang Belajar untuk mengakses silabus lengkap 7 Mata Pelajaran!")
 
 # --- HALAMAN UPLOAD ---
 elif menu == "📤 Upload Materi":
     st.title("📤 Tambah Materi Baru")
-    st.write("Tentukan penempatan hierarki materi, lalu klik **Submit** untuk menyimpan ke server.")
     
     col1, col2 = st.columns(2)
-    with col1: pilih_kelas = st.selectbox("🎓 Pilih Kelas Target:", DAFTAR_KELAS)
-    with col2: pilih_pelajaran = st.selectbox("📖 Pilih Mata Pelajaran:", list(DATA_MATERI.keys()))
+    with col1: pilih_pelajaran = st.selectbox("📖 Pilih Pelajaran:", list(DATA_MATERI.keys()))
+    with col2: pilih_kelas = st.selectbox("🎓 Pilih Kelas Target:", list(DATA_MATERI[pilih_pelajaran].keys()))
     
     col3, col4 = st.columns(2)
-    with col3: pilih_bab = st.selectbox("📑 Pilih Bab:", list(DATA_MATERI[pilih_pelajaran].keys()))
-    with col4: pilih_subbab = st.selectbox("🔖 Pilih Sub-bab:", DATA_MATERI[pilih_pelajaran][pilih_bab]["sub_bab"])
+    with col3: pilih_bab = st.selectbox("📑 Pilih Bab:", list(DATA_MATERI[pilih_pelajaran][pilih_kelas].keys()))
+    with col4: pilih_subbab = st.selectbox("🔖 Pilih Sub-bab:", DATA_MATERI[pilih_pelajaran][pilih_kelas][pilih_bab]["sub_bab"])
         
     st.markdown("---")
-    uploaded_file = st.file_uploader("Seret file ke sini atau pilih berkas", type=['jpg', 'png', 'pdf', 'docx', 'xlsx'])
+    uploaded_file = st.file_uploader("Seret file (PDF, PPT, Gambar) ke sini", type=['jpg', 'png', 'pdf', 'docx', 'xlsx', 'pptx'])
     
     if uploaded_file is not None:
-        st.warning(f"File '{uploaded_file.name}' siap ditambahkan. Klik tombol di bawah untuk konfirmasi.")
+        st.warning(f"File '{uploaded_file.name}' siap ditambahkan.")
         if st.button("🚀 Submit Materi Sekarang"):
-            folder_tujuan = os.path.join("uploads", bersihkan_nama(pilih_kelas), bersihkan_nama(pilih_pelajaran), bersihkan_nama(pilih_bab), bersihkan_nama(pilih_subbab))
+            folder_tujuan = os.path.join("uploads", bersihkan_nama(pilih_pelajaran), bersihkan_nama(pilih_kelas), bersihkan_nama(pilih_bab), bersihkan_nama(pilih_subbab))
             if not os.path.exists(folder_tujuan): os.makedirs(folder_tujuan)
             with open(os.path.join(folder_tujuan, uploaded_file.name), "wb") as f: f.write(uploaded_file.getbuffer())
-            st.success(f"🎉 Sukses menyimpan materi pelajaran!")
+            st.success("🎉 Sukses menyimpan materi pelajaran!")
             st.balloons()
 
-# --- HALAMAN LIHAT MATERI ---
+# --- HALAMAN RUANG BELAJAR ---
 elif menu == "📖 Ruang Belajar":
     st.title("📖 Ruang Belajar Interaktif")
+    
     col1, col2 = st.columns(2)
-    with col1: lihat_kelas = st.selectbox("🔍 Filter Kelas:", DAFTAR_KELAS)
-    with col2: lihat_pelajaran = st.selectbox("🔍 Filter Pelajaran:", list(DATA_MATERI.keys()))
+    with col1: lihat_pelajaran = st.selectbox("🔍 Filter Pelajaran:", list(DATA_MATERI.keys()))
+    with col2: lihat_kelas = st.selectbox("🔍 Filter Kelas:", list(DATA_MATERI[lihat_pelajaran].keys()))
+    
     col3, col4 = st.columns(2)
-    with col3: lihat_bab = st.selectbox("🔍 Filter Bab:", list(DATA_MATERI[lihat_pelajaran].keys()))
-    with col4: lihat_subbab = st.selectbox("🔍 Filter Sub-bab:", DATA_MATERI[lihat_pelajaran][lihat_bab]["sub_bab"])
+    with col3: lihat_bab = st.selectbox("🔍 Filter Bab:", list(DATA_MATERI[lihat_pelajaran][lihat_kelas].keys()))
+    with col4: lihat_subbab = st.selectbox("🔍 Filter Sub-bab:", DATA_MATERI[lihat_pelajaran][lihat_kelas][lihat_bab]["sub_bab"])
         
     st.markdown("---")
-    tab_rangkuman, tab_files = st.tabs(["📌 Rangkuman Materi", "📂 File Materi & Download"])
+    tab_rangkuman, tab_files = st.tabs(["📌 Rangkuman Materi", "📂 File Materi Tambahan"])
     
     with tab_rangkuman:
-        st.write(f"### 📝 Rangkuman {lihat_bab}")
-        st.markdown(DATA_MATERI[lihat_pelajaran][lihat_bab]["rangkuman"])
+        st.write(f"### 📝 Rangkuman Singkat: {lihat_bab}")
+        st.markdown(DATA_MATERI[lihat_pelajaran][lihat_kelas][lihat_bab]["rangkuman"])
         
-        id_materi = f"{lihat_pelajaran}_{lihat_bab}"
+        id_materi = f"{lihat_pelajaran}_{lihat_kelas}_{lihat_bab}"
         st.markdown("---")
         if id_materi in st.session_state.learned_chapters:
             st.info("✅ Kamu sudah menyelesaikan materi ini dan mengambil hadiah poinnya.")
@@ -159,33 +139,31 @@ elif menu == "📖 Ruang Belajar":
             if st.button("🏁 Selesai Membaca & Klaim +40 PTS"):
                 st.session_state.learned_chapters.add(id_materi)
                 st.session_state.user_points += 40
-                st.success("🎉 Selamat! +40 PTS telah ditambahkan ke profilmu.")
+                st.success("🎉 Selamat! +40 PTS ditambahkan.")
                 st.balloons()
                 st.rerun()
         
     with tab_files:
-        folder_target = os.path.join("uploads", bersihkan_nama(lihat_kelas), bersihkan_nama(lihat_pelajaran), bersihkan_nama(lihat_bab), bersihkan_nama(lihat_subbab))
+        folder_target = os.path.join("uploads", bersihkan_nama(lihat_pelajaran), bersihkan_nama(lihat_kelas), bersihkan_nama(lihat_bab), bersihkan_nama(lihat_subbab))
         if not os.path.exists(folder_target) or len(os.listdir(folder_target)) == 0:
-            st.info(f"📭 Belum ada berkas materi tambahan. Baca ringkasan teks gratis di tab sebelah kiri!")
+            st.info("📭 Belum ada berkas tambahan dari guru/siswa untuk sub-bab ini.")
         else:
             for file in os.listdir(folder_target):
                 file_path = os.path.join(folder_target, file)
                 file_ext = file.split('.')[-1].lower()
-                with st.expander(f"📄 Buka Materi: {file}"):
+                with st.expander(f"📄 {file}"):
                     if file_ext in ['jpg', 'png', 'jpeg']:
                         try: st.image(Image.open(file_path), use_column_width=True)
-                        except: st.write("(Gambar tidak dapat dimuat)")
+                        except: pass
                     elif file_ext in ['xlsx', 'xls']:
                         try: st.dataframe(pd.read_excel(file_path), use_container_width=True)
-                        except: st.error("Gagal membaca file Excel.")
-                    else:
-                        st.write("Pratinjau tidak tersedia. Silakan unduh dokumen di bawah ini.")
+                        except: pass
+                    else: st.write("Klik tombol di bawah untuk mengunduh dokumen.")
                     
                     try:
                         with open(file_path, "rb") as f:
-                            st.download_button(label="⬇️ Unduh File", data=f.read(), file_name=file, key=file_path)
-                    except:
-                        st.error("Gagal memuat file unduhan.")
+                            st.download_button("⬇️ Unduh File", data=f.read(), file_name=file, key=file_path)
+                    except: pass
 
 # --- HALAMAN KUSTOM AVATAR & TOKO ---
 elif menu == "🎭 Kustom Avatar & Toko":
@@ -194,34 +172,26 @@ elif menu == "🎭 Kustom Avatar & Toko":
     
     with tab_kustom:
         st.subheader("Ubah Karakter Dasarmu")
-        pilihan_base = st.selectbox("Pilih Tipe Karakter:", ["Siswa Pintar", "Siswi Kreatif", "Kucing Cerdas", "Robot Masa Depan"])
+        pilihan_base = st.selectbox("Pilih Tipe Karakter:", ["Siswa Laki-laki", "Siswa Perempuan"])
         
-        map_base = {
-            "Siswa Pintar": "https://img.icons8.com/illustrations/external-pack-flat-symbols-tanah-basah/200/external-student-back-to-school-pack-flat-symbols-tanah-basah.png",
-            "Siswi Kreatif": "https://img.icons8.com/illustrations/flat-round/200/female-student--v1.png",
-            "Kucing Cerdas": "https://img.icons8.com/illustrations/flat-round/200/cat.png",
-            "Robot Masa Depan": "https://img.icons8.com/illustrations/flat-round/200/robot.png"
-        }
-        if st.button("💾 Simpan Karakter"):
-            st.session_state.avatar_base = map_base[pilihan_base]
-            st.success("Karakter dasar berhasil diperbarui!")
+        if st.button("💾 Pakai Karakter"):
+            st.session_state.avatar_base = AVATAR_LAKI if pilihan_base == "Siswa Laki-laki" else AVATAR_PEREMPUAN
+            st.success("Karakter berhasil diubah!")
             st.rerun()
             
         st.markdown("---")
         st.subheader("Lemari Aksesoris")
         aksesoris_dipilih = st.selectbox("Gunakan Koleksimu:", st.session_state.unlocked_accessories)
         
-        if st.button("🎒 Pakai Sekarang"):
-            if aksesoris_dipilih == "Tanpa Aksesoris": st.session_state.avatar_hat = ""
-            else: st.session_state.avatar_hat = TOKO_AKSESORIS[aksesoris_dipilih]["url"]
-            st.success("Aksesoris berhasil dipasang ke kepala!")
+        if st.button("🎒 Pakai Topi/Mahkota"):
+            st.session_state.avatar_hat = "" if aksesoris_dipilih == "Tanpa Aksesoris" else TOKO_AKSESORIS[aksesoris_dipilih]["url"]
+            st.success("Aksesoris dipasang!")
             st.rerun()
             
     with tab_toko:
-        st.subheader("Beli Item Premium dengan Poin Belajarmu")
+        st.subheader("Beli Item Premium (Toko Game)")
         st.write(f"Dompet Kamu: ⭐ **{st.session_state.user_points} PTS**")
         st.markdown("---")
-        
         for item, detail in TOKO_AKSESORIS.items():
             col_grafis, col_nama, col_harga, col_tombol = st.columns([1, 2, 1, 1])
             with col_grafis: st.image(detail["url"], width=50)
@@ -237,4 +207,4 @@ elif menu == "🎭 Kustom Avatar & Toko":
                             st.session_state.unlocked_accessories.append(item)
                             st.success(f"Sukses membeli {item}!")
                             st.rerun()
-                        else: st.error("Poin tidak mencukupi!")
+                        else: st.error("Poin tidak cukup!")
