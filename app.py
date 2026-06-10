@@ -34,20 +34,39 @@ st.markdown("""
 def bersihkan_nama(teks):
     return re.sub(r'[\\/*?:"<>|]', "", teks)
 
-# --- SIDEBAR & NAVIGASI (100% NATIVE IMAGE) ---
+# --- FUNGSI PENCARI GAMBAR OTOMATIS (ANTI BROKEN IMAGE) ---
+def tampilkan_avatar(keyword, fallback_emoji, ukuran_emoji="120px"):
+    # Mencari file gambar di folder secara otomatis
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    gambar_ditemukan = False
+    
+    try:
+        for f in os.listdir(current_dir):
+            # Jika ada file dengan kata 'genius' atau 'smart' berformat jpg/png
+            if keyword in f.lower() and f.lower().endswith(('.png', '.jpg', '.jpeg')):
+                img = Image.open(os.path.join(current_dir, f))
+                st.image(img, use_column_width=True)
+                gambar_ditemukan = True
+                break
+    except:
+        pass
+        
+    # Jika gambar salah nama/belum diupload, tampilkan Emoji Besar
+    if not gambar_ditemukan:
+        st.markdown(f"<div style='text-align:center; font-size:{ukuran_emoji};'>{fallback_emoji}</div>", unsafe_allow_html=True)
+        st.caption(f"⚠️ File '{keyword}.png' atau '{keyword}.jpg' belum ditemukan di GitHub.")
+
+# --- SIDEBAR & NAVIGASI ---
 with st.sidebar:
     st.markdown("<h2 style='text-align:center; color:#1E3A8A;'>🎓 Profil Pelajar</h2>", unsafe_allow_html=True)
-    st.write("") # Spacer
+    st.write("") 
     
-    # Menampilkan Gambar secara Native (Anti-Error)
     col_img1, col_img2, col_img3 = st.columns([1, 4, 1])
     with col_img2:
         if st.session_state.avatar_name == "Geni Us":
-            try: st.image("genius.png", use_column_width=True)
-            except: st.image("https://img.icons8.com/illustrations/external-pack-flat-symbols-tanah-basah/200/external-student-back-to-school-pack-flat-symbols-tanah-basah.png", use_column_width=True)
+            tampilkan_avatar("genius", "👨‍🎓", "80px")
         else:
-            try: st.image("smart.png", use_column_width=True)
-            except: st.image("https://img.icons8.com/illustrations/flat-round/200/female-student--v1.png", use_column_width=True)
+            tampilkan_avatar("smart", "👩‍🎓", "80px")
             
     st.markdown(f"<h3 style='text-align:center; margin-bottom:0;'>{st.session_state.avatar_name}</h3>", unsafe_allow_html=True)
     st.markdown(f"<h4 style='text-align:center; color:gray;'>Level {st.session_state.user_level}</h4>", unsafe_allow_html=True)
@@ -143,7 +162,7 @@ elif menu == "📖 Ruang Belajar":
                             st.download_button("⬇️ Unduh File", data=f.read(), file_name=file, key=file_path)
                     except: pass
 
-# --- HALAMAN PEMILIHAN AVATAR (100% NATIVE IMAGE) ---
+# --- HALAMAN PEMILIHAN AVATAR ---
 elif menu == "🎭 Pilih Avatar":
     st.title("🎭 Pemilihan Avatar Kelulusan")
     st.markdown("Pilih karakter pendamping belajarmu untuk mencapai level tertinggi!")
@@ -153,8 +172,7 @@ elif menu == "🎭 Pilih Avatar":
     
     with col1:
         st.markdown("<h2 style='text-align:center; color: #1E3A8A;'>Geni Us</h2>", unsafe_allow_html=True)
-        try: st.image("genius.png", use_column_width=True)
-        except: st.image("https://img.icons8.com/illustrations/external-pack-flat-symbols-tanah-basah/200/external-student-back-to-school-pack-flat-symbols-tanah-basah.png", use_column_width=True)
+        tampilkan_avatar("genius", "👨‍🎓")
         st.info("**Si Pintar Yang Ceria, Berprestasi, Ijazah di Tangan!**")
         
         if st.button("PILIH GENI US", key="btn_genius"):
@@ -164,8 +182,7 @@ elif menu == "🎭 Pilih Avatar":
             
     with col2:
         st.markdown("<h2 style='text-align:center; color: #BE185D;'>Smar T</h2>", unsafe_allow_html=True)
-        try: st.image("smart.png", use_column_width=True)
-        except: st.image("https://img.icons8.com/illustrations/flat-round/200/female-student--v1.png", use_column_width=True)
+        tampilkan_avatar("smart", "👩‍🎓")
         st.success("**Si Cerdas Juara, Medali Emas di Leher!**")
         
         if st.button("PILIH SMAR T", key="btn_smart"):
