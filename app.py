@@ -15,14 +15,20 @@ if "user_points" not in st.session_state:
 if "learned_chapters" not in st.session_state: 
     st.session_state.learned_chapters = set()
 
-# --- SISTEM PEMBACA AVATAR LOKAL AMAN ---
-def get_base64_image(image_path, fallback_url):
-    if os.path.exists(image_path):
-        with open(image_path, "rb") as img_file:
+# --- SISTEM PEMBACA AVATAR LOKAL (DENGAN PELACAK LOKASI ABSOLUT) ---
+# Mendapatkan folder tempat file app.py ini berada
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+
+def get_base64_image(filename, fallback_url):
+    # Menggabungkan nama folder dengan nama gambar
+    file_path = os.path.join(CURRENT_DIR, filename)
+    
+    if os.path.exists(file_path):
+        with open(file_path, "rb") as img_file:
             return f"data:image/png;base64,{base64.b64encode(img_file.read()).decode()}"
     return fallback_url
 
-# Membaca gambar genius.png dan smart.png
+# Membaca gambar genius.png dan smart.png secara paksa dari folder
 AVATAR_GENIUS = get_base64_image("genius.png", "https://img.icons8.com/illustrations/external-pack-flat-symbols-tanah-basah/200/external-student-back-to-school-pack-flat-symbols-tanah-basah.png")
 AVATAR_SMART = get_base64_image("smart.png", "https://img.icons8.com/illustrations/flat-round/200/female-student--v1.png")
 
