@@ -3,69 +3,29 @@ import pandas as pd
 from PIL import Image
 import os
 import re
-import base64
-import io
 from materi import DATA_MATERI
 
 # --- KONFIGURASI HALAMAN ---
 st.set_page_config(page_title="Learning Media Pro", page_icon="📚", layout="wide")
 
 # --- INISIALISASI MEMORI USER ---
-if "user_points" not in st.session_state: st.session_state.user_points = 0
-if "learned_chapters" not in st.session_state: st.session_state.learned_chapters = set()
-if "avatar_hat" not in st.session_state: st.session_state.avatar_hat = ""
-if "unlocked_accessories" not in st.session_state: st.session_state.unlocked_accessories = ["Tanpa Aksesoris"]
-
-# --- SISTEM PEMBACA AVATAR SUPER AMAN (ANTI TEKS MUBAL/ERROR) ---
-CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-
-def get_avatar_base64(keyword, fallback_emoji):
-    try:
-        # Melacak file gambar secara otomatis berdasarkan kata kunci
-        for file in os.listdir(CURRENT_DIR):
-            if keyword.lower() in file.lower() and file.lower().endswith(('.png', '.jpg', '.jpeg')):
-                file_path = os.path.join(CURRENT_DIR, file)
-                
-                # BUKA DAN KOMPRES GAMBAR SECARA OTOMATIS
-                img = Image.open(file_path)
-                img.thumbnail((300, 300)) # Perkecil ukuran maksimal 300x300 pixel agar kode base64 tidak kepanjangan
-                
-                buffered = io.BytesIO()
-                img.save(buffered, format="PNG") # Simpan di memori sementara
-                img_str = base64.b64encode(buffered.getvalue()).decode()
-                return f"data:image/png;base64,{img_str}"
-    except Exception:
-        pass
-    
-    # Fallback Emoji jika gambar belum ter-upload sempurna
-    svg = f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="50%" x="50%" dominant-baseline="middle" text-anchor="middle" font-size="70">{fallback_emoji}</text></svg>'
-    return f"data:image/svg+xml;base64,{base64.b64encode(svg.encode('utf-8')).decode()}"
-
-# Eksekusi pencarian gambar
-AVATAR_GENIUS = get_avatar_base64("genius", "👨‍🎓")
-AVATAR_SMART = get_avatar_base64("smart", "👩‍🎓")
-
-if "avatar_base" not in st.session_state:
-    st.session_state.avatar_base = AVATAR_GENIUS 
+if "user_points" not in st.session_state: 
+    st.session_state.user_points = 0
+if "learned_chapters" not in st.session_state: 
+    st.session_state.learned_chapters = set()
 if "avatar_name" not in st.session_state:
-    st.session_state.avatar_name = "Geni Us"
+    st.session_state.avatar_name = "Geni Us" # Default Avatar
 
-# --- KUSTOMISASI CSS DENGAN HTML STANDAR (DOUBLE QUOTES) ---
+# Konversi Poin ke Level
+st.session_state.user_level = (st.session_state.user_points // 100) + 1
+
+# --- KUSTOMISASI CSS ---
 st.markdown("""
     <style>
     .stApp { background-color: #FAFAFA; }
     h1, h2, h3 { color: #1E3A8A; font-family: 'Segoe UI', sans-serif; }
     .stButton>button { background-color: #2563EB; color: white; border-radius: 8px; border: none; padding: 10px 24px; font-weight: bold; width: 100%; transition: all 0.3s ease; }
     .stButton>button:hover { background-color: #1D4ED8; transform: scale(1.02); }
-    
-    .profile-card { background-color: white; border-radius: 16px; padding: 20px; border: 2px solid #E5E7EB; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); text-align: center; margin-bottom: 20px; }
-    .avatar-container { width: 140px; height: 140px; margin: 0 auto 10px auto; position: relative; background: radial-gradient(circle, #EFF6FF 0%, #DBEAFE 100%); border-radius: 50%; border: 4px solid #3B82F6; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-    .avatar-base-img { width: 120%; height: 120%; object-fit: contain; position: absolute; bottom: -10px; z-index: 1; }
-    .avatar-hat-img { width: 65px; height: 65px; object-fit: contain; position: absolute; top: -12px; z-index: 2; }
-    
-    .selection-card { background-color: white; border-radius: 16px; padding: 30px; border: 2px solid #E5E7EB; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); text-align: center; height: 100%; }
-    .selection-img { height: 250px; object-fit: contain; margin-bottom: 20px; }
-    
     div[data-testid="stExpander"] { background-color: white; border-radius: 10px; border: 1px solid #E5E7EB; margin-bottom: 10px; }
     </style>
     """, unsafe_allow_html=True)
@@ -74,30 +34,24 @@ st.markdown("""
 def bersihkan_nama(teks):
     return re.sub(r'[\\/*?:"<>|]', "", teks)
 
-st.session_state.user_level = (st.session_state.user_points // 100) + 1
-
-# --- DATABASE GRAFIS TOKO ---
-TOKO_AKSESORIS = {
-    "👑 Mahkota Emas": {"harga": 100, "url": "https://img.icons8.com/isometric/100/crown.png"},
-    "🎧 Headphone Neon": {"harga": 60, "url": "https://img.icons8.com/isometric/100/headphones.png"},
-    "🎓 Topi Kelulusan": {"harga": 40, "url": "https://img.icons8.com/isometric/100/mortarboard.png"},
-    "🥽 Kacamata Google": {"harga": 50, "url": "https://img.icons8.com/isometric/100/safety-goggles.png"}
-}
-
-# --- SIDEBAR & NAVIGASI ---
+# --- SIDEBAR & NAVIGASI (100% NATIVE IMAGE) ---
 with st.sidebar:
-    hat_element = f'<img class="avatar-hat-img" src="{st.session_state.avatar_hat}">' if st.session_state.avatar_hat else ""
-    st.markdown(f"""
-    <div class="profile-card">
-        <div class="avatar-container">
-            {hat_element}
-            <img class="avatar-base-img" src="{st.session_state.avatar_base}">
-        </div>
-        <h3 style="margin-bottom:0; color:#1E3A8A;">{st.session_state.avatar_name}</h3>
-        <h4>Level {st.session_state.user_level}</h4>
-        <p style="color:#2563EB; font-weight:bold; margin:0;">⭐ {st.session_state.user_points} PTS</p>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align:center; color:#1E3A8A;'>🎓 Profil Pelajar</h2>", unsafe_allow_html=True)
+    st.write("") # Spacer
+    
+    # Menampilkan Gambar secara Native (Anti-Error)
+    col_img1, col_img2, col_img3 = st.columns([1, 4, 1])
+    with col_img2:
+        if st.session_state.avatar_name == "Geni Us":
+            try: st.image("genius.png", use_column_width=True)
+            except: st.image("https://img.icons8.com/illustrations/external-pack-flat-symbols-tanah-basah/200/external-student-back-to-school-pack-flat-symbols-tanah-basah.png", use_column_width=True)
+        else:
+            try: st.image("smart.png", use_column_width=True)
+            except: st.image("https://img.icons8.com/illustrations/flat-round/200/female-student--v1.png", use_column_width=True)
+            
+    st.markdown(f"<h3 style='text-align:center; margin-bottom:0;'>{st.session_state.avatar_name}</h3>", unsafe_allow_html=True)
+    st.markdown(f"<h4 style='text-align:center; color:gray;'>Level {st.session_state.user_level}</h4>", unsafe_allow_html=True)
+    st.markdown(f"<p style='text-align:center; color:#2563EB; font-weight:bold; font-size:18px;'>⭐ {st.session_state.user_points} PTS</p>", unsafe_allow_html=True)
     
     prog = st.session_state.user_points % 100
     st.progress(prog / 100)
@@ -115,6 +69,7 @@ if menu == "🏠 Beranda":
 # --- HALAMAN UPLOAD ---
 elif menu == "📤 Upload Materi":
     st.title("📤 Tambah Materi Baru")
+    
     col1, col2 = st.columns(2)
     with col1: pilih_pelajaran = st.selectbox("📖 Pilih Pelajaran:", list(DATA_MATERI.keys()))
     with col2: pilih_kelas = st.selectbox("🎓 Pilih Kelas Target:", list(DATA_MATERI[pilih_pelajaran].keys()))
@@ -138,6 +93,7 @@ elif menu == "📤 Upload Materi":
 # --- HALAMAN RUANG BELAJAR ---
 elif menu == "📖 Ruang Belajar":
     st.title("📖 Ruang Belajar Interaktif")
+    
     col1, col2 = st.columns(2)
     with col1: lihat_pelajaran = st.selectbox("🔍 Filter Pelajaran:", list(DATA_MATERI.keys()))
     with col2: lihat_kelas = st.selectbox("🔍 Filter Kelas:", list(DATA_MATERI[lihat_pelajaran].keys()))
@@ -187,7 +143,7 @@ elif menu == "📖 Ruang Belajar":
                             st.download_button("⬇️ Unduh File", data=f.read(), file_name=file, key=file_path)
                     except: pass
 
-# --- HALAMAN PEMILIHAN AVATAR ---
+# --- HALAMAN PEMILIHAN AVATAR (100% NATIVE IMAGE) ---
 elif menu == "🎭 Pilih Avatar":
     st.title("🎭 Pemilihan Avatar Kelulusan")
     st.markdown("Pilih karakter pendamping belajarmu untuk mencapai level tertinggi!")
@@ -196,27 +152,23 @@ elif menu == "🎭 Pilih Avatar":
     col1, col2 = st.columns(2)
     
     with col1:
-        st.markdown("<div class='selection-card'>", unsafe_allow_html=True)
-        st.markdown("<h2 style='color: #1E3A8A;'>Geni Us</h2>", unsafe_allow_html=True)
-        st.markdown(f'<img class="selection-img" src="{AVATAR_GENIUS}">', unsafe_allow_html=True)
-        st.markdown("**Si Pintar Yang Ceria, Berprestasi, Ijazah di Tangan!**")
-        st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("PILIH GENI US", key="btn_genius"):
-            st.session_state.avatar_base = AVATAR_GENIUS
-            st.session_state.avatar_name = "Geni Us"
-            st.success("🎉 Avatar diubah menjadi Geni Us!")
-            st.rerun()
-        st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown("<h2 style='text-align:center; color: #1E3A8A;'>Geni Us</h2>", unsafe_allow_html=True)
+        try: st.image("genius.png", use_column_width=True)
+        except: st.image("https://img.icons8.com/illustrations/external-pack-flat-symbols-tanah-basah/200/external-student-back-to-school-pack-flat-symbols-tanah-basah.png", use_column_width=True)
+        st.info("**Si Pintar Yang Ceria, Berprestasi, Ijazah di Tangan!**")
         
-    with col2:
-        st.markdown("<div class='selection-card'>", unsafe_allow_html=True)
-        st.markdown("<h2 style='color: #BE185D;'>Smar T</h2>", unsafe_allow_html=True)
-        st.markdown(f'<img class="selection-img" src="{AVATAR_SMART}">', unsafe_allow_html=True)
-        st.markdown("**Si Cerdas Juara, Medali Emas di Leher!**")
-        st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("PILIH SMAR T", key="btn_smart"):
-            st.session_state.avatar_base = AVATAR_SMART
-            st.session_state.avatar_name = "Smar T"
-            st.success("🎉 Avatar diubah menjadi Smar T!")
+        if st.button("PILIH GENI US", key="btn_genius"):
+            st.session_state.avatar_name = "Geni Us"
+            st.success("🎉 Avatar berhasil diubah menjadi Geni Us!")
             st.rerun()
-        st.markdown("</div>", unsafe_allow_html=True)
+            
+    with col2:
+        st.markdown("<h2 style='text-align:center; color: #BE185D;'>Smar T</h2>", unsafe_allow_html=True)
+        try: st.image("smart.png", use_column_width=True)
+        except: st.image("https://img.icons8.com/illustrations/flat-round/200/female-student--v1.png", use_column_width=True)
+        st.success("**Si Cerdas Juara, Medali Emas di Leher!**")
+        
+        if st.button("PILIH SMAR T", key="btn_smart"):
+            st.session_state.avatar_name = "Smar T"
+            st.success("🎉 Avatar berhasil diubah menjadi Smar T!")
+            st.rerun()
