@@ -4,6 +4,7 @@ from PIL import Image
 import os
 import re
 import base64
+import random
 
 # Sistem anti-error untuk grafik canggih
 try:
@@ -13,17 +14,17 @@ except ImportError:
     HAS_PLOTLY = False
 
 # --- KONFIGURASI HALAMAN ---
-st.set_page_config(page_title="Learning Media Pro | Edisi Mythic", page_icon="🌌", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(page_title="Learning Media Pro | Edisi Super App", page_icon="🌌", layout="wide", initial_sidebar_state="expanded")
 
-# --- INISIALISASI MEMORI (ENGINE RPG & ANALITIK) ---
+# --- INISIALISASI MEMORI (ENGINE RPG & GACHA) ---
 if "user_points" not in st.session_state: st.session_state.user_points = 0
 if "learned_chapters" not in st.session_state: st.session_state.learned_chapters = set()
 if "avatar_name" not in st.session_state: st.session_state.avatar_name = "Geni Us"
-if "user_title" not in st.session_state: st.session_state.user_title = "Pemula"
-if "unlocked_titles" not in st.session_state: st.session_state.unlocked_titles = ["Pemula"]
+if "user_title" not in st.session_state: st.session_state.user_title = "🏅 Pemula"
+if "unlocked_titles" not in st.session_state: st.session_state.unlocked_titles = ["🏅 Pemula"]
 if "daily_streak" not in st.session_state: st.session_state.daily_streak = 5
+if "gacha_claimed" not in st.session_state: st.session_state.gacha_claimed = False
 if "mastery" not in st.session_state: 
-    # Poin kecerdasan dasar tiap mapel untuk grafik Radar
     st.session_state.mastery = {"Matematika": 10, "Fisika": 10, "Kimia": 10, "Biologi": 10, "Sejarah": 10, "Ekonomi": 10, "Sosiologi": 10}
 
 # --- SISTEM KALKULASI RANK (KASTA TIER) ---
@@ -38,40 +39,42 @@ def get_tier(level):
 
 tier_name, tier_color = get_tier(st.session_state.user_level)
 
-# --- KUSTOMISASI CSS ANIMASI & PERBAIKAN DROPDOWN ---
+# --- DATABASE PASAR GELAR (SHOP) ---
+DAFTAR_GELAR = {
+    "⚡ Speedrunner Fisika": 150,
+    "🧪 Alkemis Ulung": 200,
+    "👑 Raja Eksponen": 300,
+    "🧬 Master Evolusi": 450,
+    "🌌 Penguasa Dimensi": 1000
+}
+
+# --- KUSTOMISASI CSS HOLOGRAFIS & NEON ---
 st.markdown(f"""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
     html, body, [class*="css"] {{ font-family: 'Plus Jakarta Sans', sans-serif; }}
     .stApp {{ background-color: #0F172A; background-image: radial-gradient(circle at 50% 0%, #1E293B 0%, #0F172A 100%); color: white; }}
     
-    /* Hanya Header dan Paragraf yang putih, agar komponen lain tidak rusak */
     h1, h2, h3, h4, h5, p {{ color: #F8FAFC; }}
     
-    /* PERBAIKAN KOTAK DROPDOWN (SELECTBOX) */
-    .stSelectbox label p {{ color: #00C6FF !important; font-weight: 800; letter-spacing: 0.5px; }} /* Judul Dropdown Neon */
+    /* PERBAIKAN DROPDOWN */
+    .stSelectbox label p {{ color: #00C6FF !important; font-weight: 800; letter-spacing: 0.5px; }}
     div[data-baseweb="select"] {{ background-color: #F8FAFC !important; border-radius: 10px; border: 2px solid #334155; }}
-    div[data-baseweb="select"] span {{ color: #0F172A !important; font-weight: 600; }} /* Teks Opsi Terpilih (Gelap) */
-    ul[role="listbox"] span {{ color: #0F172A !important; font-weight: 600; }} /* Teks di dalam list (Gelap) */
+    div[data-baseweb="select"] span {{ color: #0F172A !important; font-weight: 600; }} 
+    ul[role="listbox"] span {{ color: #0F172A !important; font-weight: 600; }} 
     
-    /* Animasi Melayang untuk Avatar */
-    @keyframes float {{
-        0% {{ transform: translateY(0px); }}
-        50% {{ transform: translateY(-10px); }}
-        100% {{ transform: translateY(0px); }}
-    }}
+    /* Animasi Melayang & Efek Kaca */
+    @keyframes float {{ 0% {{ transform: translateY(0px); }} 50% {{ transform: translateY(-10px); }} 100% {{ transform: translateY(0px); }} }}
     .floating-avatar {{ animation: float 4s ease-in-out infinite; }}
     
-    /* Efek Kaca (Glassmorphism) & Glow */
     .glass-card {{
         background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px);
         border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.1);
-        padding: 24px; text-align: center; transition: all 0.3s ease;
-        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        padding: 24px; text-align: center; transition: all 0.3s ease; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
     }}
     .glass-card:hover {{ transform: translateY(-5px); border: 1px solid rgba(59, 130, 246, 0.5); box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }}
     
-    /* Tombol Super Premium */
+    /* Tombol Super Premium & Lootbox */
     .stButton>button {{ 
         background: linear-gradient(135deg, #00C6FF 0%, #0072FF 100%);
         color: white; border-radius: 12px; border: none; padding: 12px 24px; font-weight: 800; 
@@ -79,17 +82,19 @@ st.markdown(f"""
     }}
     .stButton>button:hover {{ box-shadow: 0 0 20px rgba(0, 198, 255, 0.6); transform: scale(1.02); }}
     
-    /* Label Tier */
-    .tier-badge {{ background: {tier_color}40; color: {tier_color}; padding: 6px 15px; border-radius: 20px; font-weight: 800; border: 1px solid {tier_color}; display: inline-block; box-shadow: 0 0 10px {tier_color}40; }}
+    .lootbox-btn>button {{ background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); color: white; border: 2px solid #FEF3C7; box-shadow: 0 0 15px rgba(245, 158, 11, 0.5); }}
+    .lootbox-btn>button:hover {{ background: linear-gradient(135deg, #FCD34D 0%, #F59E0B 100%); box-shadow: 0 0 25px rgba(245, 158, 11, 0.8); transform: scale(1.05); }}
     
-    /* Sidebar Styling Override */
+    /* Label Tier & Title */
+    .tier-badge {{ background: {tier_color}40; color: {tier_color}; padding: 6px 15px; border-radius: 20px; font-weight: 800; border: 1px solid {tier_color}; display: inline-block; box-shadow: 0 0 10px {tier_color}40; }}
+    .title-badge {{ background: rgba(0, 198, 255, 0.1); color: #00C6FF; padding: 4px 12px; border-radius: 999px; font-size: 13px; font-weight: 800; border: 1px solid #00C6FF; margin-top: 8px; display: inline-block; }}
+    
     [data-testid="stSidebar"] {{ background-color: #1E293B !important; border-right: 1px solid #334155; }}
     </style>
     """, unsafe_allow_html=True)
 
 from materi import DATA_MATERI
 
-# Database Kuis Ringkas
 DATABASE_KUIS = {
     "Matematika": {"soal": "Jika $2^{x+1} = 16$, nilai $x$ adalah?", "opsi": ["2", "3", "4", "5"], "jaw": "3", "pem": "Sederhanakan jadi $2^{x+1} = 2^4$. Maka $x+1=4 \\Rightarrow x=3$."},
     "Fisika": {"soal": "Energi potensial benda 2 kg di ketinggian 10 m (g=10)?", "opsi": ["100 J", "200 J", "300 J", "400 J"], "jaw": "200 J", "pem": "Ep = m.g.h = $2 \\times 10 \\times 10 = 200$ Joule."},
@@ -100,7 +105,6 @@ DATABASE_KUIS = {
     "Sosiologi": {"soal": "Pengelompokan masyarakat yang sejajar/horizontal disebut...", "opsi": ["Stratifikasi", "Diferensiasi", "Mobilitas", "Konflik"], "jaw": "Diferensiasi", "pem": "Diferensiasi = setara (Suku, Agama). Stratifikasi = bertingkat (Harta)."}
 }
 
-# Fungsi Pembaca Avatar Anti-Error
 def tampilkan_avatar(keyword):
     current_dir = os.path.dirname(os.path.abspath(__file__))
     try:
@@ -112,17 +116,17 @@ def tampilkan_avatar(keyword):
     except: pass
     st.markdown(f"<div class='floating-avatar' style='text-align:center; font-size:100px;'>{'👨‍🎓' if keyword=='genius' else '👩‍🎓'}</div>", unsafe_allow_html=True)
 
-# --- SIDEBAR: KOKPIT PEMAIN ---
+# --- SIDEBAR: KOKPIT PEMAIN & RADIO FOKUS ---
 with st.sidebar:
     st.markdown("<h2 style='text-align:center; color:#00C6FF; font-weight:800;'>⚡ BATTLE STATS</h2>", unsafe_allow_html=True)
     st.write("<br>", unsafe_allow_html=True)
     
     tampilkan_avatar("genius" if st.session_state.avatar_name == "Geni Us" else "smart")
             
-    st.markdown(f"<h2 style='text-align:center; margin-top: 15px; margin-bottom: 5px;'>{st.session_state.avatar_name}</h2>", unsafe_allow_html=True)
-    st.markdown(f"<div style='text-align:center; margin-bottom: 20px;'><span class='tier-badge'>{tier_name}</span></div>", unsafe_allow_html=True)
+    st.markdown(f"<h2 style='text-align:center; margin-top: 15px; margin-bottom: 0;'>{st.session_state.avatar_name}</h2>", unsafe_allow_html=True)
+    st.markdown(f"<div style='text-align:center;'><span class='title-badge'>{st.session_state.user_title}</span></div>", unsafe_allow_html=True)
+    st.markdown(f"<div style='text-align:center; margin-top:15px; margin-bottom: 20px;'><span class='tier-badge'>{tier_name}</span></div>", unsafe_allow_html=True)
     
-    # Progress Bar Neon
     progress_val = st.session_state.user_points % 100
     st.markdown(f"""
         <div style='background-color: #334155; border-radius: 999px; height: 10px; margin: 15px 0; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);'>
@@ -135,27 +139,44 @@ with st.sidebar:
     """, unsafe_allow_html=True)
     
     st.markdown("<hr style='border:1px solid #334155;'>", unsafe_allow_html=True)
-    menu = st.radio("SISTEM NAVIGASI", ["🏠 Command Center", "⚔️ Arena Pelatihan", "📊 Analitik Kemampuan", "🎭 Ganti Karakter"])
+    menu = st.radio("SISTEM NAVIGASI", ["🏠 Command Center", "⚔️ Arena Pelatihan", "📊 Analitik Kemampuan", "🛒 Pasar Gelar & Avatar"])
+    
+    # RADIO FOKUS (SPOTIFY LOFI EMBED)
+    st.markdown("<hr style='border:1px solid #334155;'>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align:center; font-weight:bold; color:#00C6FF;'>🎧 Radio Fokus (Lo-Fi)</p>", unsafe_allow_html=True)
+    st.components.v1.html(
+        '<iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/0vvXsWCC9xrXsKd4Zsnsnl?utm_source=generator&theme=0" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>',
+        height=160
+    )
 
 # --- HALAMAN BERANDA ---
 if menu == "🏠 Command Center":
     st.markdown("<h1>COMMAND CENTER 🚀</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='font-size:18px; color:#94A3B8;'>Selesaikan misi belajarmu, taklukkan kuis, dan capai tingkat Mythic!</p>", unsafe_allow_html=True)
     
-    # KARTU STATUS
+    # --- SISTEM GACHA / LOOTBOX HARIAN ---
+    if not st.session_state.gacha_claimed:
+        st.markdown("<div class='glass-card' style='border-color:#F59E0B; background:rgba(245, 158, 11, 0.1);'>", unsafe_allow_html=True)
+        st.markdown("<h2 style='color:#FCD34D;'>🎁 Hadiah Login Harian Tersedia!</h2>", unsafe_allow_html=True)
+        st.write("Buka peti hartamu hari ini. Uji keberuntunganmu untuk mendapatkan hingga 500 XP!")
+        
+        st.markdown("<div class='lootbox-btn'>", unsafe_allow_html=True)
+        if st.button("🗝️ BUKA PETI HARTA KARUN"):
+            bonus = random.choice([20, 30, 50, 50, 100, 100, 200, 500])
+            st.session_state.user_points += bonus
+            st.session_state.gacha_claimed = True
+            if bonus >= 200: st.balloons()
+            st.success(f"🎉 BINGO! Kamu mendapatkan +{bonus} XP dari Peti Harian!")
+            st.rerun()
+        st.markdown("</div></div><br>", unsafe_allow_html=True)
+
     col1, col2, col3 = st.columns(3)
-    with col1:
-        st.markdown(f"<div class='glass-card'><div style='font-size:40px;'>🔥</div><h3>{st.session_state.daily_streak} Days</h3><p style='color:#94A3B8;'>Login Streak</p></div>", unsafe_allow_html=True)
-    with col2:
-        st.markdown(f"<div class='glass-card'><div style='font-size:40px;'>📚</div><h3>{len(st.session_state.learned_chapters)}</h3><p style='color:#94A3B8;'>Materi Diselesaikan</p></div>", unsafe_allow_html=True)
-    with col3:
-        st.markdown(f"<div class='glass-card' style='border-color:{tier_color}; box-shadow: 0 0 20px {tier_color}40;'><div style='font-size:40px;'>🏆</div><h3 style='color:{tier_color};'>{tier_name.split()[1]}</h3><p style='color:#94A3B8;'>Kasta Saat Ini</p></div>", unsafe_allow_html=True)
+    with col1: st.markdown(f"<div class='glass-card'><div style='font-size:40px;'>🔥</div><h3>{st.session_state.daily_streak} Days</h3><p style='color:#94A3B8;'>Login Streak</p></div>", unsafe_allow_html=True)
+    with col2: st.markdown(f"<div class='glass-card'><div style='font-size:40px;'>📚</div><h3>{len(st.session_state.learned_chapters)}</h3><p style='color:#94A3B8;'>Materi Diselesaikan</p></div>", unsafe_allow_html=True)
+    with col3: st.markdown(f"<div class='glass-card' style='border-color:{tier_color}; box-shadow: 0 0 20px {tier_color}40;'><div style='font-size:40px;'>🏆</div><h3 style='color:{tier_color};'>{tier_name.split()[1]}</h3><p style='color:#94A3B8;'>Kasta Saat Ini</p></div>", unsafe_allow_html=True)
         
     st.write("<br>", unsafe_allow_html=True)
-    
-    # LEADERBOARD CYBERPUNK
     st.markdown("<h3>📊 TOP 3 GLOBAL RANKING</h3>", unsafe_allow_html=True)
-    data_rank = {"Geni Us": 110, "Smar T": 70, "Eka Bot": 180, "Siti Bot": 50}
+    data_rank = {"Geni Us": 110, "Smar T": 70, "Eka Bot": 380, "Siti Bot": 250}
     data_rank[st.session_state.avatar_name] = st.session_state.user_points
     ranking = sorted(data_rank.items(), key=lambda x: x[1], reverse=True)[:3]
     
@@ -169,10 +190,9 @@ if menu == "🏠 Command Center":
         </div>
         """, unsafe_allow_html=True)
 
-# --- HALAMAN ARENA (BATTLE MODE) ---
+# --- HALAMAN ARENA ---
 elif menu == "⚔️ Arena Pelatihan":
     st.markdown("<h1>⚔️ BATTLE ARENA & MATERI</h1>", unsafe_allow_html=True)
-    
     with st.container():
         st.markdown("<div class='glass-card' style='text-align:left; padding: 30px;'>", unsafe_allow_html=True)
         col1, col2 = st.columns(2)
@@ -189,7 +209,6 @@ elif menu == "⚔️ Arena Pelatihan":
         
     st.write("<br>", unsafe_allow_html=True)
     st.markdown("### 🎯 UJI KOMPETENSI (BOSS BATTLE)")
-    
     id_kuis = f"q_{lihat_pelajaran}_{lihat_kelas}_{lihat_bab}"
     
     if lihat_pelajaran in DATABASE_KUIS:
@@ -201,8 +220,7 @@ elif menu == "⚔️ Arena Pelatihan":
         kunci = f"sub_{id_kuis}"
         if kunci not in st.session_state: st.session_state[kunci] = False
             
-        if st.button("⚡ SERANG JAWABAN", key=f"b_{id_kuis}"):
-            st.session_state[kunci] = True
+        if st.button("⚡ SERANG JAWABAN", key=f"b_{id_kuis}"): st.session_state[kunci] = True
                 
         if st.session_state[kunci]:
             if jawaban_user == ds["jaw"]:
@@ -214,7 +232,6 @@ elif menu == "⚔️ Arena Pelatihan":
                     st.rerun()
             else:
                 st.error("🛡️ ATTACK BLOCKED! Jawaban keliru. Cek analisis taktik di bawah.")
-            
             st.markdown(f"<div style='background:rgba(255,255,255,0.1); padding:15px; border-radius:10px; margin-top:15px;'><b>🧠 Analisis Taktik:</b><br>{ds['pem']}</div>", unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
     else:
@@ -226,52 +243,77 @@ elif menu == "⚔️ Arena Pelatihan":
                 st.session_state.mastery[lihat_pelajaran] += 10
                 st.rerun()
 
-# --- HALAMAN ANALITIK SPIDER-WEB ---
+# --- HALAMAN ANALITIK ---
 elif menu == "📊 Analitik Kemampuan":
     st.markdown("<h1>📊 PEMETAAN OTAK (SKILL MATRIX)</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='color:#94A3B8;'>Lihat dominasi kecerdasanmu berdasarkan kuis dan materi yang telah diselesaikan.</p>", unsafe_allow_html=True)
-    
     if HAS_PLOTLY:
         kategori = list(st.session_state.mastery.keys())
         nilai = list(st.session_state.mastery.values())
         kategori.append(kategori[0]) 
         nilai.append(nilai[0])
-        
         fig = go.Figure(data=go.Scatterpolar(
-            r=nilai, theta=kategori, fill='toself',
-            line_color='#00C6FF', fillcolor='rgba(0, 198, 255, 0.4)',
-            marker=dict(color='white', size=8)
+            r=nilai, theta=kategori, fill='toself', line_color='#00C6FF', fillcolor='rgba(0, 198, 255, 0.4)', marker=dict(color='white', size=8)
         ))
         fig.update_layout(
             polar=dict(
                 radialaxis=dict(visible=True, range=[0, max(nilai)+20], color="rgba(255,255,255,0.3)", gridcolor="rgba(255,255,255,0.2)"),
                 angularaxis=dict(color="white", gridcolor="rgba(255,255,255,0.2)")
             ),
-            showlegend=False, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-            margin=dict(l=40, r=40, t=40, b=40)
+            showlegend=False, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', margin=dict(l=40, r=40, t=40, b=40)
         )
         st.plotly_chart(fig, use_container_width=True)
-        st.info("💡 **Petunjuk:** Jawab kuis dengan benar di *Arena Pelatihan* untuk memperluas jaring kemampuan pada mata pelajaran tertentu!")
     else:
         st.bar_chart(pd.DataFrame.from_dict(st.session_state.mastery, orient='index', columns=['XP Penguasaan']))
 
-# --- HALAMAN AVATAR ---
-elif menu == "🎭 Ganti Karakter":
-    st.markdown("<h1>🎭 SANGGAR KLONING KARAKTER</h1>", unsafe_allow_html=True)
+# --- HALAMAN AVATAR & PASAR GELAR ---
+elif menu == "🛒 Pasar Gelar & Avatar":
+    st.markdown("<h1>🛒 SANGGAR KARAKTER & PASAR GELAR</h1>", unsafe_allow_html=True)
     
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown("<div class='glass-card'><h2>Geni Us</h2>", unsafe_allow_html=True)
-        tampilkan_avatar("genius")
-        if st.button("AKTIFKAN PROTOKOL GENI US"):
-            st.session_state.avatar_name = "Geni Us"
-            st.rerun()
-        st.markdown("</div>", unsafe_allow_html=True)
+    tab_av, tab_gl = st.tabs(["👤 Kloning Karakter", "👑 Beli Julukan Elit"])
+    
+    with tab_av:
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown("<div class='glass-card'><h2>Geni Us</h2>", unsafe_allow_html=True)
+            tampilkan_avatar("genius")
+            if st.button("AKTIFKAN PROTOKOL GENI US"):
+                st.session_state.avatar_name = "Geni Us"
+                st.rerun()
+            st.markdown("</div>", unsafe_allow_html=True)
+        with col2:
+            st.markdown("<div class='glass-card'><h2>Smar T</h2>", unsafe_allow_html=True)
+            tampilkan_avatar("smart")
+            if st.button("AKTIFKAN PROTOKOL SMAR T"):
+                st.session_state.avatar_name = "Smar T"
+                st.rerun()
+            st.markdown("</div>", unsafe_allow_html=True)
+            
+    with tab_gl:
+        st.markdown("<div class='glass-card' style='text-align:left;'>", unsafe_allow_html=True)
+        st.markdown("<h3>Tukarkan Poin Belajarmu dengan Gelar Kehormatan</h3>", unsafe_allow_html=True)
+        st.write(f"Saldo XP kamu saat ini: ⭐ **{st.session_state.user_points} XP**")
+        st.markdown("<hr style='border:1px solid #334155;'>", unsafe_allow_html=True)
         
-    with col2:
-        st.markdown("<div class='glass-card'><h2>Smar T</h2>", unsafe_allow_html=True)
-        tampilkan_avatar("smart")
-        if st.button("AKTIFKAN PROTOKOL SMAR T"):
-            st.session_state.avatar_name = "Smar T"
-            st.rerun()
+        for gelar, harga in DAFTAR_GELAR.items():
+            c_g1, c_g2, c_g3 = st.columns([3, 1, 1])
+            with c_g1: st.markdown(f"<h4 style='margin:0;'>{gelar}</h4>", unsafe_allow_html=True)
+            with c_g2: st.markdown(f"<p style='color:#F59E0B; font-weight:bold; margin:0;'>💰 {harga} XP</p>", unsafe_allow_html=True)
+            with c_g3:
+                if gelar in st.session_state.unlocked_titles:
+                    if st.session_state.user_title == gelar:
+                        st.button("✅ Dipakai", key=f"ak_{gelar}", disabled=True)
+                    else:
+                        if st.button("Gunakan", key=f"gk_{gelar}"):
+                            st.session_state.user_title = gelar
+                            st.rerun()
+                else:
+                    if st.button("🛒 Beli", key=f"by_{gelar}"):
+                        if st.session_state.user_points >= harga:
+                            st.session_state.user_points -= harga
+                            st.session_state.unlocked_titles.append(gelar)
+                            st.session_state.user_title = gelar
+                            st.success(f"Gelar '{gelar}' berhasil dibeli dan dipakai!")
+                            st.rerun()
+                        else:
+                            st.error("XP belum cukup!")
         st.markdown("</div>", unsafe_allow_html=True)
