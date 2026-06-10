@@ -3,6 +3,7 @@ import pandas as pd
 from PIL import Image
 import os
 import re
+import base64
 
 # Sistem anti-error untuk grafik canggih
 try:
@@ -37,14 +38,21 @@ def get_tier(level):
 
 tier_name, tier_color = get_tier(st.session_state.user_level)
 
-# --- KUSTOMISASI CSS ANIMASI & GLASSMORPHISM ---
+# --- KUSTOMISASI CSS ANIMASI & PERBAIKAN DROPDOWN ---
 st.markdown(f"""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
     html, body, [class*="css"] {{ font-family: 'Plus Jakarta Sans', sans-serif; }}
     .stApp {{ background-color: #0F172A; background-image: radial-gradient(circle at 50% 0%, #1E293B 0%, #0F172A 100%); color: white; }}
     
-    h1, h2, h3, h4, h5, p, span, div {{ color: #F8FAFC; }}
+    /* Hanya Header dan Paragraf yang putih, agar komponen lain tidak rusak */
+    h1, h2, h3, h4, h5, p {{ color: #F8FAFC; }}
+    
+    /* PERBAIKAN KOTAK DROPDOWN (SELECTBOX) */
+    .stSelectbox label p {{ color: #00C6FF !important; font-weight: 800; letter-spacing: 0.5px; }} /* Judul Dropdown Neon */
+    div[data-baseweb="select"] {{ background-color: #F8FAFC !important; border-radius: 10px; border: 2px solid #334155; }}
+    div[data-baseweb="select"] span {{ color: #0F172A !important; font-weight: 600; }} /* Teks Opsi Terpilih (Gelap) */
+    ul[role="listbox"] span {{ color: #0F172A !important; font-weight: 600; }} /* Teks di dalam list (Gelap) */
     
     /* Animasi Melayang untuk Avatar */
     @keyframes float {{
@@ -98,12 +106,11 @@ def tampilkan_avatar(keyword):
     try:
         for f in os.listdir(current_dir):
             if keyword in f.lower() and f.lower().endswith(('.png', '.jpg', '.jpeg')):
-                st.markdown(f"""<div class="floating-avatar" style="display:flex; justify-content:center;"><img src="data:image/png;base64,{base64.b64encode(open(os.path.join(current_dir, f), 'rb').read()).decode()}" style="width:150px; filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.5));"></div>""", unsafe_allow_html=True)
+                img_b64 = base64.b64encode(open(os.path.join(current_dir, f), 'rb').read()).decode()
+                st.markdown(f"""<div class="floating-avatar" style="display:flex; justify-content:center;"><img src="data:image/png;base64,{img_b64}" style="width:150px; filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.5));"></div>""", unsafe_allow_html=True)
                 return True
     except: pass
     st.markdown(f"<div class='floating-avatar' style='text-align:center; font-size:100px;'>{'👨‍🎓' if keyword=='genius' else '👩‍🎓'}</div>", unsafe_allow_html=True)
-
-import base64
 
 # --- SIDEBAR: KOKPIT PEMAIN ---
 with st.sidebar:
@@ -142,131 +149,4 @@ if menu == "🏠 Command Center":
     with col2:
         st.markdown(f"<div class='glass-card'><div style='font-size:40px;'>📚</div><h3>{len(st.session_state.learned_chapters)}</h3><p style='color:#94A3B8;'>Materi Diselesaikan</p></div>", unsafe_allow_html=True)
     with col3:
-        st.markdown(f"<div class='glass-card' style='border-color:{tier_color}; box-shadow: 0 0 20px {tier_color}40;'><div style='font-size:40px;'>🏆</div><h3 style='color:{tier_color};'>{tier_name.split()[1]}</h3><p style='color:#94A3B8;'>Kasta Saat Ini</p></div>", unsafe_allow_html=True)
-        
-    st.write("<br>", unsafe_allow_html=True)
-    
-    # LEADERBOARD CYBERPUNK
-    st.markdown("<h3>📊 TOP 3 GLOBAL RANKING</h3>", unsafe_allow_html=True)
-    data_rank = {"Geni Us": 110, "Smar T": 70, "Eka Bot": 180, "Siti Bot": 50}
-    data_rank[st.session_state.avatar_name] = st.session_state.user_points
-    ranking = sorted(data_rank.items(), key=lambda x: x[1], reverse=True)[:3]
-    
-    for i, (nama, skor) in enumerate(ranking):
-        medali = "🥇" if i == 0 else "🥈" if i == 1 else "🥉"
-        warna = "rgba(255, 215, 0, 0.1)" if i==0 else "rgba(192, 192, 192, 0.1)" if i==1 else "rgba(205, 127, 50, 0.1)"
-        st.markdown(f"""
-        <div style='background: {warna}; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;'>
-            <h3 style='margin:0;'>{medali} {nama}</h3>
-            <h3 style='margin:0; color:#00C6FF; text-shadow: 0 0 10px #00C6FF;'>⭐ {skor} XP</h3>
-        </div>
-        """, unsafe_allow_html=True)
-
-# --- HALAMAN ARENA (BATTLE MODE) ---
-elif menu == "⚔️ Arena Pelatihan":
-    st.markdown("<h1>⚔️ BATTLE ARENA & MATERI</h1>", unsafe_allow_html=True)
-    
-    with st.container():
-        st.markdown("<div class='glass-card' style='text-align:left;'>", unsafe_allow_html=True)
-        col1, col2 = st.columns(2)
-        with col1: lihat_pelajaran = st.selectbox("Pilih Mata Pelajaran:", list(DATA_MATERI.keys()))
-        with col2: lihat_kelas = st.selectbox("Pilih Tingkat Kelas:", list(DATA_MATERI[lihat_pelajaran].keys()))
-        col3, col4 = st.columns(2)
-        with col3: lihat_bab = st.selectbox("Pilih Sektor Bab:", list(DATA_MATERI[lihat_pelajaran][lihat_kelas].keys()))
-        with col4: lihat_subbab = st.selectbox("Target Sub-bab:", DATA_MATERI[lihat_pelajaran][lihat_kelas][lihat_bab]["sub_bab"])
-        st.markdown("</div>", unsafe_allow_html=True)
-        
-    st.markdown(f"### 📜 Intisari: {lihat_bab}")
-    st.markdown(f"<div class='glass-card' style='text-align:left; border-left: 5px solid #00C6FF;'>{DATA_MATERI[lihat_pelajaran][lihat_kelas][lihat_bab]['rangkuman']}</div>", unsafe_allow_html=True)
-        
-    st.write("<br>", unsafe_allow_html=True)
-    st.markdown("### 🎯 UJI KOMPETENSI (BOSS BATTLE)")
-    
-    id_kuis = f"q_{lihat_pelajaran}_{lihat_kelas}_{lihat_bab}"
-    
-    if lihat_pelajaran in DATABASE_KUIS:
-        ds = DATABASE_KUIS[lihat_pelajaran]
-        st.markdown("<div class='glass-card' style='text-align:left;'>", unsafe_allow_html=True)
-        st.write(f"**Misi Soal:**\n{ds['soal']}")
-        
-        jawaban_user = st.radio("Pilih Eksekusi Jawaban:", ds["opsi"], key=f"r_{id_kuis}")
-        kunci = f"sub_{id_kuis}"
-        if kunci not in st.session_state: st.session_state[kunci] = False
-            
-        if st.button("⚡ SERANG JAWABAN", key=f"b_{id_kuis}"):
-            st.session_state[kunci] = True
-                
-        if st.session_state[kunci]:
-            if jawaban_user == ds["jaw"]:
-                st.success("💥 CRITICAL HIT! Jawabanmu Benar!")
-                if id_kuis not in st.session_state.learned_chapters:
-                    st.session_state.learned_chapters.add(id_kuis)
-                    st.session_state.user_points += 50
-                    # Trik Analitik: Menambah keahlian spesifik mapel!
-                    st.session_state.mastery[lihat_pelajaran] += 20
-                    st.rerun()
-            else:
-                st.error("🛡️ ATTACK BLOCKED! Jawaban keliru. Cek analisis taktik di bawah.")
-            
-            st.markdown(f"<div style='background:rgba(255,255,255,0.1); padding:15px; border-radius:10px; margin-top:15px;'><b>🧠 Analisis Taktik:</b><br>{ds['pem']}</div>", unsafe_allow_html=True)
-        st.markdown("</div>", unsafe_allow_html=True)
-    else:
-        st.info("Sistem belum mendeteksi bos di sektor ini. Klaim poin eksplorasi!")
-        if st.button("🏁 Klaim +40 XP Eksplorasi"):
-            if id_kuis not in st.session_state.learned_chapters:
-                st.session_state.learned_chapters.add(id_kuis)
-                st.session_state.user_points += 40
-                st.session_state.mastery[lihat_pelajaran] += 10
-                st.rerun()
-
-# --- HALAMAN ANALITIK SPIDER-WEB ---
-elif menu == "📊 Analitik Kemampuan":
-    st.markdown("<h1>📊 PEMETAAN OTAK (SKILL MATRIX)</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='color:#94A3B8;'>Lihat dominasi kecerdasanmu berdasarkan kuis dan materi yang telah diselesaikan.</p>", unsafe_allow_html=True)
-    
-    if HAS_PLOTLY:
-        # Menyiapkan Data untuk Grafik Radar
-        kategori = list(st.session_state.mastery.keys())
-        nilai = list(st.session_state.mastery.values())
-        kategori.append(kategori[0]) # Tutup loop grafik
-        nilai.append(nilai[0])
-        
-        fig = go.Figure(data=go.Scatterpolar(
-            r=nilai, theta=kategori, fill='toself',
-            line_color='#00C6FF', fillcolor='rgba(0, 198, 255, 0.4)',
-            marker=dict(color='white', size=8)
-        ))
-        fig.update_layout(
-            polar=dict(
-                radialaxis=dict(visible=True, range=[0, max(nilai)+20], color="rgba(255,255,255,0.3)", gridcolor="rgba(255,255,255,0.2)"),
-                angularaxis=dict(color="white", gridcolor="rgba(255,255,255,0.2)")
-            ),
-            showlegend=False, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-            margin=dict(l=40, r=40, t=40, b=40)
-        )
-        st.plotly_chart(fig, use_container_width=True)
-        st.info("💡 **Petunjuk:** Jawab kuis dengan benar di *Arena Pelatihan* untuk memperluas jaring kemampuan pada mata pelajaran tertentu!")
-    else:
-        # Fallback jika Plotly belum terinstall di server
-        st.bar_chart(pd.DataFrame.from_dict(st.session_state.mastery, orient='index', columns=['XP Penguasaan']))
-
-# --- HALAMAN AVATAR ---
-elif menu == "🎭 Ganti Karakter":
-    st.markdown("<h1>🎭 SANGGAR KLONING KARAKTER</h1>", unsafe_allow_html=True)
-    
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown("<div class='glass-card'><h2>Geni Us</h2>", unsafe_allow_html=True)
-        tampilkan_avatar("genius")
-        if st.button("AKTIFKAN PROTOKOL GENI US"):
-            st.session_state.avatar_name = "Geni Us"
-            st.rerun()
-        st.markdown("</div>", unsafe_allow_html=True)
-        
-    with col2:
-        st.markdown("<div class='glass-card'><h2>Smar T</h2>", unsafe_allow_html=True)
-        tampilkan_avatar("smart")
-        if st.button("AKTIFKAN PROTOKOL SMAR T"):
-            st.session_state.avatar_name = "Smar T"
-            st.rerun()
-        st.markdown("</div>", unsafe_allow_html=True)
+        st
