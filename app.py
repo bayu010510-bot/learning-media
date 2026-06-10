@@ -4,6 +4,7 @@ from PIL import Image
 import os
 import re
 import base64
+import io
 from materi import DATA_MATERI
 
 # --- KONFIGURASI HALAMAN ---
@@ -15,7 +16,7 @@ if "learned_chapters" not in st.session_state: st.session_state.learned_chapters
 if "avatar_hat" not in st.session_state: st.session_state.avatar_hat = ""
 if "unlocked_accessories" not in st.session_state: st.session_state.unlocked_accessories = ["Tanpa Aksesoris"]
 
-# --- SISTEM PEMBACA AVATAR SUPER AMAN (ANTI BROKEN IMAGE) ---
+# --- SISTEM PEMBACA AVATAR SUPER AMAN (ANTI TEKS MUBAL/ERROR) ---
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 def get_avatar_base64(keyword, fallback_emoji):
@@ -24,13 +25,19 @@ def get_avatar_base64(keyword, fallback_emoji):
         for file in os.listdir(CURRENT_DIR):
             if keyword.lower() in file.lower() and file.lower().endswith(('.png', '.jpg', '.jpeg')):
                 file_path = os.path.join(CURRENT_DIR, file)
-                with open(file_path, "rb") as img_file:
-                    mime_type = "image/jpeg" if file.lower().endswith(('.jpg', '.jpeg')) else "image/png"
-                    return f"data:{mime_type};base64,{base64.b64encode(img_file.read()).decode()}"
+                
+                # BUKA DAN KOMPRES GAMBAR SECARA OTOMATIS
+                img = Image.open(file_path)
+                img.thumbnail((300, 300)) # Perkecil ukuran maksimal 300x300 pixel agar kode base64 tidak kepanjangan
+                
+                buffered = io.BytesIO()
+                img.save(buffered, format="PNG") # Simpan di memori sementara
+                img_str = base64.b64encode(buffered.getvalue()).decode()
+                return f"data:image/png;base64,{img_str}"
     except Exception:
         pass
     
-    # Jika gambar belum diganti namanya di GitHub, tampilkan Emoji Keren ini agar tidak terlihat "rusak"
+    # Fallback Emoji jika gambar belum ter-upload sempurna
     svg = f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="50%" x="50%" dominant-baseline="middle" text-anchor="middle" font-size="70">{fallback_emoji}</text></svg>'
     return f"data:image/svg+xml;base64,{base64.b64encode(svg.encode('utf-8')).decode()}"
 
@@ -43,7 +50,7 @@ if "avatar_base" not in st.session_state:
 if "avatar_name" not in st.session_state:
     st.session_state.avatar_name = "Geni Us"
 
-# --- KUSTOMISASI CSS ---
+# --- KUSTOMISASI CSS DENGAN HTML STANDAR (DOUBLE QUOTES) ---
 st.markdown("""
     <style>
     .stApp { background-color: #FAFAFA; }
@@ -79,16 +86,16 @@ TOKO_AKSESORIS = {
 
 # --- SIDEBAR & NAVIGASI ---
 with st.sidebar:
-    hat_element = f"<img class='avatar-hat-img' src='{st.session_state.avatar_hat}'>" if st.session_state.avatar_hat else ""
+    hat_element = f'<img class="avatar-hat-img" src="{st.session_state.avatar_hat}">' if st.session_state.avatar_hat else ""
     st.markdown(f"""
-    <div class='profile-card'>
-        <div class='avatar-container'>
+    <div class="profile-card">
+        <div class="avatar-container">
             {hat_element}
-            <img class='avatar-base-img' src='{st.session_state.avatar_base}'>
+            <img class="avatar-base-img" src="{st.session_state.avatar_base}">
         </div>
-        <h3 style='margin-bottom:0; color:#1E3A8A;'>{st.session_state.avatar_name}</h3>
+        <h3 style="margin-bottom:0; color:#1E3A8A;">{st.session_state.avatar_name}</h3>
         <h4>Level {st.session_state.user_level}</h4>
-        <p style='color:#2563EB; font-weight:bold; margin:0;'>⭐ {st.session_state.user_points} PTS</p>
+        <p style="color:#2563EB; font-weight:bold; margin:0;">⭐ {st.session_state.user_points} PTS</p>
     </div>
     """, unsafe_allow_html=True)
     
@@ -191,7 +198,7 @@ elif menu == "🎭 Pilih Avatar":
     with col1:
         st.markdown("<div class='selection-card'>", unsafe_allow_html=True)
         st.markdown("<h2 style='color: #1E3A8A;'>Geni Us</h2>", unsafe_allow_html=True)
-        st.markdown(f"<img class='selection-img' src='{AVATAR_GENIUS}'>", unsafe_allow_html=True)
+        st.markdown(f'<img class="selection-img" src="{AVATAR_GENIUS}">', unsafe_allow_html=True)
         st.markdown("**Si Pintar Yang Ceria, Berprestasi, Ijazah di Tangan!**")
         st.markdown("<br>", unsafe_allow_html=True)
         if st.button("PILIH GENI US", key="btn_genius"):
@@ -204,7 +211,7 @@ elif menu == "🎭 Pilih Avatar":
     with col2:
         st.markdown("<div class='selection-card'>", unsafe_allow_html=True)
         st.markdown("<h2 style='color: #BE185D;'>Smar T</h2>", unsafe_allow_html=True)
-        st.markdown(f"<img class='selection-img' src='{AVATAR_SMART}'>", unsafe_allow_html=True)
+        st.markdown(f'<img class="selection-img" src="{AVATAR_SMART}">', unsafe_allow_html=True)
         st.markdown("**Si Cerdas Juara, Medali Emas di Leher!**")
         st.markdown("<br>", unsafe_allow_html=True)
         if st.button("PILIH SMAR T", key="btn_smart"):
