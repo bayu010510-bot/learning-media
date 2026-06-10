@@ -10,29 +10,34 @@ from materi import DATA_MATERI
 st.set_page_config(page_title="Learning Media Pro", page_icon="📚", layout="wide")
 
 # --- INISIALISASI MEMORI USER ---
-if "user_points" not in st.session_state: 
-    st.session_state.user_points = 0
-if "learned_chapters" not in st.session_state: 
-    st.session_state.learned_chapters = set()
+if "user_points" not in st.session_state: st.session_state.user_points = 0
+if "learned_chapters" not in st.session_state: st.session_state.learned_chapters = set()
+if "avatar_hat" not in st.session_state: st.session_state.avatar_hat = ""
+if "unlocked_accessories" not in st.session_state: st.session_state.unlocked_accessories = ["Tanpa Aksesoris"]
 
-# --- SISTEM PEMBACA AVATAR LOKAL (DENGAN PELACAK LOKASI ABSOLUT) ---
-# Mendapatkan folder tempat file app.py ini berada
+# --- SISTEM PEMBACA AVATAR SUPER AMAN (ANTI BROKEN IMAGE) ---
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 
-def get_base64_image(filename, fallback_url):
-    # Menggabungkan nama folder dengan nama gambar
-    file_path = os.path.join(CURRENT_DIR, filename)
+def get_avatar_base64(keyword, fallback_emoji):
+    try:
+        # Melacak file gambar secara otomatis berdasarkan kata kunci
+        for file in os.listdir(CURRENT_DIR):
+            if keyword.lower() in file.lower() and file.lower().endswith(('.png', '.jpg', '.jpeg')):
+                file_path = os.path.join(CURRENT_DIR, file)
+                with open(file_path, "rb") as img_file:
+                    mime_type = "image/jpeg" if file.lower().endswith(('.jpg', '.jpeg')) else "image/png"
+                    return f"data:{mime_type};base64,{base64.b64encode(img_file.read()).decode()}"
+    except Exception:
+        pass
     
-    if os.path.exists(file_path):
-        with open(file_path, "rb") as img_file:
-            return f"data:image/png;base64,{base64.b64encode(img_file.read()).decode()}"
-    return fallback_url
+    # Jika gambar belum diganti namanya di GitHub, tampilkan Emoji Keren ini agar tidak terlihat "rusak"
+    svg = f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="50%" x="50%" dominant-baseline="middle" text-anchor="middle" font-size="70">{fallback_emoji}</text></svg>'
+    return f"data:image/svg+xml;base64,{base64.b64encode(svg.encode('utf-8')).decode()}"
 
-# Membaca gambar genius.png dan smart.png secara paksa dari folder
-AVATAR_GENIUS = get_base64_image("genius.png", "https://img.icons8.com/illustrations/external-pack-flat-symbols-tanah-basah/200/external-student-back-to-school-pack-flat-symbols-tanah-basah.png")
-AVATAR_SMART = get_base64_image("smart.png", "https://img.icons8.com/illustrations/flat-round/200/female-student--v1.png")
+# Eksekusi pencarian gambar
+AVATAR_GENIUS = get_avatar_base64("genius", "👨‍🎓")
+AVATAR_SMART = get_avatar_base64("smart", "👩‍🎓")
 
-# Set Avatar Default jika belum memilih
 if "avatar_base" not in st.session_state:
     st.session_state.avatar_base = AVATAR_GENIUS 
 if "avatar_name" not in st.session_state:
@@ -46,14 +51,13 @@ st.markdown("""
     .stButton>button { background-color: #2563EB; color: white; border-radius: 8px; border: none; padding: 10px 24px; font-weight: bold; width: 100%; transition: all 0.3s ease; }
     .stButton>button:hover { background-color: #1D4ED8; transform: scale(1.02); }
     
-    /* Desain Kartu Avatar di Sidebar */
     .profile-card { background-color: white; border-radius: 16px; padding: 20px; border: 2px solid #E5E7EB; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); text-align: center; margin-bottom: 20px; }
     .avatar-container { width: 140px; height: 140px; margin: 0 auto 10px auto; position: relative; background: radial-gradient(circle, #EFF6FF 0%, #DBEAFE 100%); border-radius: 50%; border: 4px solid #3B82F6; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-    .avatar-base-img { width: 120%; height: 120%; object-fit: contain; position: absolute; bottom: -10px; }
+    .avatar-base-img { width: 120%; height: 120%; object-fit: contain; position: absolute; bottom: -10px; z-index: 1; }
+    .avatar-hat-img { width: 65px; height: 65px; object-fit: contain; position: absolute; top: -12px; z-index: 2; }
     
-    /* Desain Kartu Pemilihan Avatar */
     .selection-card { background-color: white; border-radius: 16px; padding: 30px; border: 2px solid #E5E7EB; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); text-align: center; height: 100%; }
-    .selection-img { height: 300px; object-fit: contain; margin-bottom: 20px; }
+    .selection-img { height: 250px; object-fit: contain; margin-bottom: 20px; }
     
     div[data-testid="stExpander"] { background-color: white; border-radius: 10px; border: 1px solid #E5E7EB; margin-bottom: 10px; }
     </style>
@@ -63,14 +67,23 @@ st.markdown("""
 def bersihkan_nama(teks):
     return re.sub(r'[\\/*?:"<>|]', "", teks)
 
-# Konversi Poin ke Level
 st.session_state.user_level = (st.session_state.user_points // 100) + 1
+
+# --- DATABASE GRAFIS TOKO ---
+TOKO_AKSESORIS = {
+    "👑 Mahkota Emas": {"harga": 100, "url": "https://img.icons8.com/isometric/100/crown.png"},
+    "🎧 Headphone Neon": {"harga": 60, "url": "https://img.icons8.com/isometric/100/headphones.png"},
+    "🎓 Topi Kelulusan": {"harga": 40, "url": "https://img.icons8.com/isometric/100/mortarboard.png"},
+    "🥽 Kacamata Google": {"harga": 50, "url": "https://img.icons8.com/isometric/100/safety-goggles.png"}
+}
 
 # --- SIDEBAR & NAVIGASI ---
 with st.sidebar:
+    hat_element = f"<img class='avatar-hat-img' src='{st.session_state.avatar_hat}'>" if st.session_state.avatar_hat else ""
     st.markdown(f"""
     <div class='profile-card'>
         <div class='avatar-container'>
+            {hat_element}
             <img class='avatar-base-img' src='{st.session_state.avatar_base}'>
         </div>
         <h3 style='margin-bottom:0; color:#1E3A8A;'>{st.session_state.avatar_name}</h3>
@@ -95,7 +108,6 @@ if menu == "🏠 Beranda":
 # --- HALAMAN UPLOAD ---
 elif menu == "📤 Upload Materi":
     st.title("📤 Tambah Materi Baru")
-    
     col1, col2 = st.columns(2)
     with col1: pilih_pelajaran = st.selectbox("📖 Pilih Pelajaran:", list(DATA_MATERI.keys()))
     with col2: pilih_kelas = st.selectbox("🎓 Pilih Kelas Target:", list(DATA_MATERI[pilih_pelajaran].keys()))
@@ -119,7 +131,6 @@ elif menu == "📤 Upload Materi":
 # --- HALAMAN RUANG BELAJAR ---
 elif menu == "📖 Ruang Belajar":
     st.title("📖 Ruang Belajar Interaktif")
-    
     col1, col2 = st.columns(2)
     with col1: lihat_pelajaran = st.selectbox("🔍 Filter Pelajaran:", list(DATA_MATERI.keys()))
     with col2: lihat_kelas = st.selectbox("🔍 Filter Kelas:", list(DATA_MATERI[lihat_pelajaran].keys()))
@@ -186,7 +197,7 @@ elif menu == "🎭 Pilih Avatar":
         if st.button("PILIH GENI US", key="btn_genius"):
             st.session_state.avatar_base = AVATAR_GENIUS
             st.session_state.avatar_name = "Geni Us"
-            st.success("🎉 Avatar berhasil diubah menjadi Geni Us!")
+            st.success("🎉 Avatar diubah menjadi Geni Us!")
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
         
@@ -199,6 +210,6 @@ elif menu == "🎭 Pilih Avatar":
         if st.button("PILIH SMAR T", key="btn_smart"):
             st.session_state.avatar_base = AVATAR_SMART
             st.session_state.avatar_name = "Smar T"
-            st.success("🎉 Avatar berhasil diubah menjadi Smar T!")
+            st.success("🎉 Avatar diubah menjadi Smar T!")
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
