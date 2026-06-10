@@ -16,7 +16,7 @@ except ImportError:
 # --- KONFIGURASI HALAMAN ---
 st.set_page_config(page_title="Learning Media Pro | Edisi Super App", page_icon="🌌", layout="wide", initial_sidebar_state="expanded")
 
-# --- INISIALISASI MEMORI (ENGINE RPG & GACHA) ---
+# --- INISIALISASI MEMORI (ENGINE RPG, GACHA & ADMIN SECURITY) ---
 if "user_points" not in st.session_state: st.session_state.user_points = 0
 if "learned_chapters" not in st.session_state: st.session_state.learned_chapters = set()
 if "avatar_name" not in st.session_state: st.session_state.avatar_name = "Geni Us"
@@ -24,6 +24,7 @@ if "user_title" not in st.session_state: st.session_state.user_title = "🏅 Pem
 if "unlocked_titles" not in st.session_state: st.session_state.unlocked_titles = ["🏅 Pemula"]
 if "daily_streak" not in st.session_state: st.session_state.daily_streak = 5
 if "gacha_claimed" not in st.session_state: st.session_state.gacha_claimed = False
+if "is_admin" not in st.session_state: st.session_state.is_admin = False # Kunci Memori Akses Admin
 if "mastery" not in st.session_state: 
     st.session_state.mastery = {"Matematika": 10, "Fisika": 10, "Kimia": 10, "Biologi": 10, "Sejarah": 10, "Ekonomi": 10, "Sosiologi": 10}
 
@@ -47,6 +48,10 @@ DAFTAR_GELAR = {
     "🧬 Master Evolusi": 450,
     "🌌 Penguasa Dimensi": 1000
 }
+
+# --- KATA SANDI RAHASIA ADMIN ---
+# Kata sandi telah diubah sesuai permintaan
+PASSWORD_ADMIN = "LEARNWITHLM"
 
 # --- KUSTOMISASI CSS HOLOGRAFIS & NEON ---
 st.markdown(f"""
@@ -81,6 +86,9 @@ st.markdown(f"""
         text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s ease;
     }}
     .stButton>button:hover {{ box-shadow: 0 0 20px rgba(0, 198, 255, 0.6); transform: scale(1.02); }}
+    
+    .btn-red>button {{ background: linear-gradient(135deg, #EF4444 0%, #B91C1C 100%); box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }}
+    .btn-red>button:hover {{ background: linear-gradient(135deg, #F87171 0%, #DC2626 100%); box-shadow: 0 0 25px rgba(239, 68, 68, 0.8); }}
     
     .lootbox-btn>button {{ background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); color: white; border: 2px solid #FEF3C7; box-shadow: 0 0 15px rgba(245, 158, 11, 0.5); }}
     .lootbox-btn>button:hover {{ background: linear-gradient(135deg, #FCD34D 0%, #F59E0B 100%); box-shadow: 0 0 25px rgba(245, 158, 11, 0.8); transform: scale(1.05); }}
@@ -139,13 +147,13 @@ with st.sidebar:
     """, unsafe_allow_html=True)
     
     st.markdown("<hr style='border:1px solid #334155;'>", unsafe_allow_html=True)
-    menu = st.radio("SISTEM NAVIGASI", ["🏠 Command Center", "⚔️ Arena Pelatihan", "📊 Analitik Kemampuan", "🛒 Pasar Gelar & Avatar"])
+    menu = st.radio("SISTEM NAVIGASI", ["🏠 Command Center", "⚔️ Arena Pelatihan", "📤 Upload Materi", "📊 Analitik Kemampuan", "🛒 Pasar Gelar & Avatar"])
     
     # RADIO FOKUS (SPOTIFY LOFI EMBED)
     st.markdown("<hr style='border:1px solid #334155;'>", unsafe_allow_html=True)
     st.markdown("<p style='text-align:center; font-weight:bold; color:#00C6FF;'>🎧 Radio Fokus (Lo-Fi)</p>", unsafe_allow_html=True)
     st.components.v1.html(
-        '<iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/0vvXsWCC9xrXsKd4Zsnsnl?utm_source=generator&theme=0" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>',
+        '<iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/0vvXsWCC9xrXsKd4FyS8kM?utm_source=generator&theme=0" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>',
         height=160
     )
 
@@ -204,44 +212,114 @@ elif menu == "⚔️ Arena Pelatihan":
         st.markdown("</div>", unsafe_allow_html=True)
         
     st.write("<br>", unsafe_allow_html=True)
-    st.markdown(f"### 📜 Intisari: {lihat_bab}")
-    st.markdown(f"<div class='glass-card' style='text-align:left; border-left: 5px solid #00C6FF;'>{DATA_MATERI[lihat_pelajaran][lihat_kelas][lihat_bab]['rangkuman']}</div>", unsafe_allow_html=True)
-        
-    st.write("<br>", unsafe_allow_html=True)
-    st.markdown("### 🎯 UJI KOMPETENSI (BOSS BATTLE)")
-    id_kuis = f"q_{lihat_pelajaran}_{lihat_kelas}_{lihat_bab}"
     
-    if lihat_pelajaran in DATABASE_KUIS:
-        ds = DATABASE_KUIS[lihat_pelajaran]
-        st.markdown("<div class='glass-card' style='text-align:left;'>", unsafe_allow_html=True)
-        st.write(f"**Misi Soal:**\n{ds['soal']}")
-        
-        jawaban_user = st.radio("Pilih Eksekusi Jawaban:", ds["opsi"], key=f"r_{id_kuis}")
-        kunci = f"sub_{id_kuis}"
-        if kunci not in st.session_state: st.session_state[kunci] = False
+    tab1, tab2 = st.tabs(["📌 Rangkuman & Kuis", "📂 Berkas Tambahan"])
+    
+    with tab1:
+        st.markdown(f"### 📜 Intisari: {lihat_bab}")
+        st.markdown(f"<div class='glass-card' style='text-align:left; border-left: 5px solid #00C6FF;'>{DATA_MATERI[lihat_pelajaran][lihat_kelas][lihat_bab]['rangkuman']}</div>", unsafe_allow_html=True)
             
-        if st.button("⚡ SERANG JAWABAN", key=f"b_{id_kuis}"): st.session_state[kunci] = True
+        st.write("<br>", unsafe_allow_html=True)
+        st.markdown("### 🎯 UJI KOMPETENSI (BOSS BATTLE)")
+        id_kuis = f"q_{lihat_pelajaran}_{lihat_kelas}_{lihat_bab}"
+        
+        if lihat_pelajaran in DATABASE_KUIS:
+            ds = DATABASE_KUIS[lihat_pelajaran]
+            st.markdown("<div class='glass-card' style='text-align:left;'>", unsafe_allow_html=True)
+            st.write(f"**Misi Soal:**\n{ds['soal']}")
+            
+            jawaban_user = st.radio("Pilih Eksekusi Jawaban:", ds["opsi"], key=f"r_{id_kuis}")
+            kunci = f"sub_{id_kuis}"
+            if kunci not in st.session_state: st.session_state[kunci] = False
                 
-        if st.session_state[kunci]:
-            if jawaban_user == ds["jaw"]:
-                st.success("💥 CRITICAL HIT! Jawabanmu Benar!")
+            if st.button("⚡ SERANG JAWABAN", key=f"b_{id_kuis}"): st.session_state[kunci] = True
+                    
+            if st.session_state[kunci]:
+                if jawaban_user == ds["jaw"]:
+                    st.success("💥 CRITICAL HIT! Jawabanmu Benar!")
+                    if id_kuis not in st.session_state.learned_chapters:
+                        st.session_state.learned_chapters.add(id_kuis)
+                        st.session_state.user_points += 50
+                        st.session_state.mastery[lihat_pelajaran] += 20
+                        st.rerun()
+                else:
+                    st.error("🛡️ ATTACK BLOCKED! Jawaban keliru. Cek analisis taktik di bawah.")
+                st.markdown(f"<div style='background:rgba(255,255,255,0.1); padding:15px; border-radius:10px; margin-top:15px;'><b>🧠 Analisis Taktik:</b><br>{ds['pem']}</div>", unsafe_allow_html=True)
+            st.markdown("</div>", unsafe_allow_html=True)
+        else:
+            st.info("Sistem belum mendeteksi bos di sektor ini. Klaim poin eksplorasi!")
+            if st.button("🏁 Klaim +40 XP Eksplorasi"):
                 if id_kuis not in st.session_state.learned_chapters:
                     st.session_state.learned_chapters.add(id_kuis)
-                    st.session_state.user_points += 50
-                    st.session_state.mastery[lihat_pelajaran] += 20
+                    st.session_state.user_points += 40
+                    st.session_state.mastery[lihat_pelajaran] += 10
                     st.rerun()
-            else:
-                st.error("🛡️ ATTACK BLOCKED! Jawaban keliru. Cek analisis taktik di bawah.")
-            st.markdown(f"<div style='background:rgba(255,255,255,0.1); padding:15px; border-radius:10px; margin-top:15px;'><b>🧠 Analisis Taktik:</b><br>{ds['pem']}</div>", unsafe_allow_html=True)
-        st.markdown("</div>", unsafe_allow_html=True)
-    else:
-        st.info("Sistem belum mendeteksi bos di sektor ini. Klaim poin eksplorasi!")
-        if st.button("🏁 Klaim +40 XP Eksplorasi"):
-            if id_kuis not in st.session_state.learned_chapters:
-                st.session_state.learned_chapters.add(id_kuis)
-                st.session_state.user_points += 40
-                st.session_state.mastery[lihat_pelajaran] += 10
+
+    with tab2:
+        folder_target = os.path.join("uploads", bersihkan_nama(lihat_pelajaran), bersihkan_nama(lihat_kelas), bersihkan_nama(lihat_bab), bersihkan_nama(lihat_subbab))
+        if not os.path.exists(folder_target) or len(os.listdir(folder_target)) == 0:
+            st.info("📭 Belum ada dokumen PDF/PPT tambahan untuk sub-bab ini.")
+        else:
+            for file in os.listdir(folder_target):
+                file_path = os.path.join(folder_target, file)
+                with st.expander(f"📄 Berkas Pendukung: {file}"):
+                    try:
+                        with open(file_path, "rb") as f:
+                            st.download_button("⬇️ Unduh Berkas", data=f.read(), file_name=file, key=file_path)
+                    except: st.error("Gagal memuat tombol dokumen.")
+
+# --- HALAMAN UPLOAD MATERI (DENGAN SECURITY ADMIN) ---
+elif menu == "📤 Upload Materi":
+    st.markdown("<h1>📤 PUSAT UNGGAH BERKAS (RESTRICTED)</h1>", unsafe_allow_html=True)
+    
+    # KUNCI KEAMANAN ADMIN
+    if not st.session_state.is_admin:
+        st.markdown("<div class='glass-card' style='border-color:#EF4444; background:rgba(239, 68, 68, 0.05);'>", unsafe_allow_html=True)
+        st.markdown("<h2 style='color:#F87171;'>🔒 Zona Keamanan Tingkat Tinggi</h2>", unsafe_allow_html=True)
+        st.write("Area ini dibatasi secara ketat hanya untuk Admin dan Guru. Silakan masukkan kata sandi otorisasi untuk membuka kunci terminal.")
+        
+        pwd = st.text_input("Kode Akses Terminal:", type="password", placeholder="Masukkan kata sandi di sini...")
+        
+        if st.button("Buka Kunci Akses"):
+            if pwd == PASSWORD_ADMIN:
+                st.session_state.is_admin = True
+                st.success("Akses Diberikan! Menginisiasi terminal unggahan...")
                 st.rerun()
+            else:
+                st.error("Akses Ditolak! Kata sandi salah.")
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    else:
+        st.markdown("<p style='color:#00C6FF;'>Terminal terbuka. Unggah dokumen, PDF, atau gambar materi tambahan untuk dipelajari bersama.</p>", unsafe_allow_html=True)
+        
+        with st.container():
+            st.markdown("<div class='glass-card' style='text-align:left;'>", unsafe_allow_html=True)
+            col1, col2 = st.columns(2)
+            with col1: pilih_pelajaran = st.selectbox("📚 Pilih Mata Pelajaran:", list(DATA_MATERI.keys()))
+            with col2: pilih_kelas = st.selectbox("🎓 Pilih Kelas Target:", list(DATA_MATERI[pilih_pelajaran].keys()))
+            col3, col4 = st.columns(2)
+            with col3: pilih_bab = st.selectbox("📑 Pilih Target Bab:", list(DATA_MATERI[pilih_pelajaran][pilih_kelas].keys()))
+            with col4: pilih_subbab = st.selectbox("🔖 Target Sub-bab:", DATA_MATERI[pilih_pelajaran][pilih_kelas][pilih_bab]["sub_bab"])
+            st.markdown("</div>", unsafe_allow_html=True)
+            
+        st.write("<br>", unsafe_allow_html=True)
+        uploaded_file = st.file_uploader("📂 Seret atau pilih file dari perangkatmu (PDF, PPT, DOCX, JPG/PNG)", type=['jpg', 'png', 'pdf', 'docx', 'xlsx', 'pptx'])
+        
+        if uploaded_file is not None:
+            st.info(f"📄 Berkas '{uploaded_file.name}' siap diproses.")
+            if st.button("🚀 UNGGAH KE SERVER CLOUD"):
+                folder_tujuan = os.path.join("uploads", bersihkan_nama(pilih_pelajaran), bersihkan_nama(pilih_kelas), bersihkan_nama(pilih_bab), bersihkan_nama(pilih_subbab))
+                if not os.path.exists(folder_tujuan): os.makedirs(folder_tujuan)
+                with open(os.path.join(folder_tujuan, uploaded_file.name), "wb") as f: f.write(uploaded_file.getbuffer())
+                st.success("🎉 Sukses! Materi kontribusimu berhasil dipublikasikan.")
+                st.balloons()
+                
+        st.write("<br><br>", unsafe_allow_html=True)
+        st.markdown("<div class='btn-red'>", unsafe_allow_html=True)
+        if st.button("🔴 TUTUP TERMINAL (LOGOUT ADMIN)"):
+            st.session_state.is_admin = False
+            st.rerun()
+        st.markdown("</div>", unsafe_allow_html=True)
 
 # --- HALAMAN ANALITIK ---
 elif menu == "📊 Analitik Kemampuan":
