@@ -107,7 +107,7 @@ def tampilkan_avatar(keyword, ukuran="130px"):
     st.markdown(f"<div style='text-align:center; font-size:80px;'>{'👨‍🎓' if keyword=='genius' else '👩‍🎓'}</div>", unsafe_allow_html=True)
 
 # ==========================================
-# PORTAL AUTENTIKASI (LOGIN / REGISTER)
+# PORTAL AUTENTIKASI (LOGIN / REGISTER) ANTI BUG
 # ==========================================
 if not st.session_state.logged_in:
     st.markdown("<h1 style='text-align:center; margin-top:50px; font-size:50px;'>Learning Media <span class='gradient-text'>PRO</span></h1>", unsafe_allow_html=True)
@@ -119,31 +119,33 @@ if not st.session_state.logged_in:
         tab_log, tab_reg = st.tabs(["🔐 MASUK ARENA", "📝 BUAT PROFIL BARU"])
         
         with tab_log:
-            l_user = st.text_input("Username Ksatria:", key="l_usr")
-            l_pass = st.text_input("Kata Sandi:", type="password", key="l_pwd")
+            # Fungsi strip() akan otomatis membuang spasi siluman
+            l_user = st.text_input("Username Ksatria:", key="l_usr").strip()
+            l_pass = st.text_input("Kata Sandi:", type="password", key="l_pwd").strip()
             if st.button("🚀 LOGIN SEKARANG"):
                 if l_user and l_pass:
-                    cursor.execute("SELECT password FROM users WHERE username=?", (l_user,))
+                    # lower() membuat huruf besar/kecil dianggap sama
+                    cursor.execute("SELECT username, password FROM users WHERE lower(username)=lower(?)", (l_user,))
                     res = cursor.fetchone()
-                    if res and res[0] == hash_password(l_pass):
-                        st.session_state.username = l_user
+                    if res and res[1] == hash_password(l_pass):
+                        st.session_state.username = res[0] # Menggunakan nama asli dari DB
                         st.session_state.logged_in = True
                         st.rerun()
-                    else: st.error("❌ Username atau Sandi salah!")
+                    else: st.error("❌ Username atau Sandi salah! Pastikan ketikanmu benar.")
                 else: st.warning("Isi semua kolom!")
                 
         with tab_reg:
-            r_user = st.text_input("Buat Username (Maks 15 Huruf):", max_chars=15, key="r_usr")
-            r_pass = st.text_input("Buat Kata Sandi:", type="password", key="r_pwd")
+            r_user = st.text_input("Buat Username (Maks 15 Huruf):", max_chars=15, key="r_usr").strip()
+            r_pass = st.text_input("Buat Kata Sandi:", type="password", key="r_pwd").strip()
             if st.button("✨ DAFTAR BARU"):
                 if r_user and r_pass:
-                    cursor.execute("SELECT username FROM users WHERE username=?", (r_user,))
-                    if cursor.fetchone(): st.error("⚠️ Username sudah dipakai petarung lain!")
+                    cursor.execute("SELECT username FROM users WHERE lower(username)=lower(?)", (r_user,))
+                    if cursor.fetchone(): st.error("⚠️ Username sudah dipakai petarung lain. Cari nama lain!")
                     else:
                         cursor.execute("INSERT INTO users VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", 
                                        (r_user, hash_password(r_pass), "Geni Us", "🏅 Pemula", 0, 1, 10, 10, 10, 10, 10, 10, 10))
                         conn.commit()
-                        st.success("🎉 Profil Ditempa! Silakan Login di tab sebelah.")
+                        st.success("🎉 Profil Ditempa! Silakan klik tab '🔐 MASUK ARENA' untuk Login.")
                 else: st.warning("Isi semua kolom pendaftaran!")
         st.markdown("</div>", unsafe_allow_html=True)
     st.stop() # Hentikan eksekusi kode di bawah ini jika belum login
@@ -255,7 +257,7 @@ elif menu == "⚔️ Mode Duel Ranked (PvP)":
             if lawan:
                 st.session_state.lawan_duel = lawan
                 st.session_state.kuis_duel = True
-            else: st.error("Tidak ada pemain lain di server saat ini!")
+            else: st.error("Belum ada pemain lain yang terdaftar!")
             
     if st.session_state.lawan_duel and st.session_state.kuis_duel:
         l_nama, l_pts = st.session_state.lawan_duel
