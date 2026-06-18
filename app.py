@@ -60,20 +60,24 @@ DATABASE_KUIS = {
 
 DAFTAR_GELAR = {"⚡ Petarung Cepat": 150, "🧪 Alkemis Gila": 200, "👑 Raja Duel": 400, "🌌 Penguasa Server": 1000}
 
-# --- KUSTOMISASI CSS HOLOGRAFIS & NEON (ULTIMATE) ---
+# --- KUSTOMISASI CSS HOLOGRAFIS & NEON (ANTI BUG TEKS HILANG) ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800;900&display=swap');
     html, body, [class*="css"] { font-family: 'Plus Jakarta Sans', sans-serif; }
     .stApp { background-color: #0B0F19; background-image: radial-gradient(circle at 50% 0%, #172136 0%, #0B0F19 100%); color: #F8FAFC; }
-    h1, h2, h3, h4, h5, p, span { color: #F8FAFC; }
+    h1, h2, h3, h4, h5, p, span, label { color: #F8FAFC !important; }
     
     /* Teks Gradasi Super Keren */
     .gradient-text { background: linear-gradient(135deg, #00C6FF 0%, #0072FF 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; }
     .vs-text { background: linear-gradient(135deg, #FF416C 0%, #FF4B2B 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; font-size: 50px; }
     
-    /* Input dan Dropdown Fix */
-    .stTextInput input, .stSelectbox div[data-baseweb="select"] { background-color: rgba(255,255,255,0.05) !important; color: white !important; border: 1px solid rgba(255,255,255,0.2) !important; border-radius: 10px; }
+    /* PERBAIKAN INPUT & DROPDOWN AGAR TEKS SELALU TERLIHAT */
+    div[data-baseweb="input"] { background-color: rgba(15, 23, 42, 0.8) !important; border: 1px solid rgba(0, 198, 255, 0.4) !important; border-radius: 10px; }
+    div[data-baseweb="input"] input { color: #00C6FF !important; -webkit-text-fill-color: #00C6FF !important; font-weight: bold; font-size: 16px; }
+    
+    div[data-baseweb="select"] { background-color: rgba(15, 23, 42, 0.8) !important; border: 1px solid rgba(0, 198, 255, 0.4) !important; border-radius: 10px; }
+    div[data-baseweb="select"] span { color: #00C6FF !important; -webkit-text-fill-color: #00C6FF !important; font-weight: bold; }
     
     /* Kartu Kaca (Glassmorphism 3.0) */
     .glass-card { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(15px); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.08); padding: 30px; text-align: center; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); transition: transform 0.3s; }
@@ -107,7 +111,7 @@ def tampilkan_avatar(keyword, ukuran="130px"):
     st.markdown(f"<div style='text-align:center; font-size:80px;'>{'👨‍🎓' if keyword=='genius' else '👩‍🎓'}</div>", unsafe_allow_html=True)
 
 # ==========================================
-# PORTAL AUTENTIKASI (LOGIN / REGISTER) ANTI BUG
+# PORTAL AUTENTIKASI (LOGIN / REGISTER)
 # ==========================================
 if not st.session_state.logged_in:
     st.markdown("<h1 style='text-align:center; margin-top:50px; font-size:50px;'>Learning Media <span class='gradient-text'>PRO</span></h1>", unsafe_allow_html=True)
@@ -119,12 +123,11 @@ if not st.session_state.logged_in:
         tab_log, tab_reg = st.tabs(["🔐 MASUK ARENA", "📝 BUAT PROFIL BARU"])
         
         with tab_log:
-            # Fungsi strip() akan otomatis membuang spasi siluman
+            # Fungsi strip() akan membuang spasi otomatis
             l_user = st.text_input("Username Ksatria:", key="l_usr").strip()
             l_pass = st.text_input("Kata Sandi:", type="password", key="l_pwd").strip()
             if st.button("🚀 LOGIN SEKARANG"):
                 if l_user and l_pass:
-                    # lower() membuat huruf besar/kecil dianggap sama
                     cursor.execute("SELECT username, password FROM users WHERE lower(username)=lower(?)", (l_user,))
                     res = cursor.fetchone()
                     if res and res[1] == hash_password(l_pass):
