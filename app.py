@@ -6,15 +6,17 @@ import re
 import base64
 import random
 import sqlite3
+import hashlib
 
-# --- SISTEM DATABASE GLOBAL SINKRON (ONLINE SIMULATION VIA SQLITE) ---
+# --- SISTEM DATABASE MULTIPLAYER (SQLITE) ---
 conn = sqlite3.connect("learning_media_pro.db", check_same_thread=False)
 cursor = conn.cursor()
 
-# Membuat tabel database untuk menyimpan data semua pengguna secara global
+# Membuat tabel dengan Sistem Password
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS users (
     username TEXT PRIMARY KEY,
+    password TEXT,
     avatar_name TEXT,
     title TEXT,
     points INTEGER,
@@ -22,406 +24,405 @@ CREATE TABLE IF NOT EXISTS users (
     matematika INT, fisika INT, kimia INT, biologi INT, sejarah INT, ekonomi INT, sosiologi INT
 )
 """)
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS kuis_history (
-    username TEXT,
-    id_kuis TEXT,
-    PRIMARY KEY(username, id_kuis)
-)
-""")
+cursor.execute("CREATE TABLE IF NOT EXISTS kuis_history (username TEXT, id_kuis TEXT, PRIMARY KEY(username, id_kuis))")
+# Update tabel lama jika belum punya kolom password (Anti-Error)
+try: cursor.execute("ALTER TABLE users ADD COLUMN password TEXT")
+except: pass
 conn.commit()
 
-# Sistem anti-error untuk grafik canggih Plotly
-try:
-    import plotly.graph_objects as go
-    HAS_PLOTLY = True
-except ImportError:
-    HAS_PLOTLY = False
-
 # --- KONFIGURASI HALAMAN ---
-st.set_page_config(page_title="Learning Media Pro | Edisi Cloud", page_icon="🌌", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(page_title="Learning Media | Edisi Esports", page_icon="⚔️", layout="wide", initial_sidebar_state="expanded")
 
-# --- KATA SANDI RAHASIA ADMIN ---
+# --- INISIALISASI MEMORI LOGIN ---
+if "logged_in" not in st.session_state: st.session_state.logged_in = False
+if "username" not in st.session_state: st.session_state.username = ""
+if "gacha_claimed" not in st.session_state: st.session_state.gacha_claimed = False
+if "is_admin" not in st.session_state: st.session_state.is_admin = False
+
 PASSWORD_ADMIN = "LEARNWITHLM"
 
-# --- FUNGSI PEMBERSIH NAMA FOLDER & MANAJEMEN FILE ---
-def bersihkan_nama(teks):
-    return re.sub(r'[\\/*?:"<>|]', "", teks)
+# --- FUNGSI PENGAMANAN & BANTUAN ---
+def hash_password(password): return hashlib.sha256(password.encode()).hexdigest()
+def bersihkan_nama(teks): return re.sub(r'[\\/*?:"<>|]', "", teks)
 
-# --- SIDEBAR: AUTENTIKASI AKSES ONLINE ---
-st.sidebar.markdown("<h2 style='text-align:center; color:#00C6FF; font-weight:800;'>🌐 ONLINE PORTAL</h2>", unsafe_allow_html=True)
-
-# Input Nama Pengguna untuk Sinkronisasi Database Online
-user_input = st.sidebar.text_input("Masukan Nama Ksatria Kamu:", value="Geni Us Baru", max_chars=15).strip()
-if not user_input:
-    user_input = "Ksatria Anonim"
-
-# Load atau Buat Akun Baru di Database Global jika Belum Ada
-cursor.execute("SELECT * FROM users WHERE username = ?", (user_input,))
-user_data = cursor.fetchone()
-
-if user_data is None:
-    # Daftarkan pengguna baru ke database global
-    cursor.execute("INSERT INTO users VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", 
-                   (user_input, "Geni Us", "🏅 Pemula", 0, 5, 10, 10, 10, 10, 10, 10, 10))
-    conn.commit()
-    cursor.execute("SELECT * FROM users WHERE username = ?", (user_input,))
-    user_data = cursor.fetchone()
-
-# Sinkronisasi variabel lokal dengan data dari Database SQL
-player_name = user_data[0]
-avatar_name_db = user_data[1]
-user_title_db = user_data[2]
-user_points_db = user_data[3]
-daily_streak_db = user_data[4]
-
-# Ambil riwayat kuis dari database
-cursor.execute("SELECT id_kuis FROM kuis_history WHERE username = ?", (player_name,))
-learned_chapters_db = set([row[0] for row in cursor.fetchall()])
-
-# Hitung Level & Tier berdasarkan poin di Database
-user_level = (user_points_db // 100) + 1
-
-def get_tier(level):
-    if level < 3: return "🥉 Bronze", "#CD7F32"
-    elif level < 6: return "🥈 Silver", "#C0C0C0"
-    elif level < 10: return "🥇 Gold", "#FFD700"
-    elif level < 15: return "💎 Platinum", "#00EDFF"
-    else: return "🌌 Mythic", "#9D00FF"
-
-tier_name, tier_color = get_tier(user_level)
-
-# --- KUSTOMISASI CSS HOLOGRAFIS & FIXED TEXT COLOUR ---
-st.markdown(f"""
-    <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;600;800&display=swap');
-    html, body, [class*="css"] {{ font-family: 'Plus Jakarta Sans', sans-serif; }}
-    .stApp {{ background-color: #0F172A; background-image: radial-gradient(circle at 50% 0%, #1E293B 0%, #0F172A 100%); color: white; }}
-    
-    h1, h2, h3, h4, h5, p {{ color: #F8FAFC; }}
-    
-    /* PERBAIKAN WARNA INPUT & DROPDOWN DROPDOWN */
-    .stSelectbox label p, .stTextInput label p {{ color: #00C6FF !important; font-weight: 800; letter-spacing: 0.5px; }}
-    div[data-baseweb="select"], div[data-baseweb="input"] {{ background-color: #F8FAFC !important; border-radius: 10px; border: 2px solid #334155; }}
-    div[data-baseweb="select"] span, div[data-baseweb="input"] input {{ color: #0F172A !important; font-weight: 600; }} 
-    ul[role="listbox"] span {{ color: #0F172A !important; font-weight: 600; }} 
-    
-    @keyframes float {{ 0% {{ transform: translateY(0px); }} 50% {{ transform: translateY(-10px); }} 100% {{ transform: translateY(0px); }} }}
-    .floating-avatar {{ animation: float 4s ease-in-out infinite; }}
-    
-    .glass-card {{
-        background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px);
-        border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.1);
-        padding: 24px; text-align: center; transition: all 0.3s ease; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-    }}
-    .glass-card:hover {{ transform: translateY(-5px); border: 1px solid rgba(59, 130, 246, 0.5); box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }}
-    
-    .stButton>button {{ 
-        background: linear-gradient(135deg, #00C6FF 0%, #0072FF 100%);
-        color: white; border-radius: 12px; border: none; padding: 12px 24px; font-weight: 800; 
-        text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s ease;
-    }}
-    .stButton>button:hover {{ box-shadow: 0 0 20px rgba(0, 198, 255, 0.6); transform: scale(1.02); }}
-    
-    .btn-red>button {{ background: linear-gradient(135deg, #EF4444 0%, #B91C1C 100%); box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }}
-    .btn-red>button:hover {{ background: linear-gradient(135deg, #F87171 0%, #DC2626 100%); box-shadow: 0 0 25px rgba(239, 68, 68, 0.8); }}
-    
-    .lootbox-btn>button {{ background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); color: white; border: 2px solid #FEF3C7; box-shadow: 0 0 15px rgba(245, 158, 11, 0.5); }}
-    .lootbox-btn>button:hover {{ background: linear-gradient(135deg, #FCD34D 0%, #F59E0B 100%); box-shadow: 0 0 25px rgba(245, 158, 11, 0.8); transform: scale(1.05); }}
-    
-    .tier-badge {{ background: {tier_color}40; color: {tier_color}; padding: 6px 15px; border-radius: 20px; font-weight: 800; border: 1px solid {tier_color}; display: inline-block; box-shadow: 0 0 10px {tier_color}40; }}
-    .title-badge {{ background: rgba(0, 198, 255, 0.1); color: #00C6FF; padding: 4px 12px; border-radius: 999px; font-size: 13px; font-weight: 800; border: 1px solid #00C6FF; margin-top: 8px; display: inline-block; }}
-    
-    [data-testid="stSidebar"] {{ background-color: #1E293B !important; border-right: 1px solid #334155; }}
-    </style>
-    """, unsafe_allow_html=True)
-
+# --- DATABASE MATERI & KUIS UTBK ---
 from materi import DATA_MATERI
 
 DATABASE_KUIS = {
-    "Matematika": {"soal": "Jika $2^{x+1} = 16$, nilai $x$ adalah?", "opsi": ["2", "3", "4", "5"], "jaw": "3", "pem": "Sederhanakan jadi $2^{x+1} = 2^4$. Maka $x+1=4 \\Rightarrow x=3$."},
-    "Fisika": {"soal": "Energi potensial benda 2 kg di ketinggian 10 m (g=10)?", "opsi": ["100 J", "200 J", "300 J", "400 J"], "jaw": "200 J", "pem": "Ep = m.g.h = $2 \\times 10 \\times 10 = 200$ Joule."},
-    "Kimia": {"soal": "Kondisi di mana laju reaksi ke kanan dan kiri sama disebut?", "opsi": ["Katalis", "Kesetimbangan Dinamis", "Reaksi Eksoterm", "Redoks"], "jaw": "Kesetimbangan Dinamis", "pem": "Kesetimbangan tercapai saat V1 (kanan) = V2 (kiri)."},
-    "Biologi": {"soal": "Pemisah fauna Asiatis dan Peralihan adalah garis?", "opsi": ["Khatulistiwa", "Wallace", "Weber", "Bujur"], "jaw": "Wallace", "pem": "Garis Wallace memisahkan tipe Asiatis dan Peralihan."},
-    "Sejarah": {"soal": "Pengamanan Soekarno-Hatta ke luar Jakarta disebut peristiwa?", "opsi": ["Bandung Lautan Api", "Rengasdengklok", "Ambarawa", "Madiun"], "jaw": "Rengasdengklok", "pem": "Golongan muda menculik ke Rengasdengklok pada 16 Agustus 1945."},
-    "Ekonomi": {"soal": "Inti masalah ekonomi adalah...", "opsi": ["Inflasi", "Kelangkaan (Scarcity)", "Deflasi", "Monopoli"], "jaw": "Kelangkaan (Scarcity)", "pem": "Kelangkaan: kebutuhan tak terbatas vs alat pemuas terbatas."},
-    "Sosiologi": {"soal": "Pengelompokan masyarakat yang sejajar/horizontal disebut...", "opsi": ["Stratifikasi", "Diferensiasi", "Mobilitas", "Konflik"], "jaw": "Diferensiasi", "pem": "Diferensiasi = setara (Suku, Agama). Stratifikasi = bertingkat (Harta)."}
+    "Matematika": {"soal": "Jika $2^{x+1} = 16$, nilai $x$ adalah?", "opsi": ["2", "3", "4", "5"], "jaw": "3", "pem": "$2^{x+1} = 2^4 \\Rightarrow x+1=4 \\Rightarrow x=3$."},
+    "Fisika": {"soal": "Energi potensial benda 2 kg di ketinggian 10 m (g=10)?", "opsi": ["100 J", "200 J", "300 J", "400 J"], "jaw": "200 J", "pem": "Ep = m.g.h = $2 \\times 10 \\times 10 = 200$ J."},
+    "Kimia": {"soal": "Kondisi laju reaksi ke kanan dan kiri sama disebut?", "opsi": ["Katalis", "Kesetimbangan Dinamis", "Reaksi Eksoterm", "Redoks"], "jaw": "Kesetimbangan Dinamis", "pem": "V(kanan) = V(kiri)."},
+    "Biologi": {"soal": "Pemisah fauna Asiatis dan Peralihan?", "opsi": ["Khatulistiwa", "Wallace", "Weber", "Bujur"], "jaw": "Wallace", "pem": "Garis Wallace."},
+    "Sejarah": {"soal": "Penculikan Soekarno-Hatta ke luar Jakarta disebut?", "opsi": ["Bandung Lautan Api", "Rengasdengklok", "Ambarawa", "Madiun"], "jaw": "Rengasdengklok", "pem": "16 Agustus 1945."},
+    "Ekonomi": {"soal": "Inti masalah ekonomi adalah...", "opsi": ["Inflasi", "Kelangkaan (Scarcity)", "Deflasi", "Monopoli"], "jaw": "Kelangkaan (Scarcity)", "pem": "Kebutuhan tak terbatas vs alat terbatas."},
+    "Sosiologi": {"soal": "Pengelompokan masyarakat sejajar disebut...", "opsi": ["Stratifikasi", "Diferensiasi", "Mobilitas", "Konflik"], "jaw": "Diferensiasi", "pem": "Diferensiasi = setara."}
 }
 
-def tampilkan_avatar(keyword):
-    current_dir = os.path.dirname(os.path.abspath(__file__))
+DAFTAR_GELAR = {"⚡ Petarung Cepat": 150, "🧪 Alkemis Gila": 200, "👑 Raja Duel": 400, "🌌 Penguasa Server": 1000}
+
+# --- KUSTOMISASI CSS HOLOGRAFIS & NEON (ULTIMATE) ---
+st.markdown("""
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800;900&display=swap');
+    html, body, [class*="css"] { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .stApp { background-color: #0B0F19; background-image: radial-gradient(circle at 50% 0%, #172136 0%, #0B0F19 100%); color: #F8FAFC; }
+    h1, h2, h3, h4, h5, p, span { color: #F8FAFC; }
+    
+    /* Teks Gradasi Super Keren */
+    .gradient-text { background: linear-gradient(135deg, #00C6FF 0%, #0072FF 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; }
+    .vs-text { background: linear-gradient(135deg, #FF416C 0%, #FF4B2B 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; font-size: 50px; }
+    
+    /* Input dan Dropdown Fix */
+    .stTextInput input, .stSelectbox div[data-baseweb="select"] { background-color: rgba(255,255,255,0.05) !important; color: white !important; border: 1px solid rgba(255,255,255,0.2) !important; border-radius: 10px; }
+    
+    /* Kartu Kaca (Glassmorphism 3.0) */
+    .glass-card { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(15px); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.08); padding: 30px; text-align: center; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); transition: transform 0.3s; }
+    .glass-card:hover { transform: translateY(-5px); border-color: rgba(0, 198, 255, 0.4); box-shadow: 0 0 30px rgba(0, 198, 255, 0.2); }
+    
+    /* Tombol Interaktif */
+    .stButton>button { background: linear-gradient(135deg, #00C6FF 0%, #0072FF 100%); color: white; border-radius: 12px; border: none; padding: 12px 24px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s ease; width: 100%; box-shadow: 0 4px 15px rgba(0, 114, 255, 0.4); }
+    .stButton>button:hover { transform: scale(1.03); box-shadow: 0 0 25px rgba(0, 198, 255, 0.7); }
+    .btn-red>button { background: linear-gradient(135deg, #FF416C 0%, #FF4B2B 100%); box-shadow: 0 4px 15px rgba(255, 75, 43, 0.4); }
+    .btn-red>button:hover { box-shadow: 0 0 25px rgba(255, 75, 43, 0.8); }
+    
+    /* Menyembunyikan elemen bawaan Streamlit */
+    #MainMenu {visibility: hidden;} footer {visibility: hidden;}
+    [data-testid="stSidebar"] { background-color: rgba(15, 23, 42, 0.9) !important; backdrop-filter: blur(20px); border-right: 1px solid rgba(255,255,255,0.05); }
+    </style>
+    """, unsafe_allow_html=True)
+
+# Sembunyikan Sidebar jika belum login
+if not st.session_state.logged_in:
+    st.markdown("""<style>[data-testid="collapsedControl"] {display: none;} [data-testid="stSidebar"] {display: none;}</style>""", unsafe_allow_html=True)
+
+def tampilkan_avatar(keyword, ukuran="130px"):
+    c_dir = os.path.dirname(os.path.abspath(__file__))
     try:
-        for f in os.listdir(current_dir):
+        for f in os.listdir(c_dir):
             if keyword in f.lower() and f.lower().endswith(('.png', '.jpg', '.jpeg')):
-                img_b64 = base64.b64encode(open(os.path.join(current_dir, f), 'rb').read()).decode()
-                st.markdown(f"""<div class="floating-avatar" style="display:flex; justify-content:center;"><img src="data:image/png;base64,{img_b64}" style="width:130px; filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.5));"></div>""", unsafe_allow_html=True)
+                img_b64 = base64.b64encode(open(os.path.join(c_dir, f), 'rb').read()).decode()
+                st.markdown(f"<div style='display:flex; justify-content:center;'><img src='data:image/png;base64,{img_b64}' style='width:{ukuran}; filter: drop-shadow(0 0 20px rgba(0, 198, 255, 0.4)); animation: float 3s ease-in-out infinite;'></div>", unsafe_allow_html=True)
                 return True
     except: pass
-    st.markdown(f"<div class='floating-avatar' style='text-align:center; font-size:90px;'>{'👨‍🎓' if keyword=='genius' else '👩‍🎓'}</div>", unsafe_allow_html=True)
+    st.markdown(f"<div style='text-align:center; font-size:80px;'>{'👨‍🎓' if keyword=='genius' else '👩‍🎓'}</div>", unsafe_allow_html=True)
 
-# --- TAMPILAN SIDEBAR PROFIL STATS ---
+# ==========================================
+# PORTAL AUTENTIKASI (LOGIN / REGISTER)
+# ==========================================
+if not st.session_state.logged_in:
+    st.markdown("<h1 style='text-align:center; margin-top:50px; font-size:50px;'>Learning Media <span class='gradient-text'>PRO</span></h1>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align:center; color:#94A3B8; margin-bottom:40px;'>Satu Profil, Ribuan Tantangan. Masuk ke Arena Belajar.</p>", unsafe_allow_html=True)
+    
+    col_space1, col_form, col_space3 = st.columns([1, 1.5, 1])
+    with col_form:
+        st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
+        tab_log, tab_reg = st.tabs(["🔐 MASUK ARENA", "📝 BUAT PROFIL BARU"])
+        
+        with tab_log:
+            l_user = st.text_input("Username Ksatria:", key="l_usr")
+            l_pass = st.text_input("Kata Sandi:", type="password", key="l_pwd")
+            if st.button("🚀 LOGIN SEKARANG"):
+                if l_user and l_pass:
+                    cursor.execute("SELECT password FROM users WHERE username=?", (l_user,))
+                    res = cursor.fetchone()
+                    if res and res[0] == hash_password(l_pass):
+                        st.session_state.username = l_user
+                        st.session_state.logged_in = True
+                        st.rerun()
+                    else: st.error("❌ Username atau Sandi salah!")
+                else: st.warning("Isi semua kolom!")
+                
+        with tab_reg:
+            r_user = st.text_input("Buat Username (Maks 15 Huruf):", max_chars=15, key="r_usr")
+            r_pass = st.text_input("Buat Kata Sandi:", type="password", key="r_pwd")
+            if st.button("✨ DAFTAR BARU"):
+                if r_user and r_pass:
+                    cursor.execute("SELECT username FROM users WHERE username=?", (r_user,))
+                    if cursor.fetchone(): st.error("⚠️ Username sudah dipakai petarung lain!")
+                    else:
+                        cursor.execute("INSERT INTO users VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", 
+                                       (r_user, hash_password(r_pass), "Geni Us", "🏅 Pemula", 0, 1, 10, 10, 10, 10, 10, 10, 10))
+                        conn.commit()
+                        st.success("🎉 Profil Ditempa! Silakan Login di tab sebelah.")
+                else: st.warning("Isi semua kolom pendaftaran!")
+        st.markdown("</div>", unsafe_allow_html=True)
+    st.stop() # Hentikan eksekusi kode di bawah ini jika belum login
+
+# ==========================================
+# MEMUAT DATA PENGGUNA AKTIF DARI DATABASE
+# ==========================================
+player = st.session_state.username
+cursor.execute("SELECT * FROM users WHERE username=?", (player,))
+user_data = cursor.fetchone()
+avatar_db, title_db, points_db, streak_db = user_data[2], user_data[3], user_data[4], user_data[5]
+
+cursor.execute("SELECT id_kuis FROM kuis_history WHERE username=?", (player,))
+learned_db = set([row[0] for row in cursor.fetchall()])
+
+user_level = (points_db // 100) + 1
+def get_tier(lvl):
+    if lvl < 3: return "🥉 Bronze", "#CD7F32"
+    elif lvl < 6: return "🥈 Silver", "#C0C0C0"
+    elif lvl < 10: return "🥇 Gold", "#FFD700"
+    elif lvl < 15: return "💎 Platinum", "#00EDFF"
+    else: return "🌌 Mythic", "#9D00FF"
+tier_name, tier_color = get_tier(user_level)
+
+# --- SIDEBAR KOKPIT ---
 with st.sidebar:
     st.write("<br>", unsafe_allow_html=True)
-    tampilkan_avatar("genius" if avatar_name_db == "Geni Us" else "smart")
-            
-    st.markdown(f"<h3 style='text-align:center; margin-top: 10px; margin-bottom: 0;'>{player_name}</h3>", unsafe_allow_html=True)
-    st.markdown(f"<div style='text-align:center;'><span class='title-badge'>{user_title_db}</span></div>", unsafe_allow_html=True)
-    st.markdown(f"<div style='text-align:center; margin-top:10px; margin-bottom: 15px;'><span class='tier-badge'>{tier_name}</span></div>", unsafe_allow_html=True)
+    tampilkan_avatar("genius" if avatar_db == "Geni Us" else "smart", "100px")
+    st.markdown(f"<h2 style='text-align:center; margin-top:10px; margin-bottom:0;' class='gradient-text'>{player}</h2>", unsafe_allow_html=True)
+    st.markdown(f"<div style='text-align:center; margin-top:5px;'><span style='background:rgba(0,198,255,0.1); color:#00C6FF; padding:4px 15px; border-radius:20px; font-weight:bold; border:1px solid #00C6FF;'>{title_db}</span></div>", unsafe_allow_html=True)
+    st.markdown(f"<div style='text-align:center; margin-top:10px;'><span style='background:{tier_color}30; color:{tier_color}; padding:4px 15px; border-radius:20px; font-weight:bold; border:1px solid {tier_color};'>{tier_name}</span></div>", unsafe_allow_html=True)
     
-    progress_val = user_points_db % 100
+    prog = points_db % 100
     st.markdown(f"""
-        <div style='background-color: #334155; border-radius: 999px; height: 10px; margin: 15px 0;'>
-            <div style='background: linear-gradient(90deg, #00C6FF 0%, #0072FF 100%); width: {progress_val}%; height: 100%; border-radius: 999px; box-shadow: 0 0 10px #00C6FF;'></div>
+        <div style='background: rgba(255,255,255,0.05); border-radius: 10px; height: 10px; margin: 20px 0; border: 1px solid rgba(255,255,255,0.1);'>
+            <div style='background: linear-gradient(90deg, #00C6FF 0%, #0072FF 100%); width: {prog}%; height: 100%; border-radius: 10px; box-shadow: 0 0 15px #00C6FF;'></div>
         </div>
-        <div style='display: flex; justify-content: space-between; font-size: 14px; font-weight: bold;'>
-            <span style='color:#94A3B8;'>Lvl {user_level}</span>
-            <span style='color: #00C6FF;'>⭐ {user_points_db} XP</span>
+        <div style='display:flex; justify-content:space-between; font-weight:bold; color:#94A3B8; font-size:14px;'>
+            <span>Lvl {user_level}</span><span style='color:#00C6FF;'>⭐ {points_db} XP</span>
         </div>
     """, unsafe_allow_html=True)
     
-    st.markdown("<hr style='border:1px solid #334155;'>", unsafe_allow_html=True)
-    menu = st.radio("SISTEM NAVIGASI", ["🏠 Command Center", "⚔️ Arena Pelatihan", "📤 Upload Materi", "📊 Analitik Kemampuan", "🛒 Pasar Gelar & Avatar"])
+    st.markdown("<hr style='border:1px solid rgba(255,255,255,0.1);'>", unsafe_allow_html=True)
+    menu = st.radio("SISTEM NAVIGASI", ["🏠 Beranda Server", "⚔️ Mode Duel Ranked (PvP)", "📖 Arena Belajar Kuis", "📤 Terminal Berkas (Admin)", "🛒 Pasar Gelar & Profil"])
     
-    # RADIO FOKUS (SPOTIFY)
-    st.markdown("<hr style='border:1px solid #334155;'>", unsafe_allow_html=True)
-    st.components.v1.html('<iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/0vvXsWCC9xrXsKd4FyS8kM?utm_source=generator&theme=0" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>', height=160)
+    st.markdown("<hr style='border:1px solid rgba(255,255,255,0.1);'>", unsafe_allow_html=True)
+    st.markdown("<div class='btn-red'>", unsafe_allow_html=True)
+    if st.button("🚪 LOGOUT PROFIL"):
+        st.session_state.logged_in = False
+        st.rerun()
+    st.markdown("</div>", unsafe_allow_html=True)
 
-# --- HALAMAN BERANDA & REAL-TIME LEADERBOARD ---
-if menu == "🏠 Command Center":
-    st.markdown(f"<h1>COMMAND CENTER | HELLO {player_name.upper()}! 🚀</h1>", unsafe_allow_html=True)
+# ==========================================
+# HALAMAN 1: BERANDA SERVER & LEADERBOARD
+# ==========================================
+if menu == "🏠 Beranda Server":
+    st.markdown(f"<h1>SELAMAT DATANG, <span class='gradient-text'>{player.upper()}</span>! 🚀</h1>", unsafe_allow_html=True)
     
-    # SISTEM GACHA HARIAN
-    if "gacha_claimed" not in st.session_state: st.session_state.gacha_claimed = False
     if not st.session_state.gacha_claimed:
         st.markdown("<div class='glass-card' style='border-color:#F59E0B; background:rgba(245, 158, 11, 0.1);'>", unsafe_allow_html=True)
-        st.markdown("<h2 style='color:#FCD34D;'>🎁 Peti Harta Karun Harian Aktif!</h2>", unsafe_allow_html=True)
-        if st.button("🗝️ BUKA & KLAIM BONUS XP"):
-            bonus = random.choice([20, 50, 100, 200])
-            new_pts = user_points_db + bonus
-            cursor.execute("UPDATE users SET points = ? WHERE username = ?", (new_pts, player_name))
+        st.markdown("<h2 style='color:#FCD34D; margin-top:0;'>🎁 Peti Harta Karun Harian!</h2>", unsafe_allow_html=True)
+        if st.button("🗝️ KLAIM BONUS LOGIN XP"):
+            bonus = random.choice([20, 50, 100])
+            cursor.execute("UPDATE users SET points = points + ? WHERE username = ?", (bonus, player))
             conn.commit()
             st.session_state.gacha_claimed = True
-            st.success(f"🎉 Selamat! Kamu memenangkan +{bonus} XP Langsung!")
+            st.toast(f"HORE! Dapat +{bonus} XP!", icon="🎉")
             st.rerun()
         st.markdown("</div><br>", unsafe_allow_html=True)
 
     col1, col2, col3 = st.columns(3)
-    with col1: st.markdown(f"<div class='glass-card'><div style='font-size:40px;'>🔥</div><h3>{daily_streak_db} Days</h3><p style='color:#94A3B8;'>Login Streak</p></div>", unsafe_allow_html=True)
-    with col2: st.markdown(f"<div class='glass-card'><div style='font-size:40px;'>📚</div><h3>{len(learned_chapters_db)}</h3><p style='color:#94A3B8;'>Kuis Ditaklukkan</p></div>", unsafe_allow_html=True)
-    with col3: st.markdown(f"<div class='glass-card' style='border-color:{tier_color};'><div style='font-size:40px;'>🏆</div><h3 style='color:{tier_color};'>{tier_name.split()[1]}</h3><p style='color:#94A3B8;'>Kasta Saat Ini</p></div>", unsafe_allow_html=True)
+    with col1: st.markdown(f"<div class='glass-card'><div style='font-size:40px;'>🔥</div><h2 style='margin:0;'>{streak_db} Hari</h2><p style='color:#94A3B8; margin:0;'>Login Streak</p></div>", unsafe_allow_html=True)
+    with col2: st.markdown(f"<div class='glass-card'><div style='font-size:40px;'>📚</div><h2 style='margin:0;'>{len(learned_db)}</h2><p style='color:#94A3B8; margin:0;'>Kuis Dikuasai</p></div>", unsafe_allow_html=True)
+    with col3: st.markdown(f"<div class='glass-card' style='border-color:{tier_color};'><div style='font-size:40px;'>🏆</div><h2 style='color:{tier_color}; margin:0;'>{tier_name.split()[1]}</h2><p style='color:#94A3B8; margin:0;'>Kasta Global</p></div>", unsafe_allow_html=True)
         
-    # --- GLOBAL MULTIPLAYER LEADERBOARD ---
     st.write("<br>", unsafe_allow_html=True)
-    st.markdown("<h3>📊 LIVE GLOBAL LEADERBOARD (SINKRON ANTAR-SISI)</h3>", unsafe_allow_html=True)
-    st.caption("Papan peringkat di bawah ini bersifat riil dan sinkron otomatis dengan pengguna lain yang sedang online.")
+    st.markdown("<h3>📊 LIVE GLOBAL RANKING (ANTAR PEMAIN)</h3>", unsafe_allow_html=True)
     
-    cursor.execute("SELECT username, points, title, avatar_name FROM users ORDER BY points DESC LIMIT 5")
-    global_ranking = cursor.fetchall()
-    
-    for i, row in enumerate(global_ranking):
+    cursor.execute("SELECT username, points, title FROM users ORDER BY points DESC LIMIT 5")
+    for i, row in enumerate(cursor.fetchall()):
         medali = "🥇" if i == 0 else "🥈" if i == 1 else "🥉" if i == 2 else "🏅"
-        bg_color = "rgba(255, 215, 0, 0.08)" if i==0 else "rgba(255,255,255,0.03)"
+        bg_color = "rgba(255, 215, 0, 0.1)" if i==0 else "rgba(255,255,255,0.02)"
+        bdr_color = "rgba(255, 215, 0, 0.5)" if i==0 else "rgba(255,255,255,0.08)"
         st.markdown(f"""
-        <div style='background: {bg_color}; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;'>
-            <h4 style='margin:0;'>{medali} <b>{row[0]}</b> <span style='font-size:12px; color:gray;'>({row[2]})</span></h4>
-            <h3 style='margin:0; color:#00C6FF;'>⭐ {row[1]} XP</h3>
+        <div style='background: {bg_color}; border: 1px solid {bdr_color}; border-radius: 15px; padding: 15px 25px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2);'>
+            <h3 style='margin:0;'>{medali} {row[0]} <span style='font-size:14px; font-weight:normal; color:#94A3B8;'>({row[2]})</span></h3>
+            <h3 style='margin:0; color:#00C6FF; text-shadow: 0 0 10px rgba(0,198,255,0.5);'>⭐ {row[1]} XP</h3>
         </div>
         """, unsafe_allow_html=True)
 
-# --- HALAMAN ARENA (BATTLE MODE) ---
-elif menu == "⚔️ Arena Pelatihan":
-    st.markdown("<h1>⚔️ BATTLE ARENA & SYLLABUS</h1>", unsafe_allow_html=True)
+# ==========================================
+# HALAMAN 2: MODE DUEL RANKED (PvP MATERI)
+# ==========================================
+elif menu == "⚔️ Mode Duel Ranked (PvP)":
+    st.markdown("<h1>⚔️ <span class='gradient-text'>ARENA DUEL MULTIPLAYER</span></h1>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#94A3B8;'>Pilih mata pelajaran, cari lawan acak secara real-time, jawab kuisnya, dan curi XP mereka!</p>", unsafe_allow_html=True)
+    
+    col_mapel, col_btn = st.columns([3,1])
+    with col_mapel: mapel_duel = st.selectbox("🎯 Pilih Arena Mata Pelajaran:", list(DATABASE_KUIS.keys()))
+    
+    if "lawan_duel" not in st.session_state: st.session_state.lawan_duel = None
+    if "kuis_duel" not in st.session_state: st.session_state.kuis_duel = False
+    
+    with col_btn:
+        st.write("<br>", unsafe_allow_html=True)
+        if st.button("🔍 CARI LAWAN (MATCHMAKING)"):
+            cursor.execute("SELECT username, points FROM users WHERE username != ? ORDER BY RANDOM() LIMIT 1", (player,))
+            lawan = cursor.fetchone()
+            if lawan:
+                st.session_state.lawan_duel = lawan
+                st.session_state.kuis_duel = True
+            else: st.error("Tidak ada pemain lain di server saat ini!")
+            
+    if st.session_state.lawan_duel and st.session_state.kuis_duel:
+        l_nama, l_pts = st.session_state.lawan_duel
+        st.markdown("<hr style='border:1px solid rgba(255,255,255,0.1);'>", unsafe_allow_html=True)
+        
+        # Papan VS Ala Game Fighting
+        c_p1, c_vs, c_p2 = st.columns([2,1,2])
+        with c_p1: st.markdown(f"<div class='glass-card' style='border-color:#00C6FF;'><h2 style='color:#00C6FF; margin:0;'>{player}</h2><p>⭐ {points_db} XP</p></div>", unsafe_allow_html=True)
+        with c_vs: st.markdown("<div style='text-align:center; margin-top:20px;'><span class='vs-text'>VS</span></div>", unsafe_allow_html=True)
+        with c_p2: st.markdown(f"<div class='glass-card' style='border-color:#FF416C;'><h2 style='color:#FF416C; margin:0;'>{l_nama}</h2><p>⭐ {l_pts} XP</p></div>", unsafe_allow_html=True)
+        
+        st.write("<br>", unsafe_allow_html=True)
+        st.markdown("<div class='glass-card' style='text-align:left;'>", unsafe_allow_html=True)
+        st.markdown(f"### 🎯 SERANGAN KILAT: {mapel_duel.upper()}")
+        ds = DATABASE_KUIS[mapel_duel]
+        st.write(ds['soal'])
+        j_user = st.radio("Pilih Serangan:", ds['opsi'], key="duel_ans")
+        
+        if st.button("⚡ EKSEKUSI SERANGAN"):
+            if j_user == ds['jaw']:
+                # Menang! Curi Poin
+                cursor.execute("UPDATE users SET points = points + 100 WHERE username=?", (player,))
+                cursor.execute("UPDATE users SET points = MAX(0, points - 20) WHERE username=?", (l_nama,))
+                conn.commit()
+                st.toast(f"CRITICAL STRIKE! Kamu mencuri XP dari {l_nama}!", icon="⚔️")
+                st.session_state.kuis_duel = False # Reset duel
+                st.success(f"🎉 **KAMU MENANG!** +100 XP didapatkan. {l_nama} kehilangan 20 XP.")
+            else:
+                cursor.execute("UPDATE users SET points = MAX(0, points - 30) WHERE username=?", (player,))
+                conn.commit()
+                st.toast("SERANGAN GAGAL! Kamu kehilangan XP.", icon="🛡️")
+                st.session_state.kuis_duel = False
+                st.error(f"💀 **KAMU KALAH!** Jawaban keliru. Kamu kehilangan 30 XP.")
+            if st.button("🔄 Segarkan Papan Skor"): st.rerun()
+        st.markdown("</div>", unsafe_allow_html=True)
+
+# ==========================================
+# HALAMAN 3: ARENA BELAJAR (KUIS & MATERI BACAAN)
+# ==========================================
+elif menu == "📖 Arena Belajar Kuis":
+    st.markdown("<h1>📖 <span class='gradient-text'>ARENA BACA & TUGAS</span></h1>", unsafe_allow_html=True)
     with st.container():
-        st.markdown("<div class='glass-card' style='text-align:left; padding: 30px;'>", unsafe_allow_html=True)
+        st.markdown("<div class='glass-card' style='text-align:left; padding: 20px;'>", unsafe_allow_html=True)
         col1, col2 = st.columns(2)
-        with col1: lihat_pelajaran = st.selectbox("Pilih Mata Pelajaran:", list(DATA_MATERI.keys()))
-        with col2: lihat_kelas = st.selectbox("Pilih Tingkat Kelas:", list(DATA_MATERI[lihat_pelajaran].keys()))
+        with col1: p_mapel = st.selectbox("Mata Pelajaran:", list(DATA_MATERI.keys()))
+        with col2: p_kelas = st.selectbox("Tingkat Kelas:", list(DATA_MATERI[p_mapel].keys()))
         col3, col4 = st.columns(2)
-        with col3: lihat_bab = st.selectbox("Pilih Sektor Bab:", list(DATA_MATERI[lihat_pelajaran][lihat_kelas].keys()))
-        with col4: lihat_subbab = st.selectbox("Target Sub-bab:", DATA_MATERI[lihat_pelajaran][lihat_kelas][lihat_bab]["sub_bab"])
+        with col3: p_bab = st.selectbox("Sektor Bab:", list(DATA_MATERI[p_mapel][p_kelas].keys()))
+        with col4: p_sub = st.selectbox("Sub-bab:", DATA_MATERI[p_mapel][p_kelas][p_bab]["sub_bab"])
         st.markdown("</div>", unsafe_allow_html=True)
         
     st.write("<br>", unsafe_allow_html=True)
-    tab1, tab2 = st.tabs(["📌 Rangkuman & Kuis", "📂 Berkas Tambahan Pelajar"])
+    tab_mat, tab_doc = st.tabs(["📌 Rangkuman & Latihan", "📂 Modul PDF"])
     
-    with tab1:
-        st.markdown(f"### 📜 Intisari: {lihat_bab}")
-        st.markdown(f"<div class='glass-card' style='text-align:left; border-left: 5px solid #00C6FF;'>{DATA_MATERI[lihat_pelajaran][lihat_kelas][lihat_bab]['rangkuman']}</div>", unsafe_allow_html=True)
-            
+    with tab_mat:
+        st.markdown(f"<div class='glass-card' style='text-align:left; border-left: 5px solid #00C6FF;'><h3>📜 Intisari {p_bab}</h3>{DATA_MATERI[p_mapel][p_kelas][p_bab]['rangkuman']}</div>", unsafe_allow_html=True)
         st.write("<br>", unsafe_allow_html=True)
-        st.markdown("### 🎯 UJI KOMPETENSI (BOSS BATTLE)")
-        id_kuis = f"q_{lihat_pelajaran}_{lihat_kelas}_{lihat_bab}"
         
-        if lihat_pelajaran in DATABASE_KUIS:
-            ds = DATABASE_KUIS[lihat_pelajaran]
-            st.markdown("<div class='glass-card' style='text-align:left;'>", unsafe_allow_html=True)
-            st.write(f"**Misi Soal:**\n{ds['soal']}")
-            
-            jawaban_user = st.radio("Pilih Eksekusi Jawaban:", ds["opsi"], key=f"r_{id_kuis}")
-            if st.button("⚡ SERANG JAWABAN", key=f"b_{id_kuis}"):
-                if jawaban_user == ds["jaw"]:
-                    st.success("💥 CRITICAL HIT! Jawabanmu Benar!")
-                    if id_kuis not in learned_chapters_db:
-                        cursor.execute("INSERT INTO kuis_history VALUES (?, ?)", (player_name, id_kuis))
-                        cursor.execute(f"UPDATE users SET points = points + 50, {lihat_pelajaran.lower()} = {lihat_pelajaran.lower()} + 20 WHERE username = ?", (player_name,))
+        id_k = f"q_{p_mapel}_{p_kelas}_{p_bab}"
+        if p_mapel in DATABASE_KUIS:
+            ds = DATABASE_KUIS[p_mapel]
+            st.markdown("<div class='glass-card' style='text-align:left;'><h3>🎯 UJI PEMAHAMAN</h3>", unsafe_allow_html=True)
+            st.write(ds['soal'])
+            ans = st.radio("Pilih Jawaban:", ds['opsi'], key=f"r_{id_k}")
+            if st.button("JAWAB & KLAIM XP"):
+                if ans == ds['jaw']:
+                    if id_k not in learned_db:
+                        cursor.execute("INSERT INTO kuis_history VALUES (?, ?)", (player, id_k))
+                        cursor.execute(f"UPDATE users SET points = points + 50, {p_mapel.lower()} = {p_mapel.lower()} + 20 WHERE username = ?", (player,))
                         conn.commit()
-                        st.rerun()
-                else:
-                    st.error("🛡️ ATTACK BLOCKED! Jawaban keliru.")
-                st.markdown(f"<div style='background:rgba(255,255,255,0.05); padding:15px; border-radius:10px; margin-top:15px;'><b>🧠 Analisis Taktik:</b><br>{ds['pem']}</div>", unsafe_allow_html=True)
+                        st.toast("Hebat! +50 XP ditambahkan!", icon="🚀")
+                        st.success("💥 Jawaban Benar!")
+                    else: st.info("Kamu sudah pernah menyelesaikan kuis ini.")
+                else: st.error(f"❌ Keliru. Pembahasan: {ds['pem']}")
             st.markdown("</div>", unsafe_allow_html=True)
 
-    with tab2:
-        folder_target = os.path.join("uploads", bersihkan_nama(lihat_pelajaran), bersihkan_nama(lihat_kelas), bersihkan_nama(lihat_bab), bersihkan_nama(lihat_subbab))
-        if not os.path.exists(folder_target) or len(os.listdir(folder_target)) == 0:
-            st.info("📭 Belum ada berkas tambahan di folder cloud sub-bab ini.")
+    with tab_doc:
+        folder_t = os.path.join("uploads", bersihkan_nama(p_mapel), bersihkan_nama(p_kelas), bersihkan_nama(p_bab), bersihkan_nama(p_sub))
+        if not os.path.exists(folder_t) or len(os.listdir(folder_t)) == 0: st.info("📭 Tidak ada modul dari guru/admin.")
         else:
-            for file in os.listdir(folder_target):
-                file_path = os.path.join(folder_target, file)
-                with st.expander(f"📄 Modul: {file}"):
-                    try:
-                        with open(file_path, "rb") as f:
-                            st.download_button("⬇️ Unduh Berkas", data=f.read(), file_name=file, key=file_path)
-                    except: pass
+            for f in os.listdir(folder_t):
+                with open(os.path.join(folder_t, f), "rb") as file: st.download_button(f"⬇️ Unduh Berkas: {f}", data=file.read(), file_name=f)
 
-# --- HALAMAN UPLOAD & MANAJEMEN ADMIN (CRUD FILE BERKAS) ---
-elif menu == "📤 Upload Materi":
-    st.markdown("<h1>📤 TERMINAL ADMINISTRATOR & UNGGAHAN</h1>", unsafe_allow_html=True)
-    
-    if "is_admin" not in st.session_state: st.session_state.is_admin = False
-    
+# ==========================================
+# HALAMAN 4: TERMINAL ADMIN & UPLOAD
+# ==========================================
+elif menu == "📤 Terminal Berkas (Admin)":
+    st.markdown("<h1>📤 <span class='gradient-text'>CONSOLE ADMINISTRATOR</span></h1>", unsafe_allow_html=True)
     if not st.session_state.is_admin:
-        st.markdown("<div class='glass-card' style='border-color:#EF4444;'>", unsafe_allow_html=True)
-        st.markdown("<h2>🔒 Hak Akses Terbatas (Admin Only)</h2>")
-        pwd = st.text_input("Sandi Otorisasi:", type="password")
-        if st.button("Masuk Konsol Admin"):
+        st.markdown("<div class='glass-card' style='border-color:#EF4444;'><h2>🔒 RESTRICTED AREA</h2>", unsafe_allow_html=True)
+        pwd = st.text_input("Kode Otorisasi (Password Admin):", type="password")
+        if st.button("Buka Konsol"):
             if pwd == PASSWORD_ADMIN:
                 st.session_state.is_admin = True
                 st.rerun()
-            else: st.error("Sandi Salah!")
+            else: st.error("Akses Ditolak!")
         st.markdown("</div>", unsafe_allow_html=True)
     else:
-        tab_up, tab_man = st.tabs(["📤 Unggah Materi Baru", "📋 Dasbor Kendali Berkas (Hapus/Update)"])
+        st.success("🔓 Otorisasi Diterima. Selamat bekerja, Admin.")
+        tab_up, tab_del = st.tabs(["📤 Upload Materi", "🗑️ Hapus Server File"])
         
         with tab_up:
-            st.markdown("### Masukkan Materi Tambahan")
-            col1, col2 = st.columns(2)
-            with col1: pilih_pelajaran = st.selectbox("Mata Pelajaran:", list(DATA_MATERI.keys()))
-            with col2: pilih_kelas = st.selectbox("Tingkat Kelas:", list(DATA_MATERI[pilih_pelajaran].keys()))
-            col3, col4 = st.columns(2)
-            with col3: pilih_bab = st.selectbox("Pilih Bab:", list(DATA_MATERI[pilih_pelajaran][pilih_kelas].keys()))
-            with col4: pilih_subbab = st.selectbox("Pilih Sub-bab:", DATA_MATERI[pilih_pelajaran][pilih_kelas][pilih_bab]["sub_bab"])
+            c1, c2 = st.columns(2)
+            with c1: p_mapel = st.selectbox("Mapel:", list(DATA_MATERI.keys()))
+            with c2: p_kelas = st.selectbox("Kelas:", list(DATA_MATERI[p_mapel].keys()))
+            c3, c4 = st.columns(2)
+            with c3: p_bab = st.selectbox("Bab:", list(DATA_MATERI[p_mapel][p_kelas].keys()))
+            with c4: p_sub = st.selectbox("Sub-bab:", DATA_MATERI[p_mapel][p_kelas][p_bab]["sub_bab"])
             
-            uploaded_file = st.file_uploader("Pilih Berkas Pelajaran:", type=['pdf', 'docx', 'xlsx', 'pptx', 'png', 'jpg'])
-            if uploaded_file is not None:
-                if st.button("🚀 PUBLIKASIKAN MATERI"):
-                    folder_tujuan = os.path.join("uploads", bersihkan_nama(pilih_pelajaran), bersihkan_nama(pilih_kelas), bersihkan_nama(pilih_bab), bersihkan_nama(pilih_subbab))
-                    if not os.path.exists(folder_tujuan): os.makedirs(folder_tujuan)
-                    with open(os.path.join(folder_tujuan, uploaded_file.name), "wb") as f: f.write(uploaded_file.getbuffer())
-                    st.success("🎉 Berkas berhasil disinkronkan ke cloud server!")
-                    st.balloons()
-                    
-        with tab_man:
-            st.markdown("### 🗑️ Penghapusan & Manajemen Dokumen Aktif")
-            st.caption("Di bawah ini adalah daftar semua file yang tersimpan di dalam folder uploads sistem Anda. Anda dapat menghapusnya kapan saja.")
-            
-            basis_folder = "uploads"
-            file_lists = []
-            if os.path.exists(basis_folder):
-                for root, dirs, files in os.walk(basis_folder):
-                    for file in files:
-                        rel_path = os.path.relpath(os.path.join(root, file), basis_folder)
-                        file_lists.append((file, os.path.join(root, file), rel_path))
-            
-            if len(file_lists) == 0:
-                st.info("📭 Server bersih. Tidak ada file materi eksternal saat ini.")
-            else:
-                for nama_file, path_penuh, r_path in file_lists:
-                    col_f1, col_f2 = st.columns([4, 1])
-                    with col_f1:
-                        st.markdown(f"📁 <code style='color:#00C6FF;'>{r_path}</code>", unsafe_allow_html=True)
-                    with col_f2:
-                        # Tombol hapus materi untuk Admin (CRUD)
-                        if st.button("🗑️ Hapus", key=f"del_{path_penuh}"):
-                            try:
-                                os.remove(path_penuh)
-                                st.success(f"Berhasil menghapus: {nama_file}")
-                                st.rerun()
-                            except: st.error("Gagal menghapus file.")
-                            
+            up_file = st.file_uploader("Pilih Berkas (PDF/PPT):", type=['pdf', 'docx', 'xlsx', 'pptx'])
+            if up_file and st.button("🚀 UNGGAH KE SERVER CLOUD"):
+                ft = os.path.join("uploads", bersihkan_nama(p_mapel), bersihkan_nama(p_kelas), bersihkan_nama(p_bab), bersihkan_nama(p_sub))
+                if not os.path.exists(ft): os.makedirs(ft)
+                with open(os.path.join(ft, up_file.name), "wb") as f: f.write(up_file.getbuffer())
+                st.toast("Upload Sukses!", icon="✅")
+                
+        with tab_del:
+            if os.path.exists("uploads"):
+                for r, d, f_list in os.walk("uploads"):
+                    for file in f_list:
+                        path = os.path.join(r, file)
+                        c_a, c_b = st.columns([4,1])
+                        c_a.code(path)
+                        if c_b.button("🗑️ Del", key=path): os.remove(path); st.rerun()
         st.write("<br>", unsafe_allow_html=True)
         st.markdown("<div class='btn-red'>", unsafe_allow_html=True)
-        if st.button("🔴 KELUAR DARI KONSOL ADMIN"):
-            st.session_state.is_admin = False
-            st.rerun()
+        if st.button("🔴 TUTUP KONSOL ADMIN"): st.session_state.is_admin = False; st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
 
-# --- HALAMAN ANALITIK ---
-elif menu == "📊 Analitik Kemampuan":
-    st.markdown("<h1>📊 MATRIX PETA KEMAMPUAN</h1>", unsafe_allow_html=True)
-    
-    # Ambil data mastery terbaru dari SQL database milik pengguna aktif
-    cursor.execute("SELECT matematika, fisika, kimia, biologi, sejarah, ekonomi, sosiologi FROM users WHERE username = ?", (player_name,))
-    m_data = cursor.fetchone()
-    
-    mastery_dict = {"Matematika": m_data[0], "Fisika": m_data[1], "Kimia": m_data[2], "Biologi": m_data[3], "Sejarah": m_data[4], "Ekonomi": m_data[5], "Sosiologi": m_data[6]}
-    
-    if HAS_PLOTLY:
-        kategori = list(mastery_dict.keys())
-        nilai = list(mastery_dict.values())
-        kategori.append(kategori[0]) 
-        nilai.append(nilai[0])
-        fig = go.Figure(data=go.Scatterpolar(r=nilai, theta=kategori, fill='toself', line_color='#00C6FF', fillcolor='rgba(0, 198, 255, 0.4)'))
-        fig.update_layout(polar=dict(radialaxis=dict(visible=True, range=[0, max(nilai)+20], color="rgba(255,255,255,0.2)"), angularaxis=dict(color="white")), showlegend=False, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
-        st.plotly_chart(fig, use_container_width=True)
-    else:
-        st.bar_chart(pd.DataFrame.from_dict(mastery_dict, orient='index', columns=['XP']))
-
-# --- HALAMAN SANGGAR & BELI GELAR ---
-elif menu == "🛒 Pasar Gelar & Avatar":
-    st.markdown("<h1>🛒 PASAR UTAMA COIN & JULUKAN</h1>", unsafe_allow_html=True)
-    tab_av, tab_gl = st.tabs(["👤 Pilih Karakter Dasar", "👑 Beli Julukan Elit"])
+# ==========================================
+# HALAMAN 5: PASAR GELAR & KARAKTER
+# ==========================================
+elif menu == "🛒 Pasar Gelar & Profil":
+    st.markdown("<h1>🛒 <span class='gradient-text'>BLACK MARKET PROFIL</span></h1>", unsafe_allow_html=True)
+    tab_av, tab_gl = st.tabs(["👤 Kloning Karakter Utama", "👑 Beli Julukan Elit"])
     
     with tab_av:
-        col1, col2 = st.columns(2)
-        with col1:
+        c1, c2 = st.columns(2)
+        with c1:
             st.markdown("<div class='glass-card'><h2>Geni Us</h2>", unsafe_allow_html=True)
             tampilkan_avatar("genius")
-            if st.button("SET UTAMA: GENI US"):
-                cursor.execute("UPDATE users SET avatar_name = 'Geni Us' WHERE username = ?", (player_name,))
-                conn.commit()
-                st.rerun()
+            if st.button("PILIH GENI US"):
+                cursor.execute("UPDATE users SET avatar_name='Geni Us' WHERE username=?", (player,))
+                conn.commit(); st.toast("Karakter Diperbarui!", icon="👗"); st.rerun()
             st.markdown("</div>", unsafe_allow_html=True)
-        with col2:
+        with c2:
             st.markdown("<div class='glass-card'><h2>Smar T</h2>", unsafe_allow_html=True)
             tampilkan_avatar("smart")
-            if st.button("SET UTAMA: SMAR T"):
-                cursor.execute("UPDATE users SET avatar_name = 'Smar T' WHERE username = ?", (player_name,))
-                conn.commit()
-                st.rerun()
+            if st.button("PILIH SMAR T"):
+                cursor.execute("UPDATE users SET avatar_name='Smar T' WHERE username=?", (player,))
+                conn.commit(); st.toast("Karakter Diperbarui!", icon="👗"); st.rerun()
             st.markdown("</div>", unsafe_allow_html=True)
             
     with tab_gl:
-        st.markdown("<div class='glass-card' style='text-align:left;'>", unsafe_allow_html=True)
-        st.write(f"Tabungan Kamu saat ini: ⭐ **{user_points_db} XP**")
-        st.markdown("<hr style='border:1px solid #334155;'>", unsafe_allow_html=True)
-        
+        st.markdown("<div class='glass-card' style='text-align:left;'><h3>Bursa Julukan Ksatria</h3>", unsafe_allow_html=True)
+        st.write(f"Sisa XP kamu: ⭐ **{points_db} XP**")
+        st.markdown("<hr style='border:1px solid rgba(255,255,255,0.1);'>", unsafe_allow_html=True)
         for gelar, harga in DAFTAR_GELAR.items():
-            c_g1, c_g2, c_g3 = st.columns([3, 1, 1])
-            with c_g1: st.markdown(f"#### {gelar}")
-            with c_g2: st.markdown(f"<p style='color:#F59E0B;'>💰 {harga} XP</p>", unsafe_allow_html=True)
-            with c_g3:
-                # Cek jika user sudah memenuhi poin atau sudah punya julukannya
-                if user_title_db == gelar:
-                    st.button("⚙️ Aktif", key=f"ak_{gelar}", disabled=True)
+            cg1, cg2, cg3 = st.columns([3, 1, 1])
+            cg1.markdown(f"#### {gelar}")
+            cg2.markdown(f"<p style='color:#F59E0B;'>💰 {harga} XP</p>", unsafe_allow_html=True)
+            with cg3:
+                if title_db == gelar: st.button("✅ Aktif", key=f"ak_{gelar}", disabled=True)
                 else:
-                    if st.button("Gunakan / Beli", key=f"by_{gelar}"):
-                        if user_points_db >= harga or user_title_db != "🏅 Pemula":
-                            # Potong poin jika beli baru (simulasi sederhana)
-                            potong = harga if user_points_db >= harga else 0
-                            cursor.execute("UPDATE users SET title = ?, points = points - ? WHERE username = ?", (gelar, potong, player_name))
-                            conn.commit()
-                            st.success("Sukses memasang julukan baru!")
-                            st.rerun()
-                        else: st.error("XP kamu tidak cukup!")
+                    if st.button("Beli & Pakai", key=f"by_{gelar}"):
+                        if points_db >= harga:
+                            cursor.execute("UPDATE users SET title=?, points=points-? WHERE username=?", (gelar, harga, player))
+                            conn.commit(); st.toast(f"Julukan {gelar} Terpasang!", icon="👑"); st.rerun()
+                        else: st.error("XP Kurang!")
         st.markdown("</div>", unsafe_allow_html=True)
