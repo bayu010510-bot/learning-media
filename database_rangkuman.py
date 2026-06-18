@@ -1,247 +1,724 @@
 # ==========================================
 # FILE: database_rangkuman.py
-# FUNGSI: Database Rangkuman Materi Premium & Super Lengkap (Update V2)
+# FUNGSI: Database Silabus Kurikulum Merdeka (Edisi Premium HOTS)
 # ==========================================
 
 DATA_MATERI = {
     "Matematika": {
         "Kelas 10": {
-            "Eksponen dan Logaritma": {
-                "sub_bab": ["Konsep Dasar Eksponen", "Sifat-sifat Logaritma", "Aplikasi HOTS"],
+            "Bab 1: Eksponen dan Logaritma": {
+                "sub_bab": ["Sifat Eksponen", "Fungsi Eksponen", "Bentuk Akar", "Sifat Logaritma", "Penyelesaian Masalah"],
                 "rangkuman": """
 #### 🚀 Rahasia Eksponen & Logaritma
-Eksponen adalah bentuk perkalian berulang, sedangkan Logaritma adalah **kebalikan (invers)** dari eksponen. Jika kamu menguasai satu, kamu otomatis menguasai yang lainnya!
+Eksponen adalah perkalian berulang, sedangkan Logaritma adalah **invers (kebalikan)** dari eksponen. Menguasai satu berarti menguasai keduanya!
 
-#### 🔑 Sifat-Sifat Dewa Eksponen
-- **Perkalian:** $a^m \cdot a^n = a^{m+n}$ *(Pangkat ditambah)*
-- **Pembagian:** $\\frac{a^m}{a^n} = a^{m-n}$ *(Pangkat dikurang)*
-- **Pangkat Dipangkatkan:** $(a^m)^n = a^{m \cdot n}$ *(Pangkat dikali)*
-- **Pangkat Negatif:** $a^{-n} = \\frac{1}{a^n}$
-
-#### 🎯 Sifat-Sifat Dewa Logaritma
-- **Penjumlahan Log:** $^a\\!\\log x + ^a\\!\\log y = ^a\\!\\log(x \cdot y)$
-- **Pengurangan Log:** $^a\\!\\log x - ^a\\!\\log y = ^a\\!\\log\\left(\\frac{x}{y}\\right)$
-- **Pangkat ke Depan:** $^a\\!\\log x^n = n \cdot ^a\\!\\log x$
+#### 🔑 Sifat-Sifat Dewa
+- **Eksponen:** $a^m \cdot a^n = a^{m+n}$ (Kali = Tambah Pangkat)
+- **Logaritma:** $^a\!\log x + ^a\!\log y = ^a\!\log(x \cdot y)$
 
 > **🧠 KONSEP HOTS UTBK:**
-> Soal UTBK jarang menanyakan hitungan langsung! Biasanya soal dihubungkan dengan **Pertumbuhan Eksponensial** (seperti pelipatgandaan bakteri, virus, atau bunga bank). 
-> **Rumus Sakti Pertumbuhan:** $P_n = P_0(1 + r)^n$
-                """
+> Di soal ujian, logaritma sering digabung dengan Persamaan Kuadrat. Jika melihat pangkat eksponen bertingkat, segera gunakan pemisalan variabel $p = a^x$!
+"""
             },
-            "Persamaan Linear": {
-                "sub_bab": ["Sistem Persamaan Linear Satu Variabel", "Sistem Persamaan Linear Dua Variabel"],
+            "Bab 2: Barisan dan Deret": {
+                "sub_bab": ["Barisan Aritmatika", "Barisan Geometri", "Deret Tak Hingga", "Aplikasi (Bunga, Anuitas)"],
                 "rangkuman": """
-#### 🚀 Menaklukkan Persamaan Linear
-Persamaan linear adalah persamaan yang variabelnya memiliki **pangkat tertinggi satu** (grafiknya jika digambar pasti berupa garis lurus tegak atau miring).
+#### 🚀 Melipatgandakan Angka
+Barisan adalah urutan angka dengan pola pasti. Aritmatika ditandai dengan **Beda (+/-)**, sedangkan Geometri ditandai dengan **Rasio (x/÷)**.
 
-#### 🔑 Langkah Cepat Substitusi & Eliminasi
-Jika menemui Sistem Persamaan Linear Dua Variabel (SPLDV), lakukan langkah ini:
-1. **Eliminasi (Gaya Hancur):** Samakan koefisien (angka di depan huruf) dari salah satu variabel, lalu kurangkan atau tambahkan agar variabel tersebut hancur/hilang!
-2. **Substitusi (Gaya Susup):** Masukkan nilai variabel yang sudah ketemu ke dalam salah satu persamaan awal untuk mencari variabel pasangannya.
+#### 🔑 Rumus Utama
+- **Suku ke-n Aritmatika:** $U_n = a + (n-1)b$
+- **Suku ke-n Geometri:** $U_n = a \cdot r^{n-1}$
 
 > **💡 TRIK STUDI KASUS BISNIS:**
-> Seringkali persamaan linear digunakan untuk mencari **Titik Impas (Break-Even Point)**. Di mana biaya pengeluaran (Modal) persis menyentuh garis Penghasilan (Laba).
-                """
-            }
-        }
-    },
-    "Fisika": {
-        "Kelas 10": {
-            "Kinematika Partikel": {
-                "sub_bab": ["Gerak Lurus Beraturan (GLB)", "Gerak Lurus Berubah Beraturan (GLBB)"],
-                "rangkuman": """
-#### 🚀 Apa itu Kinematika Partikel?
-Kinematika adalah ilmu murni yang mempelajari gerak benda tanpa memedulikan **penyebab** benda itu bergerak (gaya). Di bab ini, otak kita hanya fokus pada 3 hal: **Kecepatan, Jarak, dan Waktu!**
-
-#### 🔑 Rumus Sakti GLB & GLBB
-**1. Gerak Lurus Beraturan (GLB)**
-Terjadi saat **Kecepatan Konstan** (Tidak ada injakan pedal gas atau rem / percepatan nol).
-$$s = v \cdot t$$
-
-**2. Gerak Lurus Berubah Beraturan (GLBB)**
-Terjadi saat kecepatan berubah karena ada **Percepatan ($a$) yang konstan**. Hafalkan 3 rumus dewa ini:
-1. $$v_t = v_0 + a \cdot t$$
-2. $$s = v_0 \cdot t + \\frac{1}{2} \cdot a \cdot t^2$$
-3. $$v_t^2 = v_0^2 + 2 \cdot a \cdot s$$
-
-> **💡 TRIK ANALISIS HOTS (Gaya Cepat):**
-> Jika sebuah benda diceritakan **"direm hingga berhenti total"**, itu adalah kata sandi rahasia bahwa kecepatan akhir ($v_t = 0$) dan nilai $a$ pasti **negatif** (perlambatan)! Selalu baca dengan teliti!
-                """
+> Deret tak hingga geometri berlimpah di soal tes PTN, terutama kasus bola pantul! Gunakan rumus cepat pantulan: $S_{\infty} = \frac{a(b+c)}{b-c}$ (di mana r = c/b).
+"""
             },
-            "Hakikat Fisika dan Besaran": {
-                "sub_bab": ["Besaran Pokok", "Analisis Dimensi"],
+            "Bab 3: Vektor dan Operasinya": {
+                "sub_bab": ["Notasi Vektor", "Vektor di R2 dan R3", "Operasi Vektor", "Cross & Dot Product"],
                 "rangkuman": """
-#### 🚀 Besaran dan Dimensi
-Dimensi membuktikan apakah sebuah rumus fisika itu nyata atau hoaks. Semua besaran turunan terlahir dari 7 Besaran Pokok.
+#### 🚀 Menavigasi Ruang Dimensi
+Vektor bukanlah sekadar angka; ia memiliki **Nilai (Besar)** dan **Arah**. 
 
-#### 🔑 7 Besaran Pokok SI (Jiwa Kuat)
-Ingat jembatan keledai **"JIWA SMP"**:
-- **J**umlah zat (Mol) $\\rightarrow [N]$
-- **I**ntensitas cahaya (Candela) $\\rightarrow [J]$
-- **W**aktu (Sekon) $\\rightarrow [T]$
-- **A**rus listrik (Ampere) $\\rightarrow [I]$
-- **S**uhu (Kelvin) $\\rightarrow [\\theta]$
-- **M**assa (Kilogram) $\\rightarrow [M]$
-- **P**anjang (Meter) $\\rightarrow [L]$
+#### 🔑 Operasi Vektor
+- **Panjang Vektor:** $|v| = \sqrt{x^2 + y^2 + z^2}$
+- **Dot Product:** Mengkombinasikan dua vektor menjadi sebuah angka pasti (skalar). $a \cdot b = |a| |b| \cos \theta$
 
-> **🧠 TRIK UTBK DIMENSI:**
-> Rumus yang memiliki penjumlahan atau pengurangan (seperti $A = B + C$) wajib memiliki **Dimensi yang SAMA** di setiap sukunya! Kita tidak mungkin menambahkan dimensi Panjang dengan dimensi Waktu.
-                """
+> **🧠 TIPS UJIAN:**
+> Jika soal menyebutkan "Dua vektor saling tegak lurus", itu adalah kata sandi bahwa **Dot Product mereka bernilai NOL ($a \cdot b = 0$)**!
+"""
             },
-            "Momentum dan Impuls": {
-                "sub_bab": ["Konsep Momentum", "Tumbukan & Impuls"],
+            "Bab 4: Trigonometri": {
+                "sub_bab": ["Penamaan Sisi", "Perbandingan Trigonometri", "Sudut Berelasi", "Konteks Nyata"],
                 "rangkuman": """
-#### 🚀 Momentum & Impuls: Rahasia Tabrakan
-Kenapa menabrak tembok terasa lebih sakit daripada menabrak kasur busa? Jawabannya ada pada Impuls! Momentum adalah tingkat kesukaran menghentikan benda bergerak, sedangkan Impuls adalah gaya kejut yang bekerja dalam waktu sangat singkat.
+#### 🚀 Misteri Sudut & Segitiga
+Trigonometri mengkaji hubungan antara sudut dan panjang sisi segitiga siku-siku.
 
-#### 🔑 Persamaan Utama
-- **Momentum ($p$):** Ukuran "gaya dorong" benda.
-  $$p = m \cdot v$$
-- **Impuls ($I$):** Gaya dikali selang waktu.
-  $$I = F \cdot \Delta t$$
-- **Teorema Impuls-Momentum:** Impuls selalu menyebabkan perubahan momentum!
-  $$I = \Delta p = m(v_t - v_0)$$
+#### 🔑 Aturan SINDEMI
+- **Sinus:** Depan / Miring
+- **Cosinus:** Samping / Miring
+- **Tangen:** Depan / Samping
 
-> **🧠 ANALISIS HOTS:**
-> Pada desain sabuk pengaman dan *airbag* mobil, tujuannya adalah **memperbesar selang waktu sentuh ($\Delta t$)**. Jika $\Delta t$ membesar saat terjadi perubahan momentum yang sama, maka **Gaya hancur ($F$) akan mengecil**, sehingga pengemudi selamat!
-                """
-            }
-        }
-    },
-    "Geografi": {
-        "Kelas 10": {
-            "Dinamika Litosfer": {
-                "sub_bab": ["Tenaga Endogen", "Tenaga Eksogen", "Mitigasi Bencana Bencana"],
+> **💡 ANALISIS HOTS:**
+> Sudut relasi kuadran sangat vital. Hafalkan "Semua - Sindikat - Tangannya - Kosong" (Kuadran I semua positif, II Sin positif, III Tan positif, IV Cos positif).
+"""
+            },
+            "Bab 5: Sistem Persamaan Linear": {
+                "sub_bab": ["SPLDV", "SPLTV", "SPtLDV", "Model Matematika"],
                 "rangkuman": """
-#### 🚀 Membedah Wajah Bumi (Litosfer)
-Bumi kita tidaklah diam. Kulit bumi (Litosfer) terus menerus dipahat oleh dua "pemahat" raksasa: Tenaga dari dalam bumi (Endogen) dan dari luar bumi (Eksogen). Bab ini adalah menu wajib untuk Penilaian Akhir Semester (PAS)!
+#### 🚀 Resolusi Konflik Variabel
+SPLDV (2 variabel) membentuk garis yang saling memotong, sedangkan SPLTV (3 variabel) berurusan dengan bidang tiga dimensi.
 
-#### 🔑 Dua Kekuatan Raksasa
-1. **Tenaga Endogen (Membangun):** - **Tektonisme:** Pergerakan lempeng (Patahan & Lipatan).
-   - **Vulkanisme:** Aktivitas magma naik ke permukaan bumi.
-   - **Seisme:** Getaran/Gempa bumi akibat pelepasan energi tektonik atau vulkanik.
-2. **Tenaga Eksogen (Merusak/Mengikis):**
-   - **Pelapukan:** Hancurnya batuan karena suhu/cuaca.
-   - **Erosi & Sedimentasi:** Pengikisan dan pengendapan oleh air, angin, atau gletser.
+#### 🔑 Langkah Penyelesaian
+Lakukan Kombinasi **Eliminasi** (menghilangkan satu variabel dengan menjumlah/mengurang) dilanjutkan dengan **Substitusi** (memasukkan nilai yang didapat ke persamaan lain).
 
-> **💡 FOKUS PAS & UJIAN:**
-> Selalu ingat bahwa letak Indonesia di jalur **Ring of Fire (Cincin Api Pasifik)** membuat tanah kita sangat subur (abu vulkanik) namun berisiko tinggi terhadap gempa megathrust. Mitigasi bencana pragempa, saat gempa, dan pascagempa adalah soal favorit para pembuat ujian!
-                """
-            }
-        }
-    },
-    "Ekonomi": {
-        "Kelas 10": {
-            "Konsep Manajemen & Bisnis Digital": {
-                "sub_bab": ["Fungsi Manajemen", "Pemasaran Digital & Pertumbuhan Eksponensial"],
+> **🧠 KUNCI MODEL MATEMATIKA:**
+> Langkah tersulit di UTBK bukan menghitungnya, melainkan menerjemahkan cerita soal menjadi bentuk $x$ dan $y$. Fokus pada kalimat "Total" atau "Maksimal".
+"""
+            },
+            "Bab 6: Fungsi Kuadrat": {
+                "sub_bab": ["Grafik Fungsi", "Mengonstruksi Fungsi", "Nilai Maks/Min", "Aplikasi"],
                 "rangkuman": """
-#### 🚀 Pengantar Bisnis di Era Digital
-Di era industri 4.0, bisnis tidak lagi mengandalkan penyebaran brosur di pinggir jalan. Manajemen digital menggunakan strategi *Growth Hacking* untuk mendapatkan pengguna secara masif dan instan.
+#### 🚀 Melengkung Membentuk Parabola
+Fungsi kuadrat memiliki bentuk umum $f(x) = ax^2 + bx + c$. Jika $a > 0$ kurva terbuka ke atas (senyum), jika $a < 0$ terbuka ke bawah (cemberut).
 
-#### 🔑 Konsep Pertumbuhan Eksponensial dalam Bisnis
-- **Viral Coefficient (K-Factor):** Jika 1 pengguna merekomendasikan aplikasi ke 2 pengguna baru, aplikasi tersebut akan meledak secara viral (Inilah algoritma asli TikTok dan Gojek di awal rilis).
-- **Customer Acquisition Cost (CAC):** Biaya riil yang dikeluarkan oleh perusahaan untuk mendatangkan 1 pembeli baru. Jika CAC lebih besar dari keuntungan per barang, bisnis akan bangkrut.
-- **Retensi (Retention):** Percuma mendapat 1000 pelanggan hari ini jika besok 999 orang kabur. Retensi adalah kunci bisnis bertahan lama.
+#### 🔑 Titik Puncak (Puncak Parabola)
+- **Sumbu Simetri (x):** $x_p = \frac{-b}{2a}$
+- **Nilai Maks/Min (y):** $y_p = \frac{D}{-4a}$
 
-> **💡 ANALISIS KURVA BISNIS (HOTS):**
-> Jika kamu melihat grafik penjualan perusahaan melengkung tajam menembus langit, itu disebut **Kurva Eksponensial**. Pemasaran digital yang brilian mampu mengubah kurva linier (naik lambat) menjadi kurva eksponensial.
-                """
-            }
-        }
-    },
-    "Kimia": {
-        "Kelas 11": {
-            "Kinetika Kimia": {
-                "sub_bab": ["Faktor-Faktor Laju Reaksi", "Orde Reaksi"],
+> **💡 TRIK KILAT:**
+> Jika fungsi kuadrat menyinggung sumbu X, artinya Diskriminan bernilai nol ($D = b^2 - 4ac = 0$).
+"""
+            },
+            "Bab 7: Statistika": {
+                "sub_bab": ["Distribusi Frekuensi", "Histogram/Ogive", "Pemusatan Data", "Letak Data", "Penyebaran Data"],
                 "rangkuman": """
-#### 🚀 Kinetika Kimia & Laju Reaksi
-Ilmu yang membahas seberapa cepat suatu reaktan (bahan baku) habis terbakar, atau seberapa cepat produk (hasil) terbentuk. 
+#### 🚀 Membaca Pola Dibalik Angka
+Statistika adalah seni mengubah data acak menjadi informasi berharga.
 
-#### 🔑 4 Faktor Utama Penentu Kecepatan Reaksi
-1. **Suhu (Temperatur):** Semakin panas, energi kinetik partikel semakin brutal. Partikel makin sering tabrakan!
-   *Rumus Cepat Kenaikan Suhu:* $$v_2 = v_1 \cdot n^{\\frac{\Delta T}{x}}$$ 
-   *(n = kelipatan laju, $\Delta T$ = selisih suhu, x = rentang kenaikan suhu)*
-2. **Konsentrasi:** Semakin kental/pekat sebuah larutan, semakin padat jumlah partikelnya. Jalanan yang padat pasti memicu lebih banyak tabrakan!
-3. **Luas Permukaan (Bidang Sentuh):** Gula pasir (serbuk) akan larut **jauh lebih cepat** dibanding gula batu (bongkahan besar). Semakin halus ukurannya, semakin cepat bereaksi.
-4. **Katalisator:** Sang mak comblang reaksi! Katalis menurunkan **Energi Aktivasi ($E_a$)** agar reaksi cepat meledak tanpa ikut habis di akhir proses.
+#### 🔑 3 Ukuran Pemusatan Utama
+1. **Mean:** Rata-rata dari total data.
+2. **Median:** Nilai tengah setelah data diurutkan.
+3. **Modus:** Data yang frekuensinya paling sering muncul.
 
-> **🧠 KUNCI SOAL LAJU REAKSI:**
-> Orde reaksi hanya bisa ditentukan melalui eksperimen, **TIDAK BISA** langsung dilihat dari angka koefisien di persamaan reaksi.
-                """
+> **🧠 TIPS UTBK STATISTIKA:**
+> Hati-hati dengan konsep Simpangan Baku. Jika semua data dikali 2, maka rata-rata ikut dikali 2, TETAPI varians akan dikali $2^2$ (kuadratnya)!
+"""
+            },
+            "Bab 8: Peluang": {
+                "sub_bab": ["Ruang Sampel", "Peluang Kejadian", "Frekuensi Harapan", "Saling Lepas/Bebas"],
+                "rangkuman": """
+#### 🚀 Mengukur Kemungkinan Takdir
+Peluang adalah rasio antara kejadian yang diharapkan (Titik Sampel) dengan total semua kemungkinan (Ruang Sampel).
+
+#### 🔑 Kaidah Pencacahan
+- **Kombinasi:** Memilih tanpa mempedulikan urutan (A, B sama dengan B, A).
+- **Permutasi:** Susunan di mana urutan sangat penting (Jabatan ketua, juara 1-2-3).
+
+> **💡 KUNCI CEPAT:**
+> Jika soal memakai kata hubung **"DAN"**, kalikan peluangnya. Jika menggunakan kata hubung **"ATAU"**, jumlahkan peluangnya!
+"""
             }
         },
-        "Kelas 10": {
-            "Struktur Atom": {
-                "sub_bab": ["Partikel Subatomik", "Konfigurasi Elektron"],
-                "rangkuman": """
-#### 🚀 Mengintip Isi Inti Atom
-Atom bukanlah bola pejal biasa. Di dalamnya terdapat semesta mikro yang bergerak tiada henti!
-
-#### 🔑 Tiga Serangkai Subatomik
-1. **Proton (+):** Berada santai di dalam inti atom (Nukleus). Menentukan *Nomor Atom* suatu unsur.
-2. **Neutron (Netral):** Pasangan proton di dalam inti atom. Menjaga agar proton-proton tidak saling tolak-menolak.
-3. **Elektron (-):** Bintang lapangan yang terus berputar mengelilingi inti atom dalam kecepatan cahaya pada jalur orbitnya (kulit elektron). Sangat mudah lepas dan berpindah!
-
-> **💡 RUMUS NOTASI UNSUR:**
-> **Nomor Massa (A)** = Jumlah Proton + Jumlah Neutron.
-> **Isotop** = Unsur kembar yang memiliki Nomor Atom (Proton) SAMA, tapi Nomor Massa beda (karena beda neutron).
-                """
-            },
-            "Persamaan Reaksi Kimia": {
-                "sub_bab": ["Hukum Kekekalan Massa", "Penyetaraan Reaksi"],
-                "rangkuman": """
-#### 🚀 Seni Menyetarakan Reaksi Kimia
-Hukum Kekekalan Massa (Lavoisier) menyatakan bahwa massa zat sebelum dan sesudah reaksi adalah **SAMA**. Artinya, jumlah atom di ruas kiri (Reaktan) harus persis sama dengan jumlah atom di ruas kanan (Produk).
-
-#### 🔑 Trik Cepat Menyetarakan Reaksi
-1. Jangan pernah mengubah angka indeks (angka kecil di belakang unsur, contoh: $O_2$), karena itu akan mengubah jenis senyawanya!
-2. Kamu hanya boleh mengotak-atik **Koefisien** (angka besar di paling depan senyawa).
-3. **Gaya Aljabar (Untuk Soal Sulit):** Jika reaksinya panjang (seperti pembakaran hidrokarbon), gunakan variabel huruf $a, b, c, d$ pada setiap molekul, lalu buat persamaan matematikanya!
-
-> **🧠 TIPS UJIAN (Balancing):**
-> Setarakan atom berurutan menggunakan metode **K-A-H-O**:
-> **K**ation (Logam/Kiri), **A**nion (Non-Logam/Kanan), lalu urus **H**idrogen, dan terakhir selesaikan **O**ksigen. Jika Oksigen sudah setara di akhir, berarti reaksimu 100% benar!
-                """
-            }
-        }
-    },
-    "Seni Budaya": {
-        "Kelas 12": {
-            "Seni Teater": {
-                "sub_bab": ["Rancangan Naskah Drama", "Penyutradaraan"],
-                "rangkuman": """
-#### 🚀 Seni Teater: Merancang Mahakarya Naskah Drama
-Teater adalah perpaduan tertinggi antara seni sastra (naskah), seni musik (scoring), seni rupa (tata panggung), dan seni peran (akting).
-
-#### 🔑 Teater Klasik Tradisional VS Drama Musikal Modern (Gen Z)
-- **Teater Tradisional (Contoh: Ketoprak, Wayang Wong, Ludruk):**
-  Sangat terikat pada pakem/aturan baku. Sering menggunakan bahasa krama (halus), iringan wajib gamelan/karawitan, dan cerita mayoritas berpusat pada kerajaan/legenda mitos (Istana Sentris).
-- **Drama Musikal Modern (Contoh: Laskar Pelangi Musikal, Teater Remaja Sekolah):**
-  Bebas, fleksibel, improvisasi tingkat tinggi. Mengangkat isu mental dan sosial masa kini, menggunakan diksi/slang bahasa yang sangat kasual, serta menggunakan transisi tata cahaya (lighting) dan musik pop/indie untuk merepresentasikan perasaan tokohnya.
-
-> **🧠 INTI PEMBUATAN NASKAH HOTS:**
-> Naskah teater remaja yang sukses adalah naskah yang memiliki *Relatability* (sangat relevan dengan keseharian penonton). Penonton modern tidak lagi mencari keindahan bahasa puisi yang sulit dimengerti, tetapi mencari pantulan diri mereka sendiri di atas panggung!
-                """
-            }
-        }
-    },
-    "Prakarya dan Kewirausahaan": {
         "Kelas 11": {
-            "Pengolahan Makanan Khas Daerah": {
-                "sub_bab": ["Modifikasi Resep (LK-10)", "Standarisasi SOP Komersial", "Strategi Pemasaran"],
+            "Bab 1: Komposisi & Invers Fungsi": {
+                "sub_bab": ["Domain/Range", "Aljabar Fungsi", "Fungsi Komposisi", "Fungsi Invers", "Invers Komposisi"],
                 "rangkuman": """
-#### 🚀 Inovasi Kuliner Daerah ke Ranah Profesional
-Memasak di rumah berbeda dengan memasak untuk industri komersial. Mengubah makanan tradisional (seperti rendang, rawon, atau soto) menjadi produk modern yang bernilai jual tinggi membutuhkan inovasi dan laporan modular berstandar industri.
+#### 🚀 Mesin Pemroses Angka
+Fungsi Ibarat mesin giling. Fungsi komposisi $(f \circ g)(x)$ berarti memasukkan output mesin $g$ ke dalam mesin $f$. Fungsi Invers $f^{-1}(x)$ adalah cara membalikkan proses mesinnya.
 
-#### 🔑 Elemen Laporan Modular (Standar LK-10)
-Sebuah rancangan pengolahan makanan tidak sekadar resep, melainkan memuat:
-1. **Ide & Justifikasi Modifikasi:** Mengapa makanan ini diubah? (Misal: Modifikasi kemasan *vacuum* agar rawon tahan 3 bulan tanpa pengawet).
-2. **Standard Operating Procedure (SOP):** Langkah baku yang harus diikuti agar jika koki diganti, rasanya tetap 100% sama persis. Mulai dari takaran gramasi bumbu, suhu api, hingga durasi menit pemanasan.
-3. **HPP (Harga Pokok Penjualan):** Hitungan matematis total biaya bahan baku dibagi jumlah porsi yang dihasilkan.
+#### 🔑 Trik Cepat Invers Pecahan
+Jika $f(x) = \frac{ax + b}{cx + d}$, maka inversnya cukup tukar posisi $a$ dan $d$, lalu ubah tandanya (plus/minus):
+$f^{-1}(x) = \frac{-dx + b}{cx - a}$
+"""
+            },
+            "Bab 2: Lingkaran": {
+                "sub_bab": ["Busur Lingkaran", "Sudut Pusat & Keliling", "Tali Busur & Garis Singgung", "Persamaan Lingkaran"],
+                "rangkuman": """
+#### 🚀 Geometri Sang Bundar
+Lingkaran memiliki persamaan analitik $(x-a)^2 + (y-b)^2 = r^2$ untuk titik pusat (a,b) dengan jari-jari r.
 
-> **💡 TRIK BISNIS KULINER MODERN:**
-> Inovasi makanan daerah masa kini sangat berfokus pada **Modifikasi Kemasan (Packaging)** dan **Bentuk Presentasi**. Rasa otentik dipertahankan, namun visualnya disesuaikan untuk menarik perhatian target pasar anak muda di platform digital.
-                """
+#### 🔑 Sudut Krusial
+Sudut Pusat selalu **2x lebih besar** daripada Sudut Keliling yang menghadap busur yang sama.
+"""
+            },
+            "Bab 3: Matriks": {
+                "sub_bab": ["Ordo & Notasi", "Jenis & Transpose", "Operasi Matriks", "Determinan & Invers", "Penyelesaian SPL"],
+                "rangkuman": """
+#### 🚀 Kotak Data Canggih
+Matriks adalah sekumpulan angka yang disusun dalam baris dan kolom. Syarat **Perkalian Matriks**: Kolom matriks pertama HARUS SAMA dengan baris matriks kedua.
+
+> **🧠 SIFAT SAKTI DETERMINAN:**
+> $|A \cdot B| = |A| \cdot |B|$. Jika matriks dikali sebuah angka konstan $k$, maka determinannya $|k \cdot A| = k^n \cdot |A|$ (n adalah ordo matriks).
+"""
+            },
+            "Bab 4: Transformasi Geometri": {
+                "sub_bab": ["Translasi", "Refleksi", "Rotasi", "Dilatasi", "Komposisi Transformasi"],
+                "rangkuman": """
+#### 🚀 Manipulasi Koordinat
+1. **Translasi (Geser):** Titik $x, y$ sekadar ditambah.
+2. **Refleksi (Cermin):** Koordinat dibalik tergantung cerminnya.
+3. **Rotasi (Putar):** Membutuhkan titik pusat dan sudut putar.
+4. **Dilatasi (Perbesar/Perkecil):** Koordinat dikali dengan faktor skala $k$.
+"""
+            }
+        },
+        "Kelas 12": {
+            "Bab 1: Geometri Ruang (Dimensi Tiga)": {
+                "sub_bab": ["Jarak Antar Titik", "Jarak Titik ke Garis", "Jarak Titik ke Bidang", "Sudut Ruang"],
+                "rangkuman": """
+#### 🚀 Memvisualisasikan 3D
+Menganalisis jarak dan sudut di ruang seperti kubus. 
+
+#### 🔑 Trik Cepat Kubus (Rusuk = a)
+- **Diagonal Sisi:** $a\sqrt{2}$
+- **Diagonal Ruang:** $a\sqrt{3}$
+
+> **🧠 STRATEGI UTBK:**
+> Tarik garis bantu hingga membentuk Segitiga Siku-siku, lalu hajar dengan Pythagoras!
+"""
+            },
+            "Bab 2: Limit Fungsi Aljabar & Trigonometri": {
+                "sub_bab": ["Konsep Limit", "Sifat Limit", "Limit Tak Hingga", "Limit Trigonometri"],
+                "rangkuman": """
+#### 🚀 Menembus Batas Pendekatan
+Limit mengkaji apa yang terjadi pada suatu fungsi saat nilainya *mendekati* titik kritis, bukan saat *berada* di titik tersebut.
+
+> **💡 TRIK L'HOPITAL:**
+> Jika disubstitusi hasilnya $0/0$ atau $\infty/\infty$, langsung turunkan (diferensialkan) pembilang dan penyebutnya!
+"""
+            },
+            "Bab 3: Turunan Fungsi (Diferensial)": {
+                "sub_bab": ["Konsep Turunan", "Rumus Turunan", "Sifat Turunan", "Aplikasi Turunan"],
+                "rangkuman": """
+#### 🚀 Laju Perubahan Instan
+Turunan pertama $f'(x)$ mewakili kemiringan (gradien) garis singgung kurva. 
+
+#### 🔑 Aplikasi Ekstrim
+Untuk mencari titik Maksimum atau Minimum dari keuntungan pabrik / luas tanah, cukup turunkan persamaannya lalu jadikan nol! ($f'(x) = 0$).
+"""
+            },
+            "Bab 4: Integral (Antiturunan)": {
+                "sub_bab": ["Integral Tak Tentu", "Sifat Integral", "Integral Tentu", "Teknik Pengintegralan", "Luas Kurva"],
+                "rangkuman": """
+#### 🚀 Mengembalikan Turunan & Menghitung Luas
+Integral Tak Tentu menghasilkan fungsi asal (+ C), sedangkan Integral Tentu menghasilkan nilai angka absolut (Luas area).
+
+> **🧠 TRIK LUAS PARABOLA:**
+> Luas area tertutup antara parabola dan garis bisa dicari kilat dengan rumus $L = \frac{D\sqrt{D}}{6a^2}$ tanpa perlu repot mengintegral!
+"""
+            }
+        }
+    },
+    
+    "Fisika": {
+        "Kelas 10": {
+            "Bab 1: Pengukuran Ilmiah": {
+                "sub_bab": ["Alat Ukur", "Besaran & Dimensi", "Angka Penting", "Ketidakpastian"],
+                "rangkuman": """
+#### 🚀 Mengukur Presisi Semesta
+Beda alat, beda ketelitian. Jangka sorong punya ketelitian 0,01 cm, sedangkan Mikrometer Sekrup sangat akurat di 0,001 cm!
+
+> **🔑 ATURAN ANGKA PENTING:**
+> Saat mengalikan atau membagi, hasil akhirnya HANYA BOLEH mengandung Angka Penting paling sedikit dari komponen yang dihitung!
+"""
+            },
+            "Bab 2: Energi Terbarukan": {
+                "sub_bab": ["Bentuk Energi", "Hukum Kekekalan Energi", "Sumber Fosil vs Terbarukan", "Dampak Lingkungan"],
+                "rangkuman": """
+#### 🚀 Transisi Hijau
+Energi mekanik ($E_M$) selalu kekal, di mana $E_M = E_{Potensial} + E_{Kinetik}$. Saat di titik tertinggi, Ek bernilai nol. Saat menyentuh tanah, Ep bernilai nol.
+"""
+            }
+        },
+        "Kelas 11": {
+            "Bab 1: Kinematika Gerak": {
+                "sub_bab": ["GLB & GLBB", "Gerak Vertikal", "Gerak Parabola", "Gerak Melingkar"],
+                "rangkuman": """
+#### 🚀 Menggambarkan Laju Partikel
+Gabungan GLB (sumbu x horizontal) dan GLBB (sumbu y vertikal yang ditarik gravitasi) menciptakan lintasan melengkung indah yang kita sebut **Gerak Parabola**.
+"""
+            },
+            "Bab 2: Dinamika Gerak (Hukum Newton)": {
+                "sub_bab": ["Hukum Newton", "Gaya Gesek/Normal", "Bidang Miring & Katrol", "Gaya Sentripetal"],
+                "rangkuman": """
+#### 🚀 Misteri Dibalik Gerakan
+- **Newton 1:** Kelembaman ($\Sigma F = 0$, benda diam akan tetap diam).
+- **Newton 2:** Percepatan ($\Sigma F = m \cdot a$).
+- **Newton 3:** Aksi = -Reaksi.
+
+> **🧠 TIPS BIDANG MIRING:**
+> Gaya yang menarik balok turun sejajar bidang miring selalu bernilai $W \cdot \sin \theta$, sedangkan Gaya Normalnya adalah $W \cdot \cos \theta$.
+"""
+            },
+            "Bab 3: Statika dan Dinamika Rotasi": {
+                "sub_bab": ["Torsi & Inersia", "Kesetimbangan", "Titik Berat", "Kekekalan Momentum Sudut"],
+                "rangkuman": """
+#### 🚀 Momen Gaya (Torsi)
+Apa yang membuat pintu berputar saat didorong? Torsi! Torsi ($\tau$) adalah perkalian gaya tarik dengan jaraknya dari engsel. Syarat Benda Tegar Seimbang: $\Sigma F = 0$ dan $\Sigma \tau = 0$.
+"""
+            },
+            "Bab 4: Fluida": {
+                "sub_bab": ["Fluida Statis", "Fluida Dinamis"],
+                "rangkuman": """
+#### 🚀 Tekanan Zat Cair & Gas
+- **Archimedes:** Gaya apung ke atas seberat air yang dipindahkan.
+- **Pascal:** Tekanan air di ruangan tertutup menyebar rata ke segala arah (Dongkrak Hidrolik).
+- **Bernoulli (Dinamis):** Semakin cepat aliran air/angin, tekanannya justru SEMAKIN KECIL (Ini prinsip mengapa pesawat bisa terbang).
+"""
+            },
+            "Bab 5: Gelombang, Cahaya, dan Bunyi": {
+                "sub_bab": ["Karakteristik Gelombang", "Stasioner & Berjalan", "Gelombang Cahaya", "Gelombang Bunyi"],
+                "rangkuman": """
+#### 🚀 Getaran Energi Alam
+Efek Doppler menjelaskan mengapa suara sirine ambulans makin melengking tinggi (Frekuensi naik) saat mendekati kita, dan merendah saat menjauh.
+"""
+            }
+        },
+        "Kelas 12": {
+            "Bab 1: Termodinamika": {
+                "sub_bab": ["Suhu & Kalor", "Teori Kinetik Gas", "Hukum Termodinamika", "Proses & Siklus Carnot"],
+                "rangkuman": """
+#### 🚀 Mesin Penghasil Usaha
+Gas yang dipanaskan akan memuai dan menghasilkan Usaha (W). 
+> **💡 SIKLUS CARNOT:**
+> Tidak ada satupun mesin di dunia yang efisiensinya 100%. Sebagian kalor pasti terbuang ke reservoir suhu rendah!
+"""
+            },
+            "Bab 2: Listrik Statis & Dinamis": {
+                "sub_bab": ["Hukum Coulomb & Kapasitor", "Hukum Ohm & Kirchhoff", "Rangkaian Seri-Paralel"],
+                "rangkuman": """
+#### 🚀 Pertarungan Muatan Positif & Negatif
+Listrik Statis dipengaruhi Hukum Coulomb (Gaya tarik tolak muatan $F = k\frac{q_1 q_2}{r^2}$). Listrik Dinamis berlaku Hukum Kirchhoff (Arus masuk ke titik percabangan persis sama dengan arus yang keluar).
+"""
+            },
+            "Bab 3: Kemagnetan & Induksi": {
+                "sub_bab": ["Medan Magnet", "Gaya Lorentz", "Induksi Faraday", "Transformator & AC"],
+                "rangkuman": """
+#### 🚀 Ilusi Kawat Berarus
+Gaya Lorentz adalah gaya dorong ajaib yang dialami kawat berarus saat ditaruh di dekat magnet. Ini adalah fondasi terciptanya Motor Listrik penggerak dunia!
+"""
+            },
+            "Bab 4: Fisika Modern & Kuantum": {
+                "sub_bab": ["Relativitas Khusus", "Radiasi Benda Hitam", "Efek Fotolistrik", "Fisika Inti"],
+                "rangkuman": """
+#### 🚀 Einstein & Fisika Inti
+Waktu dan panjang ruang tidaklah mutlak! Saat kita bergerak mendekati kecepatan cahaya, Waktu terasa lebih lambat (Dilatasi) dan Ukuran memendek (Kontraksi Panjang).
+"""
+            }
+        }
+    },
+
+    "Kimia": {
+        "Kelas 10": {
+            "Bab 1: Kimia Hijau": {
+                "sub_bab": ["12 Prinsip Kimia Hijau", "Isu Lingkungan", "Proses Ramah Lingkungan"],
+                "rangkuman": """
+#### 🚀 Solusi Atas Polusi
+Kimia hijau berupaya menciptakan desain proses kimiawi yang mengurangi atau membuang penggunaan bahan beracun demi menekan pemanasan global.
+"""
+            },
+            "Bab 2: Struktur Atom & Hukum Dasar": {
+                "sub_bab": ["Model Atom", "Partikel Penyusun", "Isotop/Isobar", "Hukum Dasar Kimia"],
+                "rangkuman": """
+#### 🚀 Partikel Fundamental & Hukum Lavoisier
+Massa reaktan sebelum bereaksi SELALU SAMA dengan massa produk sesudah bereaksi di ruang tertutup. Jika sisa abu kayu lebih ringan dari kayunya, itu karena sebagian massanya menguap menjadi gas CO2!
+"""
+            }
+        },
+        "Kelas 11": {
+            "Bab 1: Struktur Atom Modern": {
+                "sub_bab": ["Bilangan Kuantum", "Konfigurasi Elektron", "Sifat Periodik"],
+                "rangkuman": """
+#### 🚀 Alamat Absolut Elektron
+Elektron tidak berputar di orbit cincin biasa, melainkan menempati awan "Orbital". Alamatnya disebut Bilangan Kuantum (n, l, m, s).
+"""
+            },
+            "Bab 2: Ikatan Kimia": {
+                "sub_bab": ["Kestabilan Unsur", "Ikatan Ion, Kovalen, Logam", "Bentuk Molekul VSEPR", "Gaya Antarmolekul"],
+                "rangkuman": """
+#### 🚀 Berpelukan Mengejar Oktet
+- **Ion:** Serah terima elektron (Logam kuat ketemu Non-Logam).
+- **Kovalen:** Berbagi elektron bareng (Non-Logam sama Non-Logam).
+
+> **🧠 HOTS:** Titik didih H2O (air) sangat tinggi tidak wajar dibanding senyawa sejenisnya karena ia memiliki Gaya super kuat: **Ikatan Hidrogen!**
+"""
+            },
+            "Bab 3: Stoikiometri": {
+                "sub_bab": ["Konsep Mol", "Rumus Empiris/Molekul", "Kadar Zat", "Pereaksi Pembatas"],
+                "rangkuman": """
+#### 🚀 Konsep Mol: Jantungnya Hitungan Kimia
+Apapun soal kimianya, jadikan satuan MOL terlebih dahulu!
+MOL = Massa / Ar (atau Mr).
+"""
+            },
+            "Bab 4: Termokimia": {
+                "sub_bab": ["Sistem & Lingkungan", "Eksoterm/Endoterm", "Entalpi", "Penentuan Entalpi"],
+                "rangkuman": """
+#### 🚀 Kalor dan Energi
+- **Eksoterm:** Reaksi melepaskan panas ke luar (Cangkir terasa hangat).
+- **Endoterm:** Reaksi menyerap panas (Cangkir terasa dingin membeku).
+"""
+            },
+            "Bab 5: Laju Reaksi": {
+                "sub_bab": ["Konsep Laju Reaksi", "Teori Tumbukan", "Faktor Pengaruh", "Orde Reaksi"],
+                "rangkuman": """
+#### 🚀 Kinetika & Tabrakan Partikel
+Laju reaksi dipercepat oleh: Konsentrasi pekat, Suhu tinggi, Katalis (mak comblang), dan Luas permukaan serbuk yang sangat halus.
+"""
+            }
+        },
+        "Kelas 12": {
+            "Bab 1: Kesetimbangan Kimia": {
+                "sub_bab": ["Reaksi Reversibel", "Tetapan Kesetimbangan", "Pergeseran Le Chatelier", "Aplikasi Industri"],
+                "rangkuman": """
+#### 🚀 Reaksi yang Bisa Bolak-Balik
+Asas Le Chatelier: "Jika ada sistem yang diganggu/diubah, sistem akan bergeser untuk MEMINIMALISIR gangguan tersebut agar setimbang kembali."
+"""
+            },
+            "Bab 2: Asam-Basa & Larutan": {
+                "sub_bab": ["Teori Asam Basa", "Skala pH", "Larutan Penyangga", "Hidrolisis Garam", "Kelarutan (Ksp)"],
+                "rangkuman": """
+#### 🚀 Asam Kaustik & Basa Licin
+Larutan Buffer (Penyangga) ibarat pertahanan tubuh (ada di darah manusia). Walau ditetesi racun asam atau basa sedikit, nilai pH nya TIDAK AKAN BERUBAH tajam!
+"""
+            },
+            "Bab 3: Elektrokimia": {
+                "sub_bab": ["Reaksi Redoks", "Sel Volta", "Korosi", "Sel Elektrolisis"],
+                "rangkuman": """
+#### 🚀 Baterai & Karat Logam
+Sel Volta mereaksikan bahan kimia untuk *MENGHASILKAN* listrik (Baterai). Sedangkan Sel Elektrolisis *DIBERI* aliran listrik dari luar paksa untuk merusak zat air.
+"""
+            },
+            "Bab 4: Kimia Organik": {
+                "sub_bab": ["Kekhasan Karbon", "Alkana/Alkena/Alkuna", "Gugus Fungsi", "Polimer & Makromolekul"],
+                "rangkuman": """
+#### 🚀 Kerangka Senyawa Kehidupan
+Karbon (C) memiliki kekhasan sangat unik: Punya 4 "tangan" (elektron valensi) yang bisa berikatan memanjang seperti rantai kereta api! Plastik adalah contoh produk organik polimer.
+"""
+            }
+        }
+    },
+
+    "Biologi": {
+        "Kelas 10": {
+            "Bab 1: Keanekaragaman Hayati": {
+                "sub_bab": ["Tingkat Gen/Jenis", "Flora Fauna RI", "Pelestarian", "Klasifikasi"],
+                "rangkuman": """
+#### 🚀 Pesona Kehati Nusantara
+Kehati dipengaruhi Genetik, Spesies, dan Ekosistem. Indonesia terbagi oleh **Garis Wallace** (Asiatis vs Peralihan) dan **Garis Weber** (Peralihan vs Australis).
+"""
+            },
+            "Bab 2: Virus": {
+                "sub_bab": ["Struktur Virus", "Siklus Litik/Lisogenik", "Peranan Virus", "Pencegahan"],
+                "rangkuman": """
+#### 🚀 Si Partikel Aseluler Mematikan
+Virus adalah parasit sejati yang hanya memiliki 1 kode instruksi: RNA atau DNA. Reproduksinya dilakukan dengan membajak pabrik sel tubuh kita lewat siklus Litik (Hancur) atau Lisogenik (Bersembunyi).
+"""
+            },
+            "Bab 3: Lingkungan & Ekosistem": {
+                "sub_bab": ["Komponen Ekosistem", "Jaring Makanan", "Daur Biogeokimia", "Pencemaran"],
+                "rangkuman": """
+#### 🚀 Jaring Siklus Rantai Alam
+Dalam Piramida Ekologi, semakin tinggi level predatornya (Puncak piramida), energi yang ditransfer dari level dasar menjadi semakin sedikit (hanya sekitar 10%).
+"""
+            }
+        },
+        "Kelas 11": {
+            "Bab 1: Sel": {
+                "sub_bab": ["Komponen Kimiawi", "Organel Sel", "Sel Hewan vs Tumbuhan", "Transpor Membran"],
+                "rangkuman": """
+#### 🚀 Kota Mandiri Mikroskopis
+- **Mitokondria:** Pabrik pembangkit energi (ATP).
+- **Lisosom:** Petugas kebersihan/penghancur benda asing.
+- **Kloroplas:** Pabrik gula eksklusif (Hanya ada di sel tumbuhan).
+"""
+            },
+            "Bab 2: Struktur & Fungsi Jaringan": {
+                "sub_bab": ["Jaringan Tumbuhan", "Jaringan Hewan"],
+                "rangkuman": """
+#### 🚀 Xilem & Floem
+Xilem ibarat pipa air bersih (mengangkat air tanah ke daun). Floem ibarat mobil distribusi pangan (mengedarkan gula hasil fotosintesis ke seluruh dahan batang).
+"""
+            },
+            "Bab 3: Sistem Organ (Bagian 1)": {
+                "sub_bab": ["Sistem Gerak", "Sistem Sirkulasi", "Sistem Pencernaan"],
+                "rangkuman": """
+#### 🚀 Pompa Darah (Jantung) & Enzim
+Pencernaan kimiawi dikendalikan Enzim spesifik. Di lambung, Enzim Pepsin memecah protein keras menjadi serpihan Pepton dengan bantuan Asam Klorida (HCl).
+"""
+            },
+            "Bab 4: Sistem Organ (Bagian 2)": {
+                "sub_bab": ["Sistem Pernapasan", "Sistem Ekskresi", "Sistem Koordinasi", "Sistem Reproduksi"],
+                "rangkuman": """
+#### 🚀 Saraf & Ekskresi Limbah Beracun
+Ginjal adalah alat ekskresi elit! Proses Nefron ada 3 tahap: Filtrasi (Saringan darah di Glomerulus), Reabsorbsi (Penyerapan vitamin ulang), lalu Augmentasi (Penambahan zat sisa jadi urin sejati).
+"""
+            }
+        },
+        "Kelas 12": {
+            "Bab 1: Pertumbuhan & Perkembangan": {
+                "sub_bab": ["Konsep Dasar", "Perkecambahan", "Faktor Internal (Hormon)", "Faktor Eksternal"],
+                "rangkuman": """
+#### 🚀 Mekar dan Memanjang (Fitohormon)
+- **Auksin:** Mengatur tanaman untuk tumbuh terus melengkung mengejar arah datangnya sinar matahari!
+"""
+            },
+            "Bab 2: Metabolisme Sel": {
+                "sub_bab": ["Enzim", "Katabolisme (Respirasi)", "Anabolisme (Fotosintesis)"],
+                "rangkuman": """
+#### 🚀 Glikolisis, Dekarboksilasi & Krebs
+Respirasi Oksigenik memecah 1 Molekul Glukosa menjadi energi listrik sel yang sangat besar (36/38 ATP) agar makhluk hidup mampu bergerak aktif.
+"""
+            },
+            "Bab 3: Genetika & Hereditas": {
+                "sub_bab": ["DNA & RNA", "Sintesis Protein", "Pembelahan Sel", "Hukum Mendel", "Penyimpangan Mendel", "Hereditas Manusia"],
+                "rangkuman": """
+#### 🚀 Kode Cetak Biru (DNA) Manusia
+Gen adalah pita perekat instruksi biologis. Hukum Mendel mengatur probabilitas kacang hijau silangan, dan fenomena *Buta Warna* (terikat kromosom X) adalah warisan gen resesif pautan sex.
+"""
+            },
+            "Bab 4: Evolusi & Bioteknologi": {
+                "sub_bab": ["Teori Evolusi", "Bioteknologi Konvensional", "Bioteknologi Modern"],
+                "rangkuman": """
+#### 🚀 Kloning & Pemilihan Alam
+Bioteknologi modern memanipulasi kode DNA mikroba. Contohnya menyisipkan Gen penghasil Insulin Manusia ke dalam DNA Bakteri agar bakteri tersebut mampu memproduksi insulin untuk penderita diabetes.
+"""
+            }
+        }
+    },
+
+    "Sejarah": {
+        "Kelas 10": {
+            "Bab 1: Pengantar Ilmu Sejarah": {
+                "sub_bab": ["Syarat & Manfaat", "Ruang & Waktu", "Sinkronik/Diakronik", "Sumber Sejarah", "Tahapan Penelitian"],
+                "rangkuman": """
+#### 🚀 Membedah Mesin Waktu 
+- **Diakronik:** Menganalisis sejarah memanjang dalam garis waktu kronologis, tapi ruangnya sempit.
+- **Sinkronik:** Menganalisis sejarah melebar membedah struktur kondisinya secara detail, tetapi di satu waktu tertentu saja.
+"""
+            },
+            "Bab 2: Jalur Rempah & Hindu-Buddha": {
+                "sub_bab": ["Teori Masuknya", "Kerajaan Besar", "Sosial-Budaya", "Jalur Rempah"],
+                "rangkuman": """
+#### 🚀 Kedatuan Emas Nusantara
+Kerajaan Sriwijaya menguasai Selat Malaka sebagai poros maritim, disusul kebesaran Majapahit yang menyatukan kepulauan Nusantara berkat Sumpah Palapa Gajah Mada.
+"""
+            },
+            "Bab 3: Islamisasi di Nusantara": {
+                "sub_bab": ["Teori Masuk", "Saluran Islamisasi", "Kerajaan Islam", "Akulturasi Budaya"],
+                "rangkuman": """
+#### 🚀 Tsunami Akulturasi Halus
+Proses masuknya Islam sangat damai via perdagangan (Gujarat), pernikahan, dan pagelaran Wayang adaptasi oleh Walisongo. Masjid Demak menjadi bukti akulturasi budaya.
+"""
+            }
+        },
+        "Kelas 11": {
+            "Bab 1: Kolonialisme & Perlawanan": {
+                "sub_bab": ["Latar Belakang 3G", "VOC & Hindia Belanda", "Dampak Kolonialisme", "Perlawanan Daerah"],
+                "rangkuman": """
+#### 🚀 Runtuhnya Monopoli VOC
+Motif 3G: Gold (Kekayaan rempah), Glory (Kejayaan menaklukkan tanah), Gospel (Menyebarkan keyakinan). VOC bangkrut karena wabah korupsi sistemik dari para elitnya sendiri!
+"""
+            },
+            "Bab 2: Pergerakan Nasional": {
+                "sub_bab": ["Faktor Lahir", "Organisasi Awal", "Organisasi Radikal", "Sumpah Pemuda 1928", "Peran Pers"],
+                "rangkuman": """
+#### 🚀 Menulis Pena Kemerdekaan
+Munculnya Budi Utomo (1908) dan Sarekat Islam. Dari yang awalnya perlawanan pakai golok/senjata kedaerahan, berubah menjadi strategi diplomatik lewat kaum terpelajar.
+"""
+            },
+            "Bab 3: Pendudukan Jepang & Proklamasi": {
+                "sub_bab": ["Propaganda 3A", "Kebijakan Romusha", "Perlawanan", "Rengasdengklok", "Proklamasi 1945"],
+                "rangkuman": """
+#### 🚀 Vakum Kekuasaan Tercepat
+Jepang dibom atom (Hiroshima-Nagasaki). Kaum muda revolusioner "menculik" Soekarno ke Rengasdengklok untuk menghindari provokasi Jepang dan memaksa proklamasi 17 Agustus 1945 dibacakan hari itu juga!
+"""
+            }
+        },
+        "Kelas 12": {
+            "Bab 1: Mempertahankan Kemerdekaan": {
+                "sub_bab": ["Ancaman Sekutu/NICA", "Perjuangan Fisik", "Diplomasi", "Pemberontakan Dalam Negeri"],
+                "rangkuman": """
+#### 🚀 Agresi & Gencatan Senjata
+Berhadapan dengan kembalinya Belanda (NICA), Indonesia bertempur fisik luar biasa di Surabaya dan Ambarawa. Di meja diplomasi, Perjanjian Linggajati & Renville memaksa Belanda perlahan mengakui kedaulatan RI.
+"""
+            },
+            "Bab 2: Demokrasi Liberal & Terpimpin": {
+                "sub_bab": ["Kabinet Demokrasi Liberal", "Dekrit 1959 & Demokrasi Terpimpin"],
+                "rangkuman": """
+#### 🚀 Kekacauan Kabinet Cepat Ganti
+Sistem Liberal membuat kabinet Indonesia jatuh bangun tiap beberapa bulan karena mosi tidak percaya. Soekarno akhirnya mengambil alih penuh kendali negara lewat Dekrit Presiden 5 Juli 1959.
+"""
+            },
+            "Bab 3: Orde Baru hingga Reformasi": {
+                "sub_bab": ["Lahirnya Orde Baru", "Krisis Moneter 1998", "Masa Reformasi"],
+                "rangkuman": """
+#### 🚀 Pembangunan vs Krisis Moneter
+Orde Baru (Soeharto) melakukan pembangunan fisik/ekonomi masif via Repelita, namun kebebasan politik dikekang. Berakhir dengan demonstrasi mahasiswa masif akibat krisis finansial Asia 1998.
+"""
+            },
+            "Bab 4: Indonesia & Dunia": {
+                "sub_bab": ["Politik Bebas Aktif", "KAA & GNB", "Misi Garuda", "Pembentukan ASEAN"],
+                "rangkuman": """
+#### 🚀 Non-Blok Macan Asia
+Indonesia memelopori Konferensi Asia Afrika (KAA) di Bandung 1955. Kita mengkampanyekan Gerakan Non-Blok, tidak ikut persekongkolan perang Amerika (Blok Barat) maupun Soviet (Blok Timur).
+"""
+            }
+        }
+    },
+
+    "Ekonomi": {
+        "Kelas 10": {
+            "Bab 1: Konsep Dasar Ekonomi": {
+                "sub_bab": ["Kelangkaan", "Alat Pemuas", "Biaya Peluang", "Prinsip & Motif"],
+                "rangkuman": """
+#### 🚀 Biaya Kesempatan (Opportunity Cost)
+Ilmu memilih karena kelangkaan. Jika kamu memilih menghabiskan 30 ribu untuk Nonton Bioskop ketimbang makan siang, maka makan siang itulah yang disebut *Biaya Peluang* yang dikorbankan.
+"""
+            },
+            "Bab 2: Kegiatan & Pelaku Ekonomi": {
+                "sub_bab": ["Produksi & Konsumsi", "Pelaku Ekonomi", "Circular Flow Diagram"],
+                "rangkuman": """
+#### 🚀 Siklus Uang Melingkar
+Alur dari Rumah Tangga Produsen (Pabrik) memberikan barang ke Rumah Tangga Konsumen (Warga), dan Warga memberikan faktor produksi (Tenaga Kerja) ke Pabrik untuk digaji.
+"""
+            },
+            "Bab 3: Pasar & Harga": {
+                "sub_bab": ["Permintaan", "Penawaran", "Harga Keseimbangan", "Elastisitas", "Struktur Pasar"],
+                "rangkuman": """
+#### 🚀 Supply and Demand
+Hukum Permintaan: Harga naik, warga malas beli (berbanding terbalik).
+Hukum Penawaran: Harga barang naik, pabrik malah rakus memproduksi karena ingin untung besar (berbanding lurus). 
+"""
+            },
+            "Bab 4: Lembaga Keuangan": {
+                "sub_bab": ["OJK", "Perbankan", "Lembaga Non-Bank"],
+                "rangkuman": """
+#### 🚀 Para Penjaga Kestabilan Finansial
+OJK lahir sebagai wasit super independen yang mengawasi seluruh kegiatan asuransi, kredit, investasi, dan perbankan di Indonesia agar warga tidak tertipu investasi bodong/pinjol.
+"""
+            }
+        },
+        "Kelas 11": {
+            "Bab 1: Pendapatan Nasional": {
+                "sub_bab": ["Konsep GDP/GNP", "Metode Penghitungan", "Pendapatan Per Kapita", "Kesenjangan (Gini)"],
+                "rangkuman": """
+#### 🚀 Mengkalkulasi Kekayaan RI
+GDP (Gross Domestic Product) menghitung seluruh produk barang yang dihasilkan di batas negara, tak peduli siapapun yang memproduksinya (Pabrik Jepang di RI pun dihitung masuk GDP RI).
+"""
+            },
+            "Bab 2: Ketenagakerjaan": {
+                "sub_bab": ["Konsep Dasar", "Masalah di Indonesia", "Sistem Upah", "Pengangguran"],
+                "rangkuman": """
+#### 🚀 Mengurai Benang Kusut Pengangguran
+- **Friksional:** Menganggur sementara karena menunggu panggilan transisi kerja.
+- **Struktural:** Menganggur tragis karena skill yang dipunya sudah tidak laku / digantikan kemajuan teknologi.
+"""
+            },
+            "Bab 3: Inflasi & Kebijakan": {
+                "sub_bab": ["Inflasi", "Kebijakan Moneter", "Kebijakan Fiskal"],
+                "rangkuman": """
+#### 🚀 Kebijakan Menginjak Rem Ekonomi
+Saat terjadi *Inflasi Ekstrim* (harga barang gila-gilaan naik), pemerintah akan menarik uang dari peredaran warga. Caranya lewat Kebijakan Fiskal (Menaikkan Pajak Warga drastis) atau Moneter (Menaikkan Suku Bunga Bank agar warga rajin menabung uangnya).
+"""
+            }
+        },
+        "Kelas 12": {
+            "Bab 1: APBN dan APBD": {
+                "sub_bab": ["Tujuan & Fungsi", "Sumber Pendapatan", "Pengeluaran", "Pengaruh APBN"],
+                "rangkuman": """
+#### 🚀 Brankas Pembangunan Nasional
+Penerimaan terbesar negara adalah melalui sektor Pajak. Jika penerimaan negara lebih kecil dari rencana pengeluarannya (Defisit), negara bisa saja mengeluarkan surat obligasi atau meminjam dana segar.
+"""
+            },
+            "Bab 2: Akuntansi Perusahaan Jasa": {
+                "sub_bab": ["Karakteristik & Persamaan", "Siklus Akuntansi", "Jurnal Penyesuaian", "Laporan Keuangan", "Jurnal Penutup"],
+                "rangkuman": """
+#### 🚀 Persamaan Dasar Akuntansi
+Hukum Keseimbangan Universal: $\text{HARTA (Aset)} = \text{HUTANG (Kewajiban)} + \text{MODAL (Ekuitas)}$.
+"""
+            },
+            "Bab 3: Akuntansi Perusahaan Dagang": {
+                "sub_bab": ["Karakteristik Dagang", "Jurnal Khusus", "Buku Besar Pembantu", "Neraca Lajur"],
+                "rangkuman": """
+#### 🚀 Kalkulasi HPP Dagang
+Beda dengan perusahan Jasa (salon/ojek), perusahaan dagang memiliki siklus barang mentah yang sangat berisiko. Menemukan formula *Harga Pokok Penjualan (HPP)* sangat diandalkan untuk menembak untung rugi bruto-nya.
+"""
+            }
+        }
+    },
+
+    "Sosiologi": {
+        "Kelas 10": {
+            "Bab 1: Pengantar Sosiologi": {
+                "sub_bab": ["Sejarah & Tokoh", "Objek Kajian", "Fungsi Sosiologi"],
+                "rangkuman": """
+#### 🚀 Kacamata Pembedah Masyarakat
+Auguste Comte adalah bapak sosiologi pertama. Ilmu Sosiologi bersifat *Non-Etis*, artinya dia tidak peduli perbuatan itu baik atau buruk, tapi hanya fokus menganalisis *mengapa* perbuatan itu bisa terjadi di masyarakat.
+"""
+            },
+            "Bab 2: Interaksi & Hubungan Sosial": {
+                "sub_bab": ["Identitas Diri", "Tindakan Sosial", "Syarat Interaksi", "Bentuk Interaksi"],
+                "rangkuman": """
+#### 🚀 Simulasi Empati Sosial
+Interaksi sosial mensyaratkan dua gerbang utama: **Kontak Sosial** (Pertemuan fisik/virtual) dan **Komunikasi** (Pertukaran makna/bahasa). Tanpa keduanya, interaksi tidak akan sah terjadi!
+"""
+            },
+            "Bab 3: Lembaga, Nilai, & Norma": {
+                "sub_bab": ["Nilai & Norma", "Jenis Norma", "Lembaga Sosial"],
+                "rangkuman": """
+#### 🚀 Tembok Kendali Kelakuan Manusia
+- **Folkways:** Aturan kebiasaan biasa (Makan berdecak akan ditegur).
+- **Mores:** Norma tata kelakuan luhur/moral tinggi (Mengumpat akan dikucilkan).
+- **Customs (Adat):** Adat keras di mana pelanggarnya bisa dibuang dari desanya!
+"""
+            }
+        },
+        "Kelas 11": {
+            "Bab 1: Kelompok Sosial": {
+                "sub_bab": ["Pembentukan", "Jenis Kelompok", "Dinamika Kelompok"],
+                "rangkuman": """
+#### 🚀 Solidaritas vs Persaingan
+Kelompok *Gemeinschaft* (Paguyuban) diikat oleh tali darah kekerabatan sejati dan tanpa pamrih (seperti keluarga desa). Kelompok *Gesellschaft* (Patembayan) sifatnya ikatan kontrak pamrih sebatas kepentingan karier profesional saja (perusahaan/kantoran).
+"""
+            },
+            "Bab 2: Permasalahan Sosial": {
+                "sub_bab": ["Eksklusi Sosial", "Ketimpangan & Kemiskinan", "Kriminalitas & Korupsi"],
+                "rangkuman": """
+#### 🚀 Efek Samping Roda Kapitalisme
+Ketimpangan sosial terjadi karena ketidaksamaan akses kaum miskin terhadap sumber daya (pendidikan/modal), yang pada puncaknya memicu *Eksklusi Sosial* (mereka disingkirkan dan dianggap warga kelas dua).
+"""
+            },
+            "Bab 3: Konflik & Kekerasan": {
+                "sub_bab": ["Akar Penyebab", "Konflik vs Kekerasan", "Resolusi Konflik"],
+                "rangkuman": """
+#### 🚀 Resolusi Mediasi vs Arbitrase
+Keduanya menggunakan penengah/Pihak Ketiga. Namun di **Mediasi**, penengah hanya memberi nasihat (keputusan tetap di tangan orang yang bertikai). Di **Arbitrase**, keputusan pihak ke-3 bersifat mutlak dan harus ditaati!
+"""
+            }
+        },
+        "Kelas 12": {
+            "Bab 1: Perubahan Sosial": {
+                "sub_bab": ["Teori Perubahan", "Faktor Pendorong", "Dampak Modernisasi"],
+                "rangkuman": """
+#### 🚀 Pergeseran Lempeng Budaya
+- **Cultural Lag (Gegar Budaya):** Warga sudah memiliki/memakai teknologi canggih (smartphone), namun mentalitas tata kramanya masih barbar dan kampungan. Teknologinya melesat jauh meninggalkan mental budayanya.
+"""
+            },
+            "Bab 2: Globalisasi & Digitalisasi": {
+                "sub_bab": ["Konsep Globalisasi", "Tantangan Konsumerisme", "Komunitas Lokal"],
+                "rangkuman": """
+#### 🚀 Gelombang Pemudaran Batas Negara
+Masyarakat ditantang oleh **Glokalisasi**, yaitu mengemas unsur tradisional ke dalam standar promosi global (misalnya: Batik diangkat jadi gaun Milan Fashion Week, atau McDonald merilis menu Nasi Uduk lokal).
+"""
+            },
+            "Bab 3: Pemberdayaan Komunitas": {
+                "sub_bab": ["Kearifan Lokal", "Strategi Pemberdayaan", "Aksi Sosial"],
+                "rangkuman": """
+#### 🚀 Kemandirian Anti-Eksploitasi
+Pemberdayaan sosial (Empowerment) berbeda dengan sekadar "Pemberian Bantuan Uang Tunai/Charity". Pemberdayaan harus membekali warga dengan *Skill* dan *Akses Jaringan Bisnis* sehingga warga bisa menghidupi dirinya secara terhormat.
+"""
             }
         }
     }
