@@ -53,7 +53,7 @@ def hash_password(password): return hashlib.sha256(password.encode()).hexdigest(
 def bersihkan_nama(teks): return re.sub(r'[\\/*?:"<>|]', "", teks)
 
 # ==========================================
-# IMPORT DATA DARI FILE EKSTERNAL (JALUR BARU!)
+# IMPORT DATA DARI FILE EKSTERNAL
 # ==========================================
 from database_rangkuman import DATA_MATERI
 from database_soal import BANK_SOAL_PRO
@@ -455,7 +455,7 @@ elif menu == "📖 Arena Drill & Latihan":
                 with open(os.path.join(folder_t, f), "rb") as file: st.download_button(f"⬇️ Unduh Berkas: {f}", data=file.read(), file_name=f)
 
 # ==========================================
-# HALAMAN 4: TERMINAL ADMIN & UPLOAD
+# HALAMAN 4: TERMINAL ADMIN & UPLOAD (SMART DROPDOWN UPDATE!)
 # ==========================================
 elif menu == "📤 Terminal Berkas (Admin)":
     st.markdown("<h1>📤 <span class='gradient-text'>CONSOLE ADMINISTRATOR</span></h1>", unsafe_allow_html=True)
@@ -469,25 +469,40 @@ elif menu == "📤 Terminal Berkas (Admin)":
             else: st.error("Akses Ditolak!")
         st.markdown("</div>", unsafe_allow_html=True)
     else:
-        st.success("🔓 Otorisasi Diterima. Selamat bekerja, Admin.")
+        st.success("🔓 Otorisasi Diterima. Selamat bekerja, Master Admin.")
         tab_up, tab_del = st.tabs(["📤 Upload Materi", "🗑️ Hapus Server File"])
         
         with tab_up:
-            c1, c2 = st.columns(2)
-            with c1: p_mapel = st.selectbox("Mapel:", list(DATA_MATERI.keys()) if 'DATA_MATERI' in globals() else ["Umum"])
-            with c2: p_kelas = st.text_input("Kelas (Ketik Manual):", value="Kelas 10")
-            c3, c4 = st.columns(2)
-            with c3: p_bab = st.text_input("Bab:")
-            with c4: p_sub = st.text_input("Sub-bab:")
+            st.markdown("### 📂 Formulir Unggah Berkas Materi")
+            st.caption("Gunakan dropdown di bawah ini untuk memilih lokasi folder penyimpanan dengan akurat.")
             
+            c1, c2 = st.columns(2)
+            with c1: 
+                up_mapel = st.selectbox("📚 Mata Pelajaran:", list(DATA_MATERI.keys()), key="adm_mapel")
+            with c2: 
+                k_list = list(DATA_MATERI.get(up_mapel, {}).keys())
+                up_kelas = st.selectbox("🎓 Tingkat Kelas:", k_list if k_list else ["Pilih Kelas"], key="adm_kelas")
+            
+            c3, c4 = st.columns(2)
+            with c3: 
+                b_list = list(DATA_MATERI.get(up_mapel, {}).get(up_kelas, {}).keys())
+                up_bab = st.selectbox("📑 Sektor Bab:", b_list if b_list else ["Pilih Bab"], key="adm_bab")
+            with c4: 
+                s_list = []
+                try: s_list = DATA_MATERI[up_mapel][up_kelas][up_bab].get("sub_bab", [])
+                except: pass
+                up_sub = st.selectbox("🔖 Sub-bab Spesifik:", s_list if s_list else ["Pilih Sub-bab"], key="adm_sub")
+            
+            st.write("<br>", unsafe_allow_html=True)
             up_file = st.file_uploader("Pilih Berkas (PDF/PPT):", type=['pdf', 'docx', 'xlsx', 'pptx'])
             if up_file and st.button("🚀 UNGGAH KE SERVER CLOUD"):
-                ft = os.path.join("uploads", bersihkan_nama(p_mapel), bersihkan_nama(p_kelas), bersihkan_nama(p_bab), bersihkan_nama(p_sub))
+                ft = os.path.join("uploads", bersihkan_nama(up_mapel), bersihkan_nama(up_kelas), bersihkan_nama(up_bab), bersihkan_nama(up_sub))
                 if not os.path.exists(ft): os.makedirs(ft)
                 with open(os.path.join(ft, up_file.name), "wb") as f: f.write(up_file.getbuffer())
-                st.toast("Upload Sukses!", icon="✅")
+                st.toast("Upload Sukses! Berkas telah masuk ke dalam server.", icon="✅")
                 
         with tab_del:
+            st.markdown("### 🗑️ Penghapusan & Manajemen Dokumen Aktif")
             if os.path.exists("uploads"):
                 for r, d, f_list in os.walk("uploads"):
                     for file in f_list:
@@ -495,6 +510,9 @@ elif menu == "📤 Terminal Berkas (Admin)":
                         c_a, c_b = st.columns([4,1])
                         c_a.code(path)
                         if c_b.button("🗑️ Del", key=path): os.remove(path); st.rerun()
+            else:
+                st.info("Server sedang bersih. Tidak ada file di penyimpanan.")
+                
         st.write("<br>", unsafe_allow_html=True)
         st.markdown("<div class='btn-red'>", unsafe_allow_html=True)
         if st.button("🔴 TUTUP KONSOL ADMIN"): st.session_state.is_admin = False; st.rerun()
