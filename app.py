@@ -8,13 +8,13 @@ import random
 import sqlite3
 import hashlib
 
-# --- SISTEM DATABASE MULTIPLAYER (SQLITE) ---
+# --- SISTEM DATABASE MULTIPLAYER V2 (BEBAS BUG) ---
 conn = sqlite3.connect("learning_media_pro.db", check_same_thread=False)
 cursor = conn.cursor()
 
-# Membuat tabel dengan Sistem Password
+# Membuat tabel baru yang 100% bersih dari bentrok data lama
 cursor.execute("""
-CREATE TABLE IF NOT EXISTS users (
+CREATE TABLE IF NOT EXISTS users_v2 (
     username TEXT PRIMARY KEY,
     password TEXT,
     avatar_name TEXT,
@@ -24,10 +24,7 @@ CREATE TABLE IF NOT EXISTS users (
     matematika INT, fisika INT, kimia INT, biologi INT, sejarah INT, ekonomi INT, sosiologi INT
 )
 """)
-cursor.execute("CREATE TABLE IF NOT EXISTS kuis_history (username TEXT, id_kuis TEXT, PRIMARY KEY(username, id_kuis))")
-# Update tabel lama jika belum punya kolom password (Anti-Error)
-try: cursor.execute("ALTER TABLE users ADD COLUMN password TEXT")
-except: pass
+cursor.execute("CREATE TABLE IF NOT EXISTS kuis_history_v2 (username TEXT, id_kuis TEXT, PRIMARY KEY(username, id_kuis))")
 conn.commit()
 
 # --- KONFIGURASI HALAMAN ---
@@ -60,7 +57,7 @@ DATABASE_KUIS = {
 
 DAFTAR_GELAR = {"⚡ Petarung Cepat": 150, "🧪 Alkemis Gila": 200, "👑 Raja Duel": 400, "🌌 Penguasa Server": 1000}
 
-# --- KUSTOMISASI CSS HOLOGRAFIS & NEON (ANTI BUG TEKS HILANG) ---
+# --- KUSTOMISASI CSS HOLOGRAFIS & NEON ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800;900&display=swap');
@@ -68,28 +65,22 @@ st.markdown("""
     .stApp { background-color: #0B0F19; background-image: radial-gradient(circle at 50% 0%, #172136 0%, #0B0F19 100%); color: #F8FAFC; }
     h1, h2, h3, h4, h5, p, span, label { color: #F8FAFC !important; }
     
-    /* Teks Gradasi Super Keren */
     .gradient-text { background: linear-gradient(135deg, #00C6FF 0%, #0072FF 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; }
     .vs-text { background: linear-gradient(135deg, #FF416C 0%, #FF4B2B 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; font-size: 50px; }
     
-    /* PERBAIKAN INPUT & DROPDOWN AGAR TEKS SELALU TERLIHAT */
     div[data-baseweb="input"] { background-color: rgba(15, 23, 42, 0.8) !important; border: 1px solid rgba(0, 198, 255, 0.4) !important; border-radius: 10px; }
     div[data-baseweb="input"] input { color: #00C6FF !important; -webkit-text-fill-color: #00C6FF !important; font-weight: bold; font-size: 16px; }
-    
     div[data-baseweb="select"] { background-color: rgba(15, 23, 42, 0.8) !important; border: 1px solid rgba(0, 198, 255, 0.4) !important; border-radius: 10px; }
     div[data-baseweb="select"] span { color: #00C6FF !important; -webkit-text-fill-color: #00C6FF !important; font-weight: bold; }
     
-    /* Kartu Kaca (Glassmorphism 3.0) */
     .glass-card { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(15px); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.08); padding: 30px; text-align: center; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); transition: transform 0.3s; }
     .glass-card:hover { transform: translateY(-5px); border-color: rgba(0, 198, 255, 0.4); box-shadow: 0 0 30px rgba(0, 198, 255, 0.2); }
     
-    /* Tombol Interaktif */
     .stButton>button { background: linear-gradient(135deg, #00C6FF 0%, #0072FF 100%); color: white; border-radius: 12px; border: none; padding: 12px 24px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s ease; width: 100%; box-shadow: 0 4px 15px rgba(0, 114, 255, 0.4); }
     .stButton>button:hover { transform: scale(1.03); box-shadow: 0 0 25px rgba(0, 198, 255, 0.7); }
     .btn-red>button { background: linear-gradient(135deg, #FF416C 0%, #FF4B2B 100%); box-shadow: 0 4px 15px rgba(255, 75, 43, 0.4); }
     .btn-red>button:hover { box-shadow: 0 0 25px rgba(255, 75, 43, 0.8); }
     
-    /* Menyembunyikan elemen bawaan Streamlit */
     #MainMenu {visibility: hidden;} footer {visibility: hidden;}
     [data-testid="stSidebar"] { background-color: rgba(15, 23, 42, 0.9) !important; backdrop-filter: blur(20px); border-right: 1px solid rgba(255,255,255,0.05); }
     </style>
@@ -123,15 +114,14 @@ if not st.session_state.logged_in:
         tab_log, tab_reg = st.tabs(["🔐 MASUK ARENA", "📝 BUAT PROFIL BARU"])
         
         with tab_log:
-            # Fungsi strip() akan membuang spasi otomatis
             l_user = st.text_input("Username Ksatria:", key="l_usr").strip()
             l_pass = st.text_input("Kata Sandi:", type="password", key="l_pwd").strip()
             if st.button("🚀 LOGIN SEKARANG"):
                 if l_user and l_pass:
-                    cursor.execute("SELECT username, password FROM users WHERE lower(username)=lower(?)", (l_user,))
+                    cursor.execute("SELECT username, password FROM users_v2 WHERE lower(username)=lower(?)", (l_user,))
                     res = cursor.fetchone()
                     if res and res[1] == hash_password(l_pass):
-                        st.session_state.username = res[0] # Menggunakan nama asli dari DB
+                        st.session_state.username = res[0] 
                         st.session_state.logged_in = True
                         st.rerun()
                     else: st.error("❌ Username atau Sandi salah! Pastikan ketikanmu benar.")
@@ -142,26 +132,29 @@ if not st.session_state.logged_in:
             r_pass = st.text_input("Buat Kata Sandi:", type="password", key="r_pwd").strip()
             if st.button("✨ DAFTAR BARU"):
                 if r_user and r_pass:
-                    cursor.execute("SELECT username FROM users WHERE lower(username)=lower(?)", (r_user,))
+                    cursor.execute("SELECT username FROM users_v2 WHERE lower(username)=lower(?)", (r_user,))
                     if cursor.fetchone(): st.error("⚠️ Username sudah dipakai petarung lain. Cari nama lain!")
                     else:
-                        cursor.execute("INSERT INTO users VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", 
-                                       (r_user, hash_password(r_pass), "Geni Us", "🏅 Pemula", 0, 1, 10, 10, 10, 10, 10, 10, 10))
+                        # PENYISIPAN DATA SECARA EKSPLISIT KE TABEL V2
+                        cursor.execute("""
+                            INSERT INTO users_v2 (username, password, avatar_name, title, points, streak, matematika, fisika, kimia, biologi, sejarah, ekonomi, sosiologi)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        """, (r_user, hash_password(r_pass), "Geni Us", "🏅 Pemula", 0, 1, 10, 10, 10, 10, 10, 10, 10))
                         conn.commit()
                         st.success("🎉 Profil Ditempa! Silakan klik tab '🔐 MASUK ARENA' untuk Login.")
                 else: st.warning("Isi semua kolom pendaftaran!")
         st.markdown("</div>", unsafe_allow_html=True)
-    st.stop() # Hentikan eksekusi kode di bawah ini jika belum login
+    st.stop()
 
 # ==========================================
 # MEMUAT DATA PENGGUNA AKTIF DARI DATABASE
 # ==========================================
 player = st.session_state.username
-cursor.execute("SELECT * FROM users WHERE username=?", (player,))
+cursor.execute("SELECT * FROM users_v2 WHERE username=?", (player,))
 user_data = cursor.fetchone()
 avatar_db, title_db, points_db, streak_db = user_data[2], user_data[3], user_data[4], user_data[5]
 
-cursor.execute("SELECT id_kuis FROM kuis_history WHERE username=?", (player,))
+cursor.execute("SELECT id_kuis FROM kuis_history_v2 WHERE username=?", (player,))
 learned_db = set([row[0] for row in cursor.fetchall()])
 
 user_level = (points_db // 100) + 1
@@ -212,7 +205,7 @@ if menu == "🏠 Beranda Server":
         st.markdown("<h2 style='color:#FCD34D; margin-top:0;'>🎁 Peti Harta Karun Harian!</h2>", unsafe_allow_html=True)
         if st.button("🗝️ KLAIM BONUS LOGIN XP"):
             bonus = random.choice([20, 50, 100])
-            cursor.execute("UPDATE users SET points = points + ? WHERE username = ?", (bonus, player))
+            cursor.execute("UPDATE users_v2 SET points = points + ? WHERE username = ?", (bonus, player))
             conn.commit()
             st.session_state.gacha_claimed = True
             st.toast(f"HORE! Dapat +{bonus} XP!", icon="🎉")
@@ -227,7 +220,7 @@ if menu == "🏠 Beranda Server":
     st.write("<br>", unsafe_allow_html=True)
     st.markdown("<h3>📊 LIVE GLOBAL RANKING (ANTAR PEMAIN)</h3>", unsafe_allow_html=True)
     
-    cursor.execute("SELECT username, points, title FROM users ORDER BY points DESC LIMIT 5")
+    cursor.execute("SELECT username, points, title FROM users_v2 ORDER BY points DESC LIMIT 5")
     for i, row in enumerate(cursor.fetchall()):
         medali = "🥇" if i == 0 else "🥈" if i == 1 else "🥉" if i == 2 else "🏅"
         bg_color = "rgba(255, 215, 0, 0.1)" if i==0 else "rgba(255,255,255,0.02)"
@@ -255,7 +248,7 @@ elif menu == "⚔️ Mode Duel Ranked (PvP)":
     with col_btn:
         st.write("<br>", unsafe_allow_html=True)
         if st.button("🔍 CARI LAWAN (MATCHMAKING)"):
-            cursor.execute("SELECT username, points FROM users WHERE username != ? ORDER BY RANDOM() LIMIT 1", (player,))
+            cursor.execute("SELECT username, points FROM users_v2 WHERE username != ? ORDER BY RANDOM() LIMIT 1", (player,))
             lawan = cursor.fetchone()
             if lawan:
                 st.session_state.lawan_duel = lawan
@@ -281,15 +274,14 @@ elif menu == "⚔️ Mode Duel Ranked (PvP)":
         
         if st.button("⚡ EKSEKUSI SERANGAN"):
             if j_user == ds['jaw']:
-                # Menang! Curi Poin
-                cursor.execute("UPDATE users SET points = points + 100 WHERE username=?", (player,))
-                cursor.execute("UPDATE users SET points = MAX(0, points - 20) WHERE username=?", (l_nama,))
+                cursor.execute("UPDATE users_v2 SET points = points + 100 WHERE username=?", (player,))
+                cursor.execute("UPDATE users_v2 SET points = MAX(0, points - 20) WHERE username=?", (l_nama,))
                 conn.commit()
                 st.toast(f"CRITICAL STRIKE! Kamu mencuri XP dari {l_nama}!", icon="⚔️")
-                st.session_state.kuis_duel = False # Reset duel
+                st.session_state.kuis_duel = False 
                 st.success(f"🎉 **KAMU MENANG!** +100 XP didapatkan. {l_nama} kehilangan 20 XP.")
             else:
-                cursor.execute("UPDATE users SET points = MAX(0, points - 30) WHERE username=?", (player,))
+                cursor.execute("UPDATE users_v2 SET points = MAX(0, points - 30) WHERE username=?", (player,))
                 conn.commit()
                 st.toast("SERANGAN GAGAL! Kamu kehilangan XP.", icon="🛡️")
                 st.session_state.kuis_duel = False
@@ -328,8 +320,8 @@ elif menu == "📖 Arena Belajar Kuis":
             if st.button("JAWAB & KLAIM XP"):
                 if ans == ds['jaw']:
                     if id_k not in learned_db:
-                        cursor.execute("INSERT INTO kuis_history VALUES (?, ?)", (player, id_k))
-                        cursor.execute(f"UPDATE users SET points = points + 50, {p_mapel.lower()} = {p_mapel.lower()} + 20 WHERE username = ?", (player,))
+                        cursor.execute("INSERT INTO kuis_history_v2 VALUES (?, ?)", (player, id_k))
+                        cursor.execute(f"UPDATE users_v2 SET points = points + 50, {p_mapel.lower()} = {p_mapel.lower()} + 20 WHERE username = ?", (player,))
                         conn.commit()
                         st.toast("Hebat! +50 XP ditambahkan!", icon="🚀")
                         st.success("💥 Jawaban Benar!")
@@ -403,14 +395,14 @@ elif menu == "🛒 Pasar Gelar & Profil":
             st.markdown("<div class='glass-card'><h2>Geni Us</h2>", unsafe_allow_html=True)
             tampilkan_avatar("genius")
             if st.button("PILIH GENI US"):
-                cursor.execute("UPDATE users SET avatar_name='Geni Us' WHERE username=?", (player,))
+                cursor.execute("UPDATE users_v2 SET avatar_name='Geni Us' WHERE username=?", (player,))
                 conn.commit(); st.toast("Karakter Diperbarui!", icon="👗"); st.rerun()
             st.markdown("</div>", unsafe_allow_html=True)
         with c2:
             st.markdown("<div class='glass-card'><h2>Smar T</h2>", unsafe_allow_html=True)
             tampilkan_avatar("smart")
             if st.button("PILIH SMAR T"):
-                cursor.execute("UPDATE users SET avatar_name='Smar T' WHERE username=?", (player,))
+                cursor.execute("UPDATE users_v2 SET avatar_name='Smar T' WHERE username=?", (player,))
                 conn.commit(); st.toast("Karakter Diperbarui!", icon="👗"); st.rerun()
             st.markdown("</div>", unsafe_allow_html=True)
             
@@ -427,7 +419,7 @@ elif menu == "🛒 Pasar Gelar & Profil":
                 else:
                     if st.button("Beli & Pakai", key=f"by_{gelar}"):
                         if points_db >= harga:
-                            cursor.execute("UPDATE users SET title=?, points=points-? WHERE username=?", (gelar, harga, player))
+                            cursor.execute("UPDATE users_v2 SET title=?, points=points-? WHERE username=?", (gelar, harga, player))
                             conn.commit(); st.toast(f"Julukan {gelar} Terpasang!", icon="👑"); st.rerun()
                         else: st.error("XP Kurang!")
         st.markdown("</div>", unsafe_allow_html=True)
