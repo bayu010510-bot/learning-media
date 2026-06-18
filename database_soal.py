@@ -1,42 +1,69 @@
 # ==========================================
 # FILE: database_soal.py
-# FUNGSI: Brankas Penyimpanan Bank Soal Ujian
+# FUNGSI: Bank Soal Terstruktur (Mata Pelajaran -> Kelas -> Bab -> Sub-bab)
 # ==========================================
 
 BANK_SOAL_PRO = {
-    "Matematika": {
-        "Kelas 10": {
-            "Eksponen dan Logaritma": [
-                {"soal": "Nilai dari $2^3 \\times 2^2$ adalah...", "opsi": ["32", "16", "64", "8"], "jawaban": "32", "pem": "Sifat pangkat: $2^{3+2} = 2^5 = 32$."},
-                {"soal": "Bentuk sederhana dari $\\frac{x^5}{x^2}$ adalah...", "opsi": ["$x^3$", "$x^7$", "$x^{2.5}$", "$x^1$"], "jawaban": "$x^3$", "pem": "Sifat pembagian pangkat: $x^{5-2} = x^3$."},
-                {"soal": "Jika $3^x = 81$, maka nilai $x$ adalah...", "opsi": ["4", "3", "5", "6"], "jawaban": "4", "pem": "$3^4 = 81$, maka $x = 4$."},
-                {"soal": "Nilai dari $\\log_2 8$ adalah...", "opsi": ["3", "4", "2", "8"], "jawaban": "3", "pem": "$2^3 = 8$, jadi $\\log_2 8 = 3$."},
-                {"soal": "Sifat logaritma $\\log a + \\log b$ sama dengan...", "opsi": ["$\\log(a \\times b)$", "$\\log(a+b)$", "$\\log(a/b)$", "$a \\log b$"], "jawaban": "$\\log(a \\times b)$", "pem": "Penjumlahan log dengan basis sama menjadi perkalian numerus."}
-            ],
-            "Persamaan Linear": [
-                {"soal": "Jika $2x + 5 = 15$, berapakah nilai $x$?", "opsi": ["5", "10", "4", "6"], "jawaban": "5", "pem": "$2x = 15 - 5 \\Rightarrow 2x = 10 \\Rightarrow x = 5$."},
-                {"soal": "Penyelesaian dari $3(x - 2) = 9$ adalah...", "opsi": ["5", "3", "1", "7"], "jawaban": "5", "pem": "$3x - 6 = 9 \\Rightarrow 3x = 15 \\Rightarrow x = 5$."}
-            ]
-        }
-    },
     "Fisika": {
         "Kelas 10": {
-            "Hakikat Fisika dan Besaran": [
-                {"soal": "Dimensi dari besaran Gaya adalah...", "opsi": ["$MLT^{-2}$", "$ML^2T^{-2}$", "$MLT^{-1}$", "$LT^{-2}$"], "jawaban": "$MLT^{-2}$", "pem": "Gaya ($F$) = massa ($m$) $\\times$ percepatan ($a$). Dimensi: $M \\times LT^{-2}$."},
-                {"soal": "Besaran pokok menurut SI berjumlah...", "opsi": ["7", "5", "9", "6"], "jawaban": "7", "pem": "Ada 7 besaran pokok: Panjang, Massa, Waktu, Suhu, Kuat Arus, Intensitas Cahaya, Jumlah Zat."},
-                {"soal": "Satuan dari Energi dalam Sistem Internasional (SI) adalah...", "opsi": ["Joule", "Newton", "Watt", "Pascal"], "jawaban": "Joule", "pem": "Satuan Energi/Usaha adalah Joule ($kg\\cdot m^2/s^2$)."}
-            ],
-            "Gerak Lurus": [
-                {"soal": "Sebuah mobil bergerak dengan kecepatan konstan 20 m/s. Jarak yang ditempuh dalam 5 detik adalah...", "opsi": ["100 m", "50 m", "200 m", "25 m"], "jawaban": "100 m", "pem": "Jarak = Kecepatan $\\times$ Waktu = $20 \\times 5 = 100$ meter."}
-            ]
+            "Kinematika Partikel": {
+                "Gerak Lurus Berubah Beraturan": [
+                    {
+                        "soal": "Dalam persiapan menyambut acara lari maraton SMANSARUN, seorang pelari mulai memacu kecepatannya saat mendekati garis finis. Ia mempercepat larinya dari kecepatan awal 2 m/s menjadi 6 m/s secara konstan dalam waktu 4 detik. Berapakah jarak total yang ditempuh pelari tersebut selama proses percepatan berlangsung?",
+                        "opsi": ["16 meter", "32 meter", "8 meter", "24 meter"],
+                        "jawaban": "16 meter",
+                        "pem": "Gunakan persamaan GLBB. Pertama, cari percepatan (a):<br>$a = \\frac{v_t - v_0}{t} = \\frac{6 - 2}{4} = 1 \\text{ m/s}^2$<br>Lalu, hitung jarak tempuh (s):<br>$s = v_0 \\cdot t + \\frac{1}{2} \\cdot a \\cdot t^2$<br>$s = 2(4) + \\frac{1}{2}(1)(4^2)$<br>$s = 8 + 8 = 16 \\text{ meter}$."
+                    },
+                    {
+                        "soal": "Sebuah mobil mengerem mendadak dari kecepatan 20 m/s hingga berhenti total dalam waktu 5 detik untuk menghindari tabrakan. Berapakah perlambatan mobil tersebut?",
+                        "opsi": ["-4 m/s²", "-5 m/s²", "-2 m/s²", "-10 m/s²"],
+                        "jawaban": "-4 m/s²",
+                        "pem": "$a = \\frac{v_t - v_0}{t} = \\frac{0 - 20}{5} = -4 \\text{ m/s}^2$."
+                    }
+                ]
+            }
+        }
+    },
+    "Ekonomi": {
+        "Kelas 10": {
+            "Konsep Manajemen & Bisnis Digital": {
+                "Pemasaran Digital & Pertumbuhan Eksponensial": [
+                    {
+                        "soal": "Sebuah akun TikTok @gitarsurabaya yang menjual instrumen akustik mengalami lonjakan penonton eksponensial setelah memposting video tutorial genjrengan pola DDUUDD untuk lagu dari Raim Laode. Jika penonton awal video tersebut adalah 100 orang dan jumlahnya berlipat ganda setiap 3 hari, berapa total penonton pada hari ke-15?",
+                        "opsi": ["3.200 penonton", "1.500 penonton", "6.400 penonton", "800 penonton"],
+                        "jawaban": "3.200 penonton",
+                        "pem": "Gunakan deret geometri: $U_n = a \\cdot r^n$.<br>Waktu = 15 hari. Karena berlipat setiap 3 hari, maka terjadi $n = \\frac{15}{3} = 5$ kali pelipatan.<br>Jumlah = $100 \\times 2^5 = 100 \\times 32 = 3.200 \\text{ penonton}$."
+                    }
+                ]
+            }
         }
     },
     "Kimia": {
-        "Kelas 10": {
-            "Struktur Atom": [
-                {"soal": "Partikel penyusun atom yang bermuatan negatif adalah...", "opsi": ["Elektron", "Proton", "Neutron", "Nukleon"], "jawaban": "Elektron", "pem": "Elektron bermuatan negatif, proton positif, dan neutron netral."},
-                {"soal": "Nomor massa suatu unsur menunjukkan jumlah...", "opsi": ["Proton + Neutron", "Proton + Elektron", "Neutron saja", "Elektron saja"], "jawaban": "Proton + Neutron", "pem": "Nomor massa (A) = Jumlah Proton (Z) + Jumlah Neutron (n)."}
-            ]
+        "Kelas 11": {
+            "Kinetika Kimia": {
+                "Faktor-Faktor Laju Reaksi": [
+                    {
+                        "soal": "Dalam penyusunan LK-10 untuk inovasi resep masakan daerah, SOP menyebutkan bahwa pemanasan bumbu pada suhu 60°C membutuhkan waktu 20 menit agar matang sempurna. Diketahui setiap kenaikan suhu sebesar 10°C akan mempercepat laju reaksi pencoklatan (Maillard) menjadi 2 kali lipat lebih cepat. Jika koki menaikkan suhu kompor menjadi 80°C, berapa waktu yang dibutuhkan bumbu untuk matang?",
+                        "opsi": ["5 menit", "10 menit", "2.5 menit", "40 menit"],
+                        "jawaban": "5 menit",
+                        "pem": "Kenaikan suhu $\\Delta T = 80 - 60 = 20^\\circ\\text{C}$.<br>Karena naik setiap 10°C laju menjadi 2x lipat, maka laju total = $2^{\\frac{20}{10}} = 2^2 = 4$ kali lebih cepat.<br>Waktu reaksi berbanding terbalik dengan laju: $t_{baru} = \\frac{t_{awal}}{4} = \\frac{20}{4} = 5 \\text{ menit}$."
+                    }
+                ]
+            }
+        }
+    },
+    "Seni Budaya": {
+        "Kelas 12": {
+            "Seni Teater": {
+                "Rancangan Naskah Drama": [
+                    {
+                        "soal": "Dalam penulisan naskah drama musikal berbahasa Jawa moderen yang mengambil inspirasi dari dinamika komunikasi Gen Z (seperti gaya penceritaan film 'Sekawan Limo' atau 'Yowis Ben'), elemen penyutradaraan apa yang paling membedakannya secara struktural dibandingkan dengan teater Ketoprak klasik?",
+                        "opsi": ["Penggunaan dialog improvisasi kasual yang disisipi musik pop-indie sebagai transisi emosi adegan.", "Penggunaan pakem tembang macapat yang ketat di setiap pergantian babak.", "Penggunaan latar panggung keraton dengan tata bahasa krama inggil secara penuh.", "Penghilangan unsur komedi demi menjaga nilai moral naskah."],
+                        "jawaban": "Penggunaan dialog improvisasi kasual yang disisipi musik pop-indie sebagai transisi emosi adegan.",
+                        "pem": "Drama musikal remaja Jawa modern mengandalkan unsur pop-kultur, musik indie/akustik, serta *slang* lokal yang *relatable* dengan Gen Z, berbeda dengan Ketoprak klasik yang terikat erat pada pakem macapat, krama inggil, dan struktur cerita keraton."
+                    }
+                ]
+            }
         }
     }
 }
