@@ -21,11 +21,17 @@ CREATE TABLE IF NOT EXISTS users_v2 (
     points INTEGER,
     streak INTEGER,
     matematika INT, fisika INT, kimia INT, biologi INT, sejarah INT, ekonomi INT, sosiologi INT,
-    seni_budaya INT DEFAULT 10
+    seni_budaya INT DEFAULT 10, geografi INT DEFAULT 10, prakarya_dan_kewirausahaan INT DEFAULT 10
 )
 """)
 cursor.execute("CREATE TABLE IF NOT EXISTS kuis_history_v2 (username TEXT, id_kuis TEXT, PRIMARY KEY(username, id_kuis))")
+
+# Menambahkan kolom mapel baru jika belum ada di database lama
 try: cursor.execute("ALTER TABLE users_v2 ADD COLUMN seni_budaya INT DEFAULT 10")
+except: pass
+try: cursor.execute("ALTER TABLE users_v2 ADD COLUMN geografi INT DEFAULT 10")
+except: pass
+try: cursor.execute("ALTER TABLE users_v2 ADD COLUMN prakarya_dan_kewirausahaan INT DEFAULT 10")
 except: pass
 conn.commit()
 
@@ -47,14 +53,14 @@ def hash_password(password): return hashlib.sha256(password.encode()).hexdigest(
 def bersihkan_nama(teks): return re.sub(r'[\\/*?:"<>|]', "", teks)
 
 # ==========================================
-# IMPORT DATA DARI FILE EKSTERNAL
+# IMPORT DATA DARI FILE EKSTERNAL (JALUR BARU!)
 # ==========================================
-from materi import DATA_MATERI
+from database_rangkuman import DATA_MATERI
 from database_soal import BANK_SOAL_PRO
 
 DAFTAR_GELAR = {"⚡ Petarung Cepat": 150, "🧪 Alkemis Gila": 200, "👑 Raja Duel": 400, "🌌 Penguasa Server": 1000}
 
-# --- KUSTOMISASI CSS HOLOGRAFIS & NEON (ULTIMATE UI) ---
+# --- KUSTOMISASI CSS HOLOGRAFIS & NEON ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800;900&display=swap');
@@ -68,13 +74,11 @@ st.markdown("""
     div[data-baseweb="input"], div[data-baseweb="select"] { background-color: rgba(15, 23, 42, 0.8) !important; border: 1px solid rgba(0, 198, 255, 0.4) !important; border-radius: 10px; }
     div[data-baseweb="input"] input, div[data-baseweb="select"] span { color: #00C6FF !important; -webkit-text-fill-color: #00C6FF !important; font-weight: bold; font-size: 16px; }
     
-    /* Kartu UI Canggih */
     .glass-card { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(15px); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.08); padding: 30px; text-align: center; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); transition: transform 0.3s; }
     .glass-card:hover { transform: translateY(-5px); border-color: rgba(0, 198, 255, 0.4); box-shadow: 0 0 30px rgba(0, 198, 255, 0.2); }
     
     .score-card { background: linear-gradient(135deg, rgba(0, 198, 255, 0.1) 0%, rgba(0, 114, 255, 0.1) 100%); border: 1px solid #00C6FF; border-radius: 15px; padding: 20px; text-align: center; }
     
-    /* Tombol Interaktif */
     .stButton>button { background: linear-gradient(135deg, #00C6FF 0%, #0072FF 100%); color: white; border-radius: 12px; border: none; padding: 12px 24px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s ease; width: 100%; box-shadow: 0 4px 15px rgba(0, 114, 255, 0.4); }
     .stButton>button:hover { transform: scale(1.03); box-shadow: 0 0 25px rgba(0, 198, 255, 0.7); }
     .btn-red>button { background: linear-gradient(135deg, #FF416C 0%, #FF4B2B 100%); box-shadow: 0 4px 15px rgba(255, 75, 43, 0.4); }
@@ -82,7 +86,6 @@ st.markdown("""
     .btn-green>button { background: linear-gradient(135deg, #10B981 0%, #047857 100%); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); }
     .btn-green>button:hover { box-shadow: 0 0 25px rgba(16, 185, 129, 0.8); }
     
-    /* Metrik UI Override */
     div[data-testid="stMetricValue"] { color: #00C6FF !important; font-size: 35px !important; font-weight: 900 !important; }
     div[data-testid="stMetricLabel"] { color: #94A3B8 !important; font-size: 16px !important; font-weight: bold !important; text-transform: uppercase; }
     
@@ -140,9 +143,9 @@ if not st.session_state.logged_in:
                     if cursor.fetchone(): st.error("⚠️ Username sudah dipakai petarung lain!")
                     else:
                         cursor.execute("""
-                            INSERT INTO users_v2 (username, password, avatar_name, title, points, streak, matematika, fisika, kimia, biologi, sejarah, ekonomi, sosiologi, seni_budaya)
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                        """, (r_user, hash_password(r_pass), "Geni Us", "🏅 Pemula", 0, 1, 10, 10, 10, 10, 10, 10, 10, 10))
+                            INSERT INTO users_v2 (username, password, avatar_name, title, points, streak, matematika, fisika, kimia, biologi, sejarah, ekonomi, sosiologi, seni_budaya, geografi, prakarya_dan_kewirausahaan)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        """, (r_user, hash_password(r_pass), "Geni Us", "🏅 Pemula", 0, 1, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10))
                         conn.commit()
                         st.success("🎉 Profil Ditempa! Silakan klik tab '🔐 MASUK ARENA' untuk Login.")
                 else: st.warning("Isi semua kolom pendaftaran!")
@@ -309,37 +312,37 @@ elif menu == "⚔️ Mode Duel Ranked (PvP)":
         st.markdown("</div>", unsafe_allow_html=True)
 
 # ==========================================
-# HALAMAN 3: ARENA DRILL & LATIHAN BAB (ENGINE 3.0)
+# HALAMAN 3: ARENA DRILL & LATIHAN BAB 
 # ==========================================
 elif menu == "📖 Arena Drill & Latihan":
     st.markdown("<h1>📖 <span class='gradient-text'>ARENA DRILL EVALUASI</span></h1>", unsafe_allow_html=True)
     
-    # Deteksi Semua Struktur Mapel yang ada di BANK_SOAL_PRO
-    mapel_list = list(BANK_SOAL_PRO.keys())
+    mapel_list = list(DATA_MATERI.keys())
     
     with st.container():
         st.markdown("<div class='glass-card' style='text-align:left; padding: 20px;'>", unsafe_allow_html=True)
         col1, col2 = st.columns(2)
         with col1: p_mapel = st.selectbox("📚 Mata Pelajaran:", mapel_list)
         
-        kelas_list = list(BANK_SOAL_PRO.get(p_mapel, {}).keys())
+        kelas_list = list(DATA_MATERI.get(p_mapel, {}).keys())
         with col2: p_kelas = st.selectbox("🎓 Tingkat Kelas:", kelas_list if kelas_list else ["Tidak tersedia"])
         
         col3, col4 = st.columns(2)
-        bab_list = list(BANK_SOAL_PRO.get(p_mapel, {}).get(p_kelas, {}).keys())
+        bab_list = list(DATA_MATERI.get(p_mapel, {}).get(p_kelas, {}).keys())
         with col3: p_bab = st.selectbox("📑 Sektor Bab:", bab_list if bab_list else ["Tidak tersedia"])
         
-        sub_list = list(BANK_SOAL_PRO.get(p_mapel, {}).get(p_kelas, {}).get(p_bab, {}).keys())
+        sub_list = []
+        try: sub_list = DATA_MATERI[p_mapel][p_kelas][p_bab].get("sub_bab", [])
+        except: pass
         with col4: p_sub = st.selectbox("🔖 Sub-bab Spesifik:", sub_list if sub_list else ["Tidak tersedia"])
         st.markdown("</div>", unsafe_allow_html=True)
         
     st.write("<br>", unsafe_allow_html=True)
     tab_drill, tab_mat, tab_doc = st.tabs(["⚔️ Latihan Drill (Sistem Acak)", "📌 Rangkuman Ekstra", "📂 Modul Tambahan"])
     
-    # MESIN DRILL & TEST PEMAHAMAN (UI BARU)
     with tab_drill:
         st.markdown("### 🎯 Simulasi Ujian Sub-bab")
-        st.caption("Sistem akan menarik maksimal 5 soal secara acak dari brankas soal. Susunan opsi (A, B, C, D) dirotasi otomatis untuk mencegah penghafalan posisi.")
+        st.caption("Sistem akan menarik maksimal 5 soal secara acak dari brankas soal. Susunan opsi dirotasi otomatis.")
         
         soal_tersedia = []
         try: soal_tersedia = BANK_SOAL_PRO[p_mapel][p_kelas][p_bab][p_sub]
@@ -411,7 +414,11 @@ elif menu == "📖 Arena Drill & Latihan":
                 with c_met3: st.markdown(f"<div class='score-card'><h4>⚡ XP Diraih</h4><h1 style='color:#F59E0B; margin:0;'>+{xp_gained}</h1></div>", unsafe_allow_html=True)
                 
                 if xp_gained > 0:
-                    cursor.execute(f"UPDATE users_v2 SET points = points + ? WHERE username = ?", (xp_gained, player))
+                    try:
+                        cursor.execute(f"UPDATE users_v2 SET points = points + ?, {p_mapel.lower().replace(' ', '_')} = {p_mapel.lower().replace(' ', '_')} + ? WHERE username = ?", (xp_gained, skor*10, player))
+                    except:
+                        cursor.execute(f"UPDATE users_v2 SET points = points + ? WHERE username = ?", (xp_gained, player))
+                        
                     id_drill = f"drill_{p_mapel}_{p_kelas}_{p_bab}_{p_sub}"
                     if akurasi == 100 and id_drill not in learned_db:
                         cursor.execute("INSERT INTO kuis_history_v2 VALUES (?, ?)", (player, id_drill))
@@ -438,7 +445,7 @@ elif menu == "📖 Arena Drill & Latihan":
             teks_materi = DATA_MATERI[p_mapel][p_kelas][p_bab]['rangkuman']
             st.markdown(f"<div class='glass-card' style='text-align:left;'>{teks_materi}</div>", unsafe_allow_html=True)
         except KeyError:
-            st.info("Catatan khusus rangkuman tidak ditemukan di file lokal `materi.py`.")
+            st.info("Catatan khusus rangkuman tidak ditemukan di file `database_rangkuman.py`.")
 
     with tab_doc:
         folder_t = os.path.join("uploads", bersihkan_nama(p_mapel), bersihkan_nama(p_kelas), bersihkan_nama(p_bab), bersihkan_nama(p_sub))
