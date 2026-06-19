@@ -114,7 +114,6 @@ if "hasil_drill" not in st.session_state: st.session_state.hasil_drill = None
 
 PASSWORD_ADMIN = "LEARNWITHLM"
 
-# INI DIA FUNGSI YANG TADI HILANG!
 def hash_password(password): return hashlib.sha256(password.encode()).hexdigest()
 def bersihkan_nama(teks): return re.sub(r'[\\/*?:"<>|]', "", teks)
 
@@ -379,7 +378,7 @@ elif menu == "⚔️ Mode Duel Ranked (PvP)":
         st.markdown("</div>", unsafe_allow_html=True)
 
 # ==========================================
-# HALAMAN 3: ARENA DRILL & LATIHAN BAB (CLOUD INTEGRATED)
+# HALAMAN 3: ARENA DRILL & LATIHAN BAB 
 # ==========================================
 elif menu == "📖 Arena Drill & Latihan":
     st.markdown("<h1>📖 <span class='gradient-text'>ARENA DRILL EVALUASI</span></h1>", unsafe_allow_html=True)
@@ -402,7 +401,7 @@ elif menu == "📖 Arena Drill & Latihan":
         st.markdown("</div>", unsafe_allow_html=True)
         
     st.write("<br>", unsafe_allow_html=True)
-    tab_drill, tab_mat, tab_doc = st.tabs(["⚔️ Latihan Drill (Sistem Acak)", "📌 Rangkuman Ekstra", "📂 Modul Google Drive"])
+    tab_drill, tab_mat, tab_doc = st.tabs(["⚔️ Latihan Drill (Sistem Acak)", "📌 Rangkuman Ekstra", "📂 Modul & File Pendukung"])
     
     with tab_drill:
         st.markdown("### 🎯 Simulasi Ujian Sub-bab")
@@ -487,12 +486,37 @@ elif menu == "📖 Arena Drill & Latihan":
         try: st.markdown(f"<div class='glass-card' style='text-align:left;'>{DATA_MATERI[p_mapel][p_kelas][p_bab]['rangkuman']}</div>", unsafe_allow_html=True)
         except: st.info("Rangkuman tidak ditemukan di file `database_rangkuman.py`.")
 
+    # --- HYBRID MODE: GOOGLE DRIVE + LOCAL UPLOAD RENDERER ---
     with tab_doc:
-        st.markdown("### 📂 Modul Pendukung Cloud")
+        st.markdown("### 📂 Pangkalan Modul & Dokumen Pendukung")
+        
+        # 1. Mengecek ketersediaan link Google Drive
         try: link_drive = DATA_MATERI[p_mapel][p_kelas][p_bab].get("link_drive", "")
         except: link_drive = ""
-        if link_drive: st.link_button("🔗 BUKA MODUL DI GOOGLE DRIVE", link_drive, use_container_width=True)
-        else: st.info("📭 Modul Google Drive belum disematkan oleh Admin.")
+        
+        if link_drive: 
+            st.link_button("🔗 BUKA MODUL DI GOOGLE DRIVE", link_drive, use_container_width=True)
+            st.write("<hr style='border:1px solid rgba(255,255,255,0.1);'>", unsafe_allow_html=True)
+            
+        # 2. Mengecek ketersediaan File Internal/Lokal yang diupload admin
+        folder_t = os.path.join("uploads", bersihkan_nama(p_mapel), bersihkan_nama(p_kelas), bersihkan_nama(p_bab), bersihkan_nama(p_sub))
+        if os.path.exists(folder_t) and len(os.listdir(folder_t)) > 0:
+            st.markdown("#### 📁 File Materi Internal:")
+            for f in os.listdir(folder_t):
+                ext = f.split('.')[-1].lower()
+                file_path = os.path.join(folder_t, f)
+                
+                # Jika file berupa Gambar, LANGSUNG TAMPILKAN di layar
+                if ext in ['jpg', 'jpeg', 'png']:
+                    st.image(file_path, caption=f"🖼️ {f}", use_container_width=True)
+                    st.write("<br>", unsafe_allow_html=True)
+                # Jika file berupa Dokumen/Presentasi/Spreadsheet, BERIKAN TOMBOL UNDUH
+                else:
+                    with open(file_path, "rb") as file:
+                        st.download_button(f"⬇️ Unduh Dokumen: {f}", data=file.read(), file_name=f)
+                        
+        elif not link_drive:
+            st.info("📭 Admin belum menyematkan file lokal atau link Drive untuk materi ini.")
 
 # ==========================================
 # HALAMAN 4: SUPER ADMIN DASHBOARD
@@ -508,7 +532,7 @@ elif menu == "⚙️ Konsol Admin Pro":
         st.markdown("</div>", unsafe_allow_html=True)
     else:
         st.success("🔓 Akses Server Utama Terbuka.")
-        tab_stat, tab_db = st.tabs(["📊 Statistik Jaringan Cloud", "👥 Pantau Database Siswa"])
+        tab_stat, tab_db, tab_up, tab_del = st.tabs(["📊 Metrik Cloud", "👥 Database Siswa", "📤 Upload File Lokal", "🗑️ Hapus File Lokal"])
         
         users_admin = db_get_all_users_admin()
         
@@ -530,6 +554,51 @@ elif menu == "⚙️ Konsol Admin Pro":
                 st.dataframe(df, use_container_width=True, hide_index=True)
             else: st.info("Database Kosong.")
             
+        with tab_up:
+            st.markdown("### 📂 Formulir Unggah Berkas Materi")
+            st.caption("Mendukung gambar (JPG/PNG) dan dokumen (PDF/Word/Excel/PPT). File gambar akan dirender langsung di layar materi.")
+            
+            c1, c2 = st.columns(2)
+            with c1: up_mapel = st.selectbox("📚 Mata Pelajaran:", list(DATA_MATERI.keys()), key="adm_mapel")
+            with c2: 
+                k_list = list(DATA_MATERI.get(up_mapel, {}).keys())
+                up_kelas = st.selectbox("🎓 Tingkat Kelas:", k_list if k_list else ["Pilih Kelas"], key="adm_kelas")
+            
+            c3, c4 = st.columns(2)
+            with c3: 
+                b_list = list(DATA_MATERI.get(up_mapel, {}).get(up_kelas, {}).keys())
+                up_bab = st.selectbox("📑 Sektor Bab:", b_list if b_list else ["Pilih Bab"], key="adm_bab")
+            with c4: 
+                s_list = []
+                try: s_list = DATA_MATERI[up_mapel][up_kelas][up_bab].get("sub_bab", [])
+                except: pass
+                up_sub = st.selectbox("🔖 Sub-bab Spesifik:", s_list if s_list else ["Pilih Sub-bab"], key="adm_sub")
+            
+            st.write("<br>", unsafe_allow_html=True)
+            # Ekstensi diatur menjadi super lengkap!
+            up_file = st.file_uploader("Pilih Berkas Materi:", type=['pdf', 'docx', 'doc', 'xlsx', 'xls', 'pptx', 'ppt', 'jpg', 'jpeg', 'png'])
+            if up_file and st.button("🚀 UNGGAH KE SERVER"):
+                ft = os.path.join("uploads", bersihkan_nama(up_mapel), bersihkan_nama(up_kelas), bersihkan_nama(up_bab), bersihkan_nama(up_sub))
+                os.makedirs(ft, exist_ok=True)
+                with open(os.path.join(ft, up_file.name), "wb") as f: 
+                    f.write(up_file.getbuffer())
+                st.toast(f"Upload {up_file.name} Sukses!", icon="✅")
+                
+        with tab_del:
+            st.markdown("### 🗑️ Penghapusan Dokumen Aktif")
+            if os.path.exists("uploads"):
+                for r, d, f_list in os.walk("uploads"):
+                    for file in f_list:
+                        path = os.path.join(r, file)
+                        c_a, c_b = st.columns([4,1])
+                        c_a.code(path)
+                        if c_b.button("🗑️ Del", key=path): 
+                            os.remove(path)
+                            st.rerun()
+            else:
+                st.info("Penyimpanan lokal masih kosong.")
+            
+        st.write("<br><br>", unsafe_allow_html=True)
         if st.button("🔴 KUNCI DASHBOARD ADMIN"): st.session_state.is_admin = False; st.rerun()
 
 # ==========================================
