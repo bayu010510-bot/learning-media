@@ -5,30 +5,89 @@ import os
 import re
 import base64
 import random
-import sqlite3
 import hashlib
-
-# --- SISTEM DATABASE MULTIPLAYER V2 ---
-conn = sqlite3.connect("learning_media_pro.db", check_same_thread=False)
-cursor = conn.cursor()
-
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS users_v2 (
-    username TEXT PRIMARY KEY,
-    password TEXT,
-    avatar_name TEXT,
-    title TEXT,
-    points INTEGER,
-    streak INTEGER,
-    matematika INT, fisika INT, kimia INT, biologi INT, sejarah INT, ekonomi INT, sosiologi INT,
-    seni_budaya INT DEFAULT 10, geografi INT DEFAULT 10, prakarya_dan_kewirausahaan INT DEFAULT 10
-)
-""")
-cursor.execute("CREATE TABLE IF NOT EXISTS kuis_history_v2 (username TEXT, id_kuis TEXT, PRIMARY KEY(username, id_kuis))")
-conn.commit()
+import requests
 
 # --- KONFIGURASI HALAMAN ---
-st.set_page_config(page_title="Learning Media | Edisi Profesional", page_icon="⚡", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(page_title="Learning Media | Edisi Cloud Pro", page_icon="⚡", layout="wide", initial_sidebar_state="expanded")
+
+# --- KONEKSI GLOBAL SUPABASE (API REST) ---
+SUPABASE_URL = st.secrets["SUPABASE_URL"]
+SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
+
+HEADERS = {
+    "apikey": SUPABASE_KEY,
+    "Authorization": f"Bearer {SUPABASE_KEY}",
+    "Content-Type": "application/json",
+    "Prefer": "return=representation"
+}
+
+# --- FUNGSI UTILITAS DATABASE (REST API SUPABASE ENGINE) ---
+def db_get_user(username):
+    url = f"{SUPABASE_URL}/rest/v1/users_cloud?username=ilike.{username}"
+    res = requests.get(url, headers=HEADERS).json()
+    return res[0] if res else None
+
+def db_create_user(username, hashed_pwd):
+    url = f"{SUPABASE_URL}/rest/v1/users_cloud"
+    data = {
+        "username": username, "password": hashed_pwd, "avatar_name": "Geni Us",
+        "title": "🏅 Pemula", "points": 0, "streak": 1,
+        "matematika": 10, "fisika": 10, "kimia": 10, "biologi": 10,
+        "sejarah": 10, "ekonomi": 10, "sosiologi": 10, "seni_budaya": 10,
+        "geografi": 10, "prakarya_dan_kewirausahaan": 10
+    }
+    requests.post(url, headers=HEADERS, json=data)
+
+def db_update_points(username, new_points):
+    url = f"{SUPABASE_URL}/rest/v1/users_cloud?username=eq.{username}"
+    requests.patch(url, headers=HEADERS, json={"points": new_points})
+
+def db_update_avatar(username, avatar_name):
+    url = f"{SUPABASE_URL}/rest/v1/users_cloud?username=eq.{username}"
+    requests.patch(url, headers=HEADERS, json={"avatar_name": avatar_name})
+
+def db_update_title(username, title, cost=0):
+    url = f"{SUPABASE_URL}/rest/v1/users_cloud?username=eq.{username}"
+    payload = {"title": title}
+    if cost > 0:
+        # Ambil poin saat ini lalu kurangi
+        current = db_get_user(username)
+        if current:
+            payload["points"] = current["points"] - cost
+    requests.patch(url, headers=HEADERS, json=payload)
+
+def db_get_learned_history(username):
+    url = f"{SUPABASE_URL}/rest/v1/kuis_history_cloud?username=eq.{username}"
+    res = requests.get(url, headers=HEADERS).json()
+    return set([row["id_kuis"] for row in res])
+
+def db_add_kuis_history(username, id_kuis):
+    url = f"{SUPABASE_URL}/rest/v1/kuis_history_cloud"
+    requests.post(url, headers=HEADERS, json={"username": username, "id_kuis": id_kuis})
+
+def db_get_leaderboard():
+    url = f"{SUPABASE_URL}/rest/v1/users_cloud?select=username,points,title&order=points.desc&limit=5"
+    return requests.get(url, headers=HEADERS).json()
+
+def db_get_all_users_admin():
+    url = f"{SUPABASE_URL}/rest/v1/users_cloud?select=username,title,points,streak&order=points.desc"
+    return requests.get(url, headers=HEADERS).json()
+
+def db_get_random_opponent(exclude_username):
+    url = f"{SUPABASE_URL}/rest/v1/users_cloud?username=neq.{exclude_username}&limit=10"
+    res = requests.get(url, headers=HEADERS).json()
+    return random.choice(res) if res else None
+
+def db_update_pvp_win(winner, loser, winner_current_pts, loser_current_pts):
+    url_w = f"{SUPABASE_URL}/rest/v1/users_cloud?username=eq.{winner}"
+    requests.patch(url_w, headers=HEADERS, json={"points": winner_current_pts + 100})
+    url_l = f"{SUPABASE_URL}/rest/v1/users_cloud?username=eq.{loser}"
+    requests.patch(url_l, headers=HEADERS, json={"points": max(0, loser_current_pts - 20)})
+
+def db_update_pvp_lose(loser, loser_current_pts):
+    url_l = f"{SUPABASE_URL}/rest/v1/users_cloud?username=eq.{loser}"
+    requests.patch(url_l, headers=HEADERS, json={"points": max(0, loser_current_pts - 30)})
 
 # --- INISIALISASI MEMORI ---
 if "logged_in" not in st.session_state: st.session_state.logged_in = False
@@ -42,10 +101,9 @@ if "hasil_drill" not in st.session_state: st.session_state.hasil_drill = None
 PASSWORD_ADMIN = "LEARNWITHLM"
 
 def hash_password(password): return hashlib.sha256(password.encode()).hexdigest()
+def bersihkan_nama(teks): return re.sub(r'[\\/*?:"<>|]', "", teks)
 
-# ==========================================
-# IMPORT DATA DARI FILE EKSTERNAL 
-# ==========================================
+# --- IMPORT DARI FILE EKSTERNAL ---
 from database_rangkuman import DATA_MATERI
 from database_soal import BANK_SOAL_PRO
 
@@ -67,7 +125,6 @@ st.markdown("""
     
     .glass-card { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(15px); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.08); padding: 30px; text-align: center; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); transition: transform 0.3s; }
     .glass-card:hover { transform: translateY(-5px); border-color: rgba(0, 198, 255, 0.4); box-shadow: 0 0 30px rgba(0, 198, 255, 0.2); }
-    
     .score-card { background: linear-gradient(135deg, rgba(0, 198, 255, 0.1) 0%, rgba(0, 114, 255, 0.1) 100%); border: 1px solid #00C6FF; border-radius: 15px; padding: 20px; text-align: center; }
     
     .stButton>button { background: linear-gradient(135deg, #00C6FF 0%, #0072FF 100%); color: white; border-radius: 12px; border: none; padding: 12px 24px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s ease; width: 100%; box-shadow: 0 4px 15px rgba(0, 114, 255, 0.4); }
@@ -100,11 +157,11 @@ def tampilkan_avatar(keyword, ukuran="130px"):
     st.markdown(f"<div style='text-align:center; font-size:80px;'>{'👨‍🎓' if keyword=='genius' else '👩‍🎓'}</div>", unsafe_allow_html=True)
 
 # ==========================================
-# PORTAL AUTENTIKASI
+# PORTAL AUTENTIKASI CLOUD
 # ==========================================
 if not st.session_state.logged_in:
     st.markdown("<h1 style='text-align:center; margin-top:50px; font-size:50px;'>Learning Media <span class='gradient-text'>PRO</span></h1>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align:center; color:#94A3B8; margin-bottom:40px;'>Satu Profil, Ribuan Tantangan. Masuk ke Arena Belajar.</p>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align:center; color:#94A3B8; margin-bottom:40px;'>Satu Profil, Ribuan Tantangan. Masuk ke Arena Belajar Cloud.</p>", unsafe_allow_html=True)
     
     col_space1, col_form, col_space3 = st.columns([1, 1.5, 1])
     with col_form:
@@ -116,10 +173,9 @@ if not st.session_state.logged_in:
             l_pass = st.text_input("Kata Sandi:", type="password", key="l_pwd").strip()
             if st.button("🚀 LOGIN SEKARANG"):
                 if l_user and l_pass:
-                    cursor.execute("SELECT username, password FROM users_v2 WHERE lower(username)=lower(?)", (l_user,))
-                    res = cursor.fetchone()
-                    if res and res[1] == hash_password(l_pass):
-                        st.session_state.username = res[0] 
+                    user_record = db_get_user(l_user)
+                    if user_record and user_record["password"] == hash_password(l_pass):
+                        st.session_state.username = user_record["username"] 
                         st.session_state.logged_in = True
                         st.rerun()
                     else: st.error("❌ Username atau Sandi salah!")
@@ -130,31 +186,24 @@ if not st.session_state.logged_in:
             r_pass = st.text_input("Buat Kata Sandi:", type="password", key="r_pwd").strip()
             if st.button("✨ DAFTAR BARU"):
                 if r_user and r_pass:
-                    cursor.execute("SELECT username FROM users_v2 WHERE lower(username)=lower(?)", (r_user,))
-                    if cursor.fetchone(): st.error("⚠️ Username sudah dipakai petarung lain!")
+                    if db_get_user(r_user): st.error("⚠️ Username sudah dipakai petarung lain!")
                     else:
-                        cursor.execute("""
-                            INSERT INTO users_v2 (username, password, avatar_name, title, points, streak, matematika, fisika, kimia, biologi, sejarah, ekonomi, sosiologi, seni_budaya, geografi, prakarya_dan_kewirausahaan)
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                        """, (r_user, hash_password(r_pass), "Geni Us", "🏅 Pemula", 0, 1, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10))
-                        conn.commit()
-                        st.success("🎉 Profil Ditempa! Silakan klik tab '🔐 MASUK ARENA' untuk Login.")
+                        db_create_user(r_user, hash_password(r_pass))
+                        st.success("🎉 Profil Berhasil Ditempa Cloud! Silakan beralih ke tab '🔐 MASUK ARENA'.")
                 else: st.warning("Isi semua kolom pendaftaran!")
         st.markdown("</div>", unsafe_allow_html=True)
     st.stop()
 
 # ==========================================
-# MEMUAT DATA PENGGUNA AKTIF
+# MEMUAT DATA CLOUD PENGGUNA AKTIF
 # ==========================================
 player = st.session_state.username
-cursor.execute("SELECT * FROM users_v2 WHERE username=?", (player,))
-user_data = cursor.fetchone()
-avatar_db, title_db, points_db, streak_db = user_data[2], user_data[3], user_data[4], user_data[5]
+user_data = db_get_user(player)
+avatar_db, title_db, points_db, streak_db = user_data["avatar_name"], user_data["title"], user_data["points"], user_data["streak"]
 
-cursor.execute("SELECT id_kuis FROM kuis_history_v2 WHERE username=?", (player,))
-learned_db = set([row[0] for row in cursor.fetchall()])
-
+learned_db = db_get_learned_history(player)
 user_level = (points_db // 100) + 1
+
 def get_tier(lvl):
     if lvl < 3: return "🥉 Bronze", "#CD7F32"
     elif lvl < 6: return "🥈 Silver", "#C0C0C0"
@@ -192,7 +241,7 @@ with st.sidebar:
     st.markdown("</div>", unsafe_allow_html=True)
 
 # ==========================================
-# HALAMAN 1: BERANDA SERVER 
+# HALAMAN 1: BERANDA SERVER CLOUD
 # ==========================================
 if menu == "🏠 Beranda Server":
     st.markdown(f"<h1>SELAMAT DATANG, <span class='gradient-text'>{player.upper()}</span>! 🚀</h1>", unsafe_allow_html=True)
@@ -202,8 +251,7 @@ if menu == "🏠 Beranda Server":
         st.markdown("<h2 style='color:#FCD34D; margin-top:0;'>🎁 Peti Harta Karun Harian!</h2>", unsafe_allow_html=True)
         if st.button("🗝️ KLAIM BONUS LOGIN XP"):
             bonus = random.choice([20, 50, 100])
-            cursor.execute("UPDATE users_v2 SET points = points + ? WHERE username = ?", (bonus, player))
-            conn.commit()
+            db_update_points(player, points_db + bonus)
             st.session_state.gacha_claimed = True
             st.toast(f"HORE! Dapat +{bonus} XP!", icon="🎉")
             st.rerun()
@@ -215,25 +263,25 @@ if menu == "🏠 Beranda Server":
     with col3: st.markdown(f"<div class='glass-card' style='border-color:{tier_color};'><div style='font-size:40px;'>🏆</div><h2 style='color:{tier_color}; margin:0;'>{tier_name.split()[1]}</h2><p style='color:#94A3B8; margin:0;'>Kasta Global</p></div>", unsafe_allow_html=True)
         
     st.write("<br>", unsafe_allow_html=True)
-    st.markdown("<h3>📊 LIVE GLOBAL RANKING</h3>", unsafe_allow_html=True)
+    st.markdown("<h3>📊 LIVE GLOBAL RANKING (CLOUD REAL-TIME)</h3>", unsafe_allow_html=True)
     
-    cursor.execute("SELECT username, points, title FROM users_v2 ORDER BY points DESC LIMIT 5")
-    for i, row in enumerate(cursor.fetchall()):
+    ranking_data = db_get_leaderboard()
+    for i, row in enumerate(ranking_data):
         medali = "🥇" if i == 0 else "🥈" if i == 1 else "🥉" if i == 2 else "🏅"
         bg_color = "rgba(255, 215, 0, 0.1)" if i==0 else "rgba(255,255,255,0.02)"
         bdr_color = "rgba(255, 215, 0, 0.5)" if i==0 else "rgba(255,255,255,0.08)"
         st.markdown(f"""
         <div style='background: {bg_color}; border: 1px solid {bdr_color}; border-radius: 15px; padding: 15px 25px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;'>
-            <h3 style='margin:0;'>{medali} {row[0]} <span style='font-size:14px; font-weight:normal; color:#94A3B8;'>({row[2]})</span></h3>
-            <h3 style='margin:0; color:#00C6FF;'>⭐ {row[1]} XP</h3>
+            <h3 style='margin:0;'>{medali} {row["username"]} <span style='font-size:14px; font-weight:normal; color:#94A3B8;'>({row["title"]})</span></h3>
+            <h3 style='margin:0; color:#00C6FF;'>⭐ {row["points"]} XP</h3>
         </div>
         """, unsafe_allow_html=True)
 
 # ==========================================
-# HALAMAN 2: MODE DUEL (PvP)
+# HALAMAN 2: MODE DUEL CLOUD (PvP MENGGUNAKAN BANK SOAL)
 # ==========================================
 elif menu == "⚔️ Mode Duel Ranked (PvP)":
-    st.markdown("<h1>⚔️ <span class='gradient-text'>ARENA DUEL MULTIPLAYER</span></h1>", unsafe_allow_html=True)
+    st.markdown("<h1>⚔️ <span class='gradient-text'>ARENA DUEL MULTIPLAYER CLOUD</span></h1>", unsafe_allow_html=True)
     
     pool_pvp = {}
     for mp, data_kelas in BANK_SOAL_PRO.items():
@@ -256,17 +304,16 @@ elif menu == "⚔️ Mode Duel Ranked (PvP)":
     
     with col_btn:
         st.write("<br>", unsafe_allow_html=True)
-        if st.button("🔍 CARI LAWAN"):
-            cursor.execute("SELECT username, points FROM users_v2 WHERE username != ? ORDER BY RANDOM() LIMIT 1", (player,))
-            lawan = cursor.fetchone()
+        if st.button("🔍 CARI LAWAN ACURATE"):
+            lawan = db_get_random_opponent(player)
             if lawan and len(pool_pvp[mapel_duel]) > 0:
-                st.session_state.lawan_duel = lawan
+                st.session_state.lawan_duel = (lawan["username"], lawan["points"])
                 st.session_state.kuis_duel = True
                 soal_asli = random.choice(pool_pvp[mapel_duel])
                 opsi_acak = soal_asli["opsi"].copy()
                 random.shuffle(opsi_acak)
                 st.session_state.soal_pvp_aktif = {"soal": soal_asli["soal"], "opsi": opsi_acak, "jawaban": soal_asli["jawaban"]}
-            else: st.error("Tidak ada lawan / soal tersedia!")
+            else: st.error("Tidak ada lawan / kuis tersedia di cloud!")
             
     if st.session_state.lawan_duel and st.session_state.kuis_duel and st.session_state.soal_pvp_aktif:
         l_nama, l_pts = st.session_state.lawan_duel
@@ -281,45 +328,39 @@ elif menu == "⚔️ Mode Duel Ranked (PvP)":
         st.markdown("<div class='glass-card' style='text-align:left;'>", unsafe_allow_html=True)
         ds = st.session_state.soal_pvp_aktif
         st.write(ds['soal'])
-        j_user = st.radio("Pilih Serangan:", ds['opsi'], key="duel_ans")
+        j_user = st.radio("Pilih Serangan Taktismu:", ds['opsi'], key="duel_ans")
         
-        if st.button("⚡ EKSEKUSI SERANGAN"):
+        if st.button("⚡ EKSEKUSI SERANGAN CLOUD"):
             if j_user == ds['jawaban']:
-                cursor.execute("UPDATE users_v2 SET points = points + 100 WHERE username=?", (player,))
-                cursor.execute("UPDATE users_v2 SET points = MAX(0, points - 20) WHERE username=?", (l_nama,))
-                conn.commit()
-                st.toast(f"CRITICAL STRIKE! +100 XP", icon="⚔️")
+                db_update_pvp_win(player, l_nama, points_db, l_pts)
+                st.toast(f"CRITICAL STRIKE! Berhasil mengalahkan {l_nama}", icon="⚔️")
                 st.session_state.kuis_duel = False 
-                st.success(f"🎉 **KAMU MENANG!** +100 XP. {l_nama} kehilangan 20 XP.")
+                st.success(f"🎉 **KAMU MENANG!** +100 XP ditambahkan ke database cloud.")
             else:
-                cursor.execute("UPDATE users_v2 SET points = MAX(0, points - 30) WHERE username=?", (player,))
-                conn.commit()
-                st.toast("GAGAL! -30 XP.", icon="🛡️")
+                db_update_pvp_lose(player, points_db)
+                st.toast("BLOCKED! Pertahanan hancur.", icon="🛡️")
                 st.session_state.kuis_duel = False
-                st.error(f"💀 **KAMU KALAH!** Kamu kehilangan 30 XP.")
-            if st.button("🔄 Lanjut"): st.rerun()
+                st.error(f"💀 **KAMU KALAH!** Kehilangan 30 XP.")
+            if st.button("🔄 Sinkronisasi"): st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
 
 # ==========================================
-# HALAMAN 3: ARENA DRILL & LATIHAN BAB (CLOUD STORAGE INTEGRATED)
+# HALAMAN 3: ARENA DRILL & LATIHAN BAB (CLOUD INTEGRATED)
 # ==========================================
 elif menu == "📖 Arena Drill & Latihan":
     st.markdown("<h1>📖 <span class='gradient-text'>ARENA DRILL EVALUASI</span></h1>", unsafe_allow_html=True)
     
     mapel_list = list(DATA_MATERI.keys())
-    
     with st.container():
         st.markdown("<div class='glass-card' style='text-align:left; padding: 20px;'>", unsafe_allow_html=True)
         col1, col2 = st.columns(2)
         with col1: p_mapel = st.selectbox("📚 Mata Pelajaran:", mapel_list)
-        
         kelas_list = list(DATA_MATERI.get(p_mapel, {}).keys())
         with col2: p_kelas = st.selectbox("🎓 Tingkat Kelas:", kelas_list if kelas_list else ["Tidak tersedia"])
         
         col3, col4 = st.columns(2)
         bab_list = list(DATA_MATERI.get(p_mapel, {}).get(p_kelas, {}).keys())
         with col3: p_bab = st.selectbox("📑 Sektor Bab:", bab_list if bab_list else ["Tidak tersedia"])
-        
         sub_list = []
         try: sub_list = DATA_MATERI[p_mapel][p_kelas][p_bab].get("sub_bab", [])
         except: pass
@@ -336,7 +377,7 @@ elif menu == "📖 Arena Drill & Latihan":
         except KeyError: pass
         
         if not soal_tersedia:
-            st.info("📭 Bank Soal untuk Sub-bab ini sedang dibangun oleh Administrator.")
+            st.info("📭 Bank Soal untuk Sub-bab ini belum di-input di database_soal.py.")
         else:
             if not st.session_state.drill_aktif and not st.session_state.hasil_drill:
                 st.markdown("<div class='btn-green'>", unsafe_allow_html=True)
@@ -347,9 +388,7 @@ elif menu == "📖 Arena Drill & Latihan":
                     for s in soal_terpilih:
                         opsi_acak = s["opsi"].copy()
                         random.shuffle(opsi_acak)
-                        data_sesi.append({
-                            "soal": s["soal"], "opsi_acak": opsi_acak, "jawaban_asli": s["jawaban"], "pembahasan": s["pem"]
-                        })
+                        data_sesi.append({"soal": s["soal"], "opsi_acak": opsi_acak, "jawaban_asli": s["jawaban"], "pembahasan": s["pem"]})
                     st.session_state.soal_drill_saat_ini = data_sesi
                     st.session_state.drill_aktif = True
                     st.rerun()
@@ -358,20 +397,15 @@ elif menu == "📖 Arena Drill & Latihan":
             elif st.session_state.drill_aktif:
                 total_s = len(st.session_state.soal_drill_saat_ini)
                 st.progress(100)
-                st.markdown(f"**Sesi Drill Aktif: {total_s} Soal Evaluasi**")
-                
                 with st.form(key="form_drill"):
                     jawaban_user = []
                     for i, s in enumerate(st.session_state.soal_drill_saat_ini):
                         st.markdown(f"<div class='glass-card' style='text-align:left; padding:20px; margin-bottom:15px; border-left:4px solid #00C6FF;'>", unsafe_allow_html=True)
                         st.markdown(f"**Pertanyaan {i+1}:**<br>{s['soal']}", unsafe_allow_html=True)
-                        ans = st.radio(f"Pilih jawaban Anda untuk soal {i+1}:", s['opsi_acak'], key=f"d_ans_{i}", label_visibility="collapsed")
+                        ans = st.radio(f"Pilih jawaban:", s['opsi_acak'], key=f"d_ans_{i}", label_visibility="collapsed")
                         jawaban_user.append(ans)
                         st.markdown("</div>", unsafe_allow_html=True)
-                    
-                    st.markdown("<div style='margin-top:20px;'>", unsafe_allow_html=True)
                     submit_drill = st.form_submit_button("📝 KUMPULKAN JAWABAN & KOREKSI")
-                    st.markdown("</div>", unsafe_allow_html=True)
                     
                 if submit_drill:
                     skor_benar = 0
@@ -382,138 +416,114 @@ elif menu == "📖 Arena Drill & Latihan":
                         benar = (j_user == j_asli)
                         if benar: skor_benar += 1
                         eval_data.append({"soal": s['soal'], "jawaban_anda": j_user, "jawaban_benar": j_asli, "pem": s['pembahasan'], "is_correct": benar})
-                    
                     st.session_state.hasil_drill = {"skor_benar": skor_benar, "total": total_s, "evaluasi": eval_data}
                     st.session_state.drill_aktif = False
                     st.rerun()
             
             elif st.session_state.hasil_drill:
                 hasil = st.session_state.hasil_drill
-                skor = hasil["skor_benar"]
-                tot = hasil["total"]
+                skor, tot = hasil["skor_benar"], hasil["total"]
                 xp_gained = skor * 30
                 akurasi = int((skor / tot) * 100)
                 
                 st.markdown("### 📊 DASHBOARD EVALUASI")
                 c_met1, c_met2, c_met3 = st.columns(3)
                 with c_met1: st.markdown(f"<div class='score-card'><h4>🎯 Akurasi</h4><h1 style='color:#00C6FF; margin:0;'>{akurasi}%</h1></div>", unsafe_allow_html=True)
-                with c_met2: st.markdown(f"<div class='score-card'><h4>✅ Jawaban Benar</h4><h1 style='color:#10B981; margin:0;'>{skor}/{tot}</h1></div>", unsafe_allow_html=True)
-                with c_met3: st.markdown(f"<div class='score-card'><h4>⚡ XP Diraih</h4><h1 style='color:#F59E0B; margin:0;'>+{xp_gained}</h1></div>", unsafe_allow_html=True)
+                with c_met2: st.markdown(f"<div class='score-card'><h4>✅ Benar</h4><h1 style='color:#10B981; margin:0;'>{skor}/{tot}</h1></div>", unsafe_allow_html=True)
+                with c_met3: st.markdown(f"<div class='score-card'><h4>⚡ XP</h4><h1 style='color:#F59E0B; margin:0;'>+{xp_gained}</h1></div>", unsafe_allow_html=True)
                 
                 if xp_gained > 0:
-                    try:
-                        cursor.execute(f"UPDATE users_v2 SET points = points + ?, {p_mapel.lower().replace(' ', '_')} = {p_mapel.lower().replace(' ', '_')} + ? WHERE username = ?", (xp_gained, skor*10, player))
-                    except:
-                        cursor.execute(f"UPDATE users_v2 SET points = points + ? WHERE username = ?", (xp_gained, player))
-                        
+                    db_update_points(player, points_db + xp_gained)
                     id_drill = f"drill_{p_mapel}_{p_kelas}_{p_bab}_{p_sub}"
                     if akurasi == 100 and id_drill not in learned_db:
-                        cursor.execute("INSERT INTO kuis_history_v2 VALUES (?, ?)", (player, id_drill))
-                    conn.commit()
-                    st.toast(f"Evaluasi selesai! Kamu mendapat +{xp_gained} XP.", icon="🏆")
+                        db_add_kuis_history(player, id_drill)
+                    st.toast(f"Sinkronisasi Cloud Selesai! +{xp_gained} XP Saved.", icon="🏆")
                 
-                st.write("<br>", unsafe_allow_html=True)
-                st.markdown("#### Rincian & Pembahasan Jawaban")
                 for i, ev in enumerate(hasil["evaluasi"]):
-                    ikon = "✅" if ev["is_correct"] else "❌"
-                    warna = "#10B981" if ev["is_correct"] else "#EF4444"
-                    with st.expander(f"{ikon} Soal {i+1} | Jawaban Anda: {ev['jawaban_anda']}"):
+                    ikon, warna = ("✅", "#10B981") if ev["is_correct"] else ("❌", "#EF4444")
+                    with st.expander(f"{ikon} Soal {i+1} | Kunci: {ev['jawaban_benar']}"):
                         st.write(ev['soal'])
-                        st.markdown(f"**Kunci Jawaban:** <span style='color:{warna}; font-weight:bold;'>{ev['jawaban_benar']}</span>", unsafe_allow_html=True)
-                        st.markdown(f"<div style='background:rgba(255,255,255,0.05); padding:15px; border-radius:10px; margin-top:10px; border-left:3px solid {warna};'><b>🧠 Pembahasan:</b><br>{ev['pem']}</div>", unsafe_allow_html=True)
+                        st.markdown(f"<div style='background:rgba(255,255,255,0.05); padding:15px; border-radius:10px; border-left:3px solid {warna};'><b>🧠 Pembahasan:</b><br>{ev['pem']}</div>", unsafe_allow_html=True)
                 
-                st.write("<br>", unsafe_allow_html=True)
-                if st.button("🔄 Akhiri Evaluasi & Kembali Latihan"):
+                if st.button("🔄 Selesai & Kembali"):
                     st.session_state.hasil_drill = None
                     st.rerun()
 
     with tab_mat:
-        try:
-            teks_materi = DATA_MATERI[p_mapel][p_kelas][p_bab]['rangkuman']
-            st.markdown(f"<div class='glass-card' style='text-align:left;'>{teks_materi}</div>", unsafe_allow_html=True)
-        except KeyError:
-            st.info("Catatan khusus rangkuman tidak ditemukan di file `database_rangkuman.py`.")
+        try: st.markdown(f"<div class='glass-card' style='text-align:left;'>{DATA_MATERI[p_mapel][p_kelas][p_bab]['rangkuman']}</div>", unsafe_allow_html=True)
+        except: st.info("Rangkuman tidak ditemukan di file `database_rangkuman.py`.")
 
-    # --- MODE PRO: GOOGLE DRIVE LINK TERINTEGRASI ---
     with tab_doc:
-        st.markdown("### 📂 Modul Pendukung (Google Drive)")
-        st.caption("Akses materi berformat PDF/PPT yang disimpan secara aman di Cloud Storage berkecepatan tinggi.")
-        try:
-            link_drive = DATA_MATERI[p_mapel][p_kelas][p_bab].get("link_drive", "")
-        except:
-            link_drive = ""
-            
-        if link_drive:
-            st.link_button("🔗 BUKA MODUL DI GOOGLE DRIVE", link_drive, use_container_width=True)
-        else:
-            st.info("📭 Admin belum menyematkan link modul Google Drive untuk bab ini. (Tambahkan kunci 'link_drive' di database_rangkuman.py)")
+        st.markdown("### 📂 Modul Pendukung Cloud")
+        try: link_drive = DATA_MATERI[p_mapel][p_kelas][p_bab].get("link_drive", "")
+        except: link_drive = ""
+        if link_drive: st.link_button("🔗 BUKA MODUL DI GOOGLE DRIVE", link_drive, use_container_width=True)
+        else: st.info("📭 Modul Google Drive belum disematkan oleh Admin.")
 
 # ==========================================
-# HALAMAN 4: SUPER ADMIN DASHBOARD PRO
+# HALAMAN 4: SUPER ADMIN DASHBOARD
 # ==========================================
 elif menu == "⚙️ Konsol Admin Pro":
-    st.markdown("<h1>⚙️ <span class='gradient-text'>SUPER ADMIN DASHBOARD</span></h1>", unsafe_allow_html=True)
+    st.markdown("<h1>⚙️ <span class='gradient-text'>SUPER ADMIN COMMAND CENTER</span></h1>", unsafe_allow_html=True)
     if not st.session_state.is_admin:
-        st.markdown("<div class='glass-card' style='border-color:#EF4444;'><h2>🔒 KODE OTORISASI DIBUTUHKAN</h2>", unsafe_allow_html=True)
-        pwd = st.text_input("Password Master:", type="password")
-        if st.button("Akses Sistem"):
-            if pwd == PASSWORD_ADMIN:
-                st.session_state.is_admin = True
-                st.rerun()
+        st.markdown("<div class='glass-card' style='border-color:#EF4444;'><h2>🔒 SECURE SECURITY GATEWAY</h2>", unsafe_allow_html=True)
+        pwd = st.text_input("Master Password Admin:", type="password")
+        if st.button("Buka Akses"):
+            if pwd == PASSWORD_ADMIN: st.session_state.is_admin = True; st.rerun()
             else: st.error("Akses Ditolak!")
         st.markdown("</div>", unsafe_allow_html=True)
     else:
-        st.success("🔓 Otorisasi Diterima. Pusat Kendali Intelijen Aktif.")
-        tab_stat, tab_db = st.tabs(["📊 Metrik Server", "👥 Manajemen Database User"])
+        st.success("🔓 Akses Server Utama Terbuka.")
+        tab_stat, tab_db = st.tabs(["📊 Statistik Jaringan Cloud", "👥 Pantau Database Siswa"])
+        
+        users_admin = db_get_all_users_admin()
         
         with tab_stat:
-            cursor.execute("SELECT COUNT(*), SUM(points), MAX(streak) FROM users_v2")
-            data_stat = cursor.fetchone()
+            total_akun = len(users_admin)
+            total_xp = sum([r["points"] for r in users_admin])
+            max_streak = max([r["streak"] for r in users_admin]) if users_admin else 0
+            
             c1, c2, c3 = st.columns(3)
-            c1.metric("Total Petarung (Akun)", data_stat[0])
-            c2.metric("Total XP Beredar", data_stat[1] if data_stat[1] else 0)
-            c3.metric("Rekor Streak Tertinggi", data_stat[2] if data_stat[2] else 0)
+            c1.metric("Siswa Terdaftar", f"{total_akun} Akun")
+            c2.metric("Total XP di Database", f"{total_xp} XP")
+            c3.metric("Rekor Login Streak", f"{max_streak} Hari")
             
-            st.write("<br>", unsafe_allow_html=True)
-            st.info("💡 Karena kita telah menggunakan arsitektur Profesional (Cloud Storage), fitur Upload File lokal telah dihapus untuk meringankan beban server. Semua modul kini dapat diakses langsung via link Google Drive di menu Drill & Latihan.")
-        
         with tab_db:
-            st.markdown("### 📋 Tabel Data Pengguna Real-Time")
-            df_users = pd.read_sql_query("SELECT username as 'Nama Akun', title as 'Kasta/Gelar', points as 'Total XP', streak as 'Login Beruntun' FROM users_v2 ORDER BY points DESC", conn)
-            st.dataframe(df_users, use_container_width=True, hide_index=True)
+            if users_admin:
+                df = pd.DataFrame(users_admin)
+                df.columns = ["Nama Akun", "Julukan", "Total XP", "Login Streak"]
+                st.dataframe(df, use_container_width=True, hide_index=True)
+            else: st.info("Database Kosong.")
             
-        st.write("<br><br>", unsafe_allow_html=True)
-        st.markdown("<div class='btn-red'>", unsafe_allow_html=True)
-        if st.button("🔴 KUNCI & KELUAR DARI KONSOL"): st.session_state.is_admin = False; st.rerun()
-        st.markdown("</div>", unsafe_allow_html=True)
+        if st.button("🔴 KUNCI DASHBOARD ADMIN"): st.session_state.is_admin = False; st.rerun()
 
 # ==========================================
-# HALAMAN 5: PASAR GELAR & KARAKTER
+# HALAMAN 5: PASAR SHOP
 # ==========================================
 elif menu == "🛒 Pasar Gelar & Profil":
     st.markdown("<h1>🛒 <span class='gradient-text'>BLACK MARKET PROFIL</span></h1>", unsafe_allow_html=True)
-    tab_av, tab_gl = st.tabs(["👤 Kloning Karakter Utama", "👑 Beli Julukan Elit"])
+    tab_av, tab_gl = st.tabs(["👤 Pilih Karakter", "👑 Tukar Julukan"])
     
     with tab_av:
         c1, c2 = st.columns(2)
         with c1:
             st.markdown("<div class='glass-card'><h2>Geni Us</h2>", unsafe_allow_html=True)
             tampilkan_avatar("genius")
-            if st.button("PILIH GENI US"):
-                cursor.execute("UPDATE users_v2 SET avatar_name='Geni Us' WHERE username=?", (player,))
-                conn.commit(); st.toast("Karakter Diperbarui!", icon="👗"); st.rerun()
+            if st.button("SET AVATAR: GENI US"):
+                db_update_avatar(player, "Geni Us")
+                st.toast("Avatar Diperbarui!", icon="👗"); st.rerun()
             st.markdown("</div>", unsafe_allow_html=True)
         with c2:
             st.markdown("<div class='glass-card'><h2>Smar T</h2>", unsafe_allow_html=True)
             tampilkan_avatar("smart")
-            if st.button("PILIH SMAR T"):
-                cursor.execute("UPDATE users_v2 SET avatar_name='Smar T' WHERE username=?", (player,))
-                conn.commit(); st.toast("Karakter Diperbarui!", icon="👗"); st.rerun()
+            if st.button("SET AVATAR: SMAR T"):
+                db_update_avatar(player, "Smar T")
+                st.toast("Avatar Diperbarui!", icon="👗"); st.rerun()
             st.markdown("</div>", unsafe_allow_html=True)
             
     with tab_gl:
         st.markdown("<div class='glass-card' style='text-align:left;'><h3>Bursa Julukan Ksatria</h3>", unsafe_allow_html=True)
-        st.write(f"Sisa XP kamu: ⭐ **{points_db} XP**")
+        st.write(f"Tabungan Kamu: ⭐ **{points_db} XP**")
         st.markdown("<hr style='border:1px solid rgba(255,255,255,0.1);'>", unsafe_allow_html=True)
         for gelar, harga in DAFTAR_GELAR.items():
             cg1, cg2, cg3 = st.columns([3, 1, 1])
@@ -524,7 +534,7 @@ elif menu == "🛒 Pasar Gelar & Profil":
                 else:
                     if st.button("Beli & Pakai", key=f"by_{gelar}"):
                         if points_db >= harga:
-                            cursor.execute("UPDATE users_v2 SET title=?, points=points-? WHERE username=?", (gelar, harga, player))
-                            conn.commit(); st.toast(f"Julukan {gelar} Terpasang!", icon="👑"); st.rerun()
+                            db_update_title(player, gelar, cost=harga)
+                            st.toast(f"Julukan {gelar} Terpasang!", icon="👑"); st.rerun()
                         else: st.error("XP Kurang!")
         st.markdown("</div>", unsafe_allow_html=True)
