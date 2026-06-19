@@ -25,18 +25,10 @@ CREATE TABLE IF NOT EXISTS users_v2 (
 )
 """)
 cursor.execute("CREATE TABLE IF NOT EXISTS kuis_history_v2 (username TEXT, id_kuis TEXT, PRIMARY KEY(username, id_kuis))")
-
-# Menambahkan kolom mapel baru jika belum ada di database lama
-try: cursor.execute("ALTER TABLE users_v2 ADD COLUMN seni_budaya INT DEFAULT 10")
-except: pass
-try: cursor.execute("ALTER TABLE users_v2 ADD COLUMN geografi INT DEFAULT 10")
-except: pass
-try: cursor.execute("ALTER TABLE users_v2 ADD COLUMN prakarya_dan_kewirausahaan INT DEFAULT 10")
-except: pass
 conn.commit()
 
 # --- KONFIGURASI HALAMAN ---
-st.set_page_config(page_title="Learning Media | Edisi Esports", page_icon="⚔️", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(page_title="Learning Media | Edisi Profesional", page_icon="⚡", layout="wide", initial_sidebar_state="expanded")
 
 # --- INISIALISASI MEMORI ---
 if "logged_in" not in st.session_state: st.session_state.logged_in = False
@@ -50,17 +42,16 @@ if "hasil_drill" not in st.session_state: st.session_state.hasil_drill = None
 PASSWORD_ADMIN = "LEARNWITHLM"
 
 def hash_password(password): return hashlib.sha256(password.encode()).hexdigest()
-def bersihkan_nama(teks): return re.sub(r'[\\/*?:"<>|]', "", teks)
 
 # ==========================================
-# IMPORT DATA DARI FILE EKSTERNAL
+# IMPORT DATA DARI FILE EKSTERNAL 
 # ==========================================
 from database_rangkuman import DATA_MATERI
 from database_soal import BANK_SOAL_PRO
 
 DAFTAR_GELAR = {"⚡ Petarung Cepat": 150, "🧪 Alkemis Gila": 200, "👑 Raja Duel": 400, "🌌 Penguasa Server": 1000}
 
-# --- KUSTOMISASI CSS HOLOGRAFIS & NEON ---
+# --- KUSTOMISASI CSS PRO UI ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800;900&display=swap');
@@ -191,7 +182,7 @@ with st.sidebar:
     """, unsafe_allow_html=True)
     
     st.markdown("<hr style='border:1px solid rgba(255,255,255,0.1);'>", unsafe_allow_html=True)
-    menu = st.radio("SISTEM NAVIGASI", ["🏠 Beranda Server", "⚔️ Mode Duel Ranked (PvP)", "📖 Arena Drill & Latihan", "📤 Terminal Berkas (Admin)", "🛒 Pasar Gelar & Profil"])
+    menu = st.radio("SISTEM NAVIGASI", ["🏠 Beranda Server", "⚔️ Mode Duel Ranked (PvP)", "📖 Arena Drill & Latihan", "⚙️ Konsol Admin Pro", "🛒 Pasar Gelar & Profil"])
     
     st.markdown("<hr style='border:1px solid rgba(255,255,255,0.1);'>", unsafe_allow_html=True)
     st.markdown("<div class='btn-red'>", unsafe_allow_html=True)
@@ -201,7 +192,7 @@ with st.sidebar:
     st.markdown("</div>", unsafe_allow_html=True)
 
 # ==========================================
-# HALAMAN 1: BERANDA SERVER & LEADERBOARD
+# HALAMAN 1: BERANDA SERVER 
 # ==========================================
 if menu == "🏠 Beranda Server":
     st.markdown(f"<h1>SELAMAT DATANG, <span class='gradient-text'>{player.upper()}</span>! 🚀</h1>", unsafe_allow_html=True)
@@ -243,7 +234,6 @@ if menu == "🏠 Beranda Server":
 # ==========================================
 elif menu == "⚔️ Mode Duel Ranked (PvP)":
     st.markdown("<h1>⚔️ <span class='gradient-text'>ARENA DUEL MULTIPLAYER</span></h1>", unsafe_allow_html=True)
-    st.markdown("<p style='color:#94A3B8;'>Pilih mata pelajaran, cari lawan acak, jawab 1 kuis tercepat, dan curi XP mereka!</p>", unsafe_allow_html=True)
     
     pool_pvp = {}
     for mp, data_kelas in BANK_SOAL_PRO.items():
@@ -289,7 +279,6 @@ elif menu == "⚔️ Mode Duel Ranked (PvP)":
         
         st.write("<br>", unsafe_allow_html=True)
         st.markdown("<div class='glass-card' style='text-align:left;'>", unsafe_allow_html=True)
-        st.markdown(f"### 🎯 SERANGAN KILAT: {mapel_duel.upper()}")
         ds = st.session_state.soal_pvp_aktif
         st.write(ds['soal'])
         j_user = st.radio("Pilih Serangan:", ds['opsi'], key="duel_ans")
@@ -312,7 +301,7 @@ elif menu == "⚔️ Mode Duel Ranked (PvP)":
         st.markdown("</div>", unsafe_allow_html=True)
 
 # ==========================================
-# HALAMAN 3: ARENA DRILL & LATIHAN BAB 
+# HALAMAN 3: ARENA DRILL & LATIHAN BAB (CLOUD STORAGE INTEGRATED)
 # ==========================================
 elif menu == "📖 Arena Drill & Latihan":
     st.markdown("<h1>📖 <span class='gradient-text'>ARENA DRILL EVALUASI</span></h1>", unsafe_allow_html=True)
@@ -338,12 +327,10 @@ elif menu == "📖 Arena Drill & Latihan":
         st.markdown("</div>", unsafe_allow_html=True)
         
     st.write("<br>", unsafe_allow_html=True)
-    tab_drill, tab_mat, tab_doc = st.tabs(["⚔️ Latihan Drill (Sistem Acak)", "📌 Rangkuman Ekstra", "📂 Modul Tambahan"])
+    tab_drill, tab_mat, tab_doc = st.tabs(["⚔️ Latihan Drill (Sistem Acak)", "📌 Rangkuman Ekstra", "📂 Modul Google Drive"])
     
     with tab_drill:
         st.markdown("### 🎯 Simulasi Ujian Sub-bab")
-        st.caption("Sistem akan menarik maksimal 5 soal secara acak dari brankas soal. Susunan opsi dirotasi otomatis.")
-        
         soal_tersedia = []
         try: soal_tersedia = BANK_SOAL_PRO[p_mapel][p_kelas][p_bab][p_sub]
         except KeyError: pass
@@ -447,75 +434,57 @@ elif menu == "📖 Arena Drill & Latihan":
         except KeyError:
             st.info("Catatan khusus rangkuman tidak ditemukan di file `database_rangkuman.py`.")
 
+    # --- MODE PRO: GOOGLE DRIVE LINK TERINTEGRASI ---
     with tab_doc:
-        folder_t = os.path.join("uploads", bersihkan_nama(p_mapel), bersihkan_nama(p_kelas), bersihkan_nama(p_bab), bersihkan_nama(p_sub))
-        if not os.path.exists(folder_t) or len(os.listdir(folder_t)) == 0: st.info("📭 Tidak ada modul PDF dari guru/admin.")
+        st.markdown("### 📂 Modul Pendukung (Google Drive)")
+        st.caption("Akses materi berformat PDF/PPT yang disimpan secara aman di Cloud Storage berkecepatan tinggi.")
+        try:
+            link_drive = DATA_MATERI[p_mapel][p_kelas][p_bab].get("link_drive", "")
+        except:
+            link_drive = ""
+            
+        if link_drive:
+            st.link_button("🔗 BUKA MODUL DI GOOGLE DRIVE", link_drive, use_container_width=True)
         else:
-            for f in os.listdir(folder_t):
-                with open(os.path.join(folder_t, f), "rb") as file: st.download_button(f"⬇️ Unduh Berkas: {f}", data=file.read(), file_name=f)
+            st.info("📭 Admin belum menyematkan link modul Google Drive untuk bab ini. (Tambahkan kunci 'link_drive' di database_rangkuman.py)")
 
 # ==========================================
-# HALAMAN 4: TERMINAL ADMIN & UPLOAD (SMART DROPDOWN UPDATE!)
+# HALAMAN 4: SUPER ADMIN DASHBOARD PRO
 # ==========================================
-elif menu == "📤 Terminal Berkas (Admin)":
-    st.markdown("<h1>📤 <span class='gradient-text'>CONSOLE ADMINISTRATOR</span></h1>", unsafe_allow_html=True)
+elif menu == "⚙️ Konsol Admin Pro":
+    st.markdown("<h1>⚙️ <span class='gradient-text'>SUPER ADMIN DASHBOARD</span></h1>", unsafe_allow_html=True)
     if not st.session_state.is_admin:
-        st.markdown("<div class='glass-card' style='border-color:#EF4444;'><h2>🔒 RESTRICTED AREA</h2>", unsafe_allow_html=True)
-        pwd = st.text_input("Kode Otorisasi (Password Admin):", type="password")
-        if st.button("Buka Konsol"):
+        st.markdown("<div class='glass-card' style='border-color:#EF4444;'><h2>🔒 KODE OTORISASI DIBUTUHKAN</h2>", unsafe_allow_html=True)
+        pwd = st.text_input("Password Master:", type="password")
+        if st.button("Akses Sistem"):
             if pwd == PASSWORD_ADMIN:
                 st.session_state.is_admin = True
                 st.rerun()
             else: st.error("Akses Ditolak!")
         st.markdown("</div>", unsafe_allow_html=True)
     else:
-        st.success("🔓 Otorisasi Diterima. Selamat bekerja, Master Admin.")
-        tab_up, tab_del = st.tabs(["📤 Upload Materi", "🗑️ Hapus Server File"])
+        st.success("🔓 Otorisasi Diterima. Pusat Kendali Intelijen Aktif.")
+        tab_stat, tab_db = st.tabs(["📊 Metrik Server", "👥 Manajemen Database User"])
         
-        with tab_up:
-            st.markdown("### 📂 Formulir Unggah Berkas Materi")
-            st.caption("Gunakan dropdown di bawah ini untuk memilih lokasi folder penyimpanan dengan akurat.")
-            
-            c1, c2 = st.columns(2)
-            with c1: 
-                up_mapel = st.selectbox("📚 Mata Pelajaran:", list(DATA_MATERI.keys()), key="adm_mapel")
-            with c2: 
-                k_list = list(DATA_MATERI.get(up_mapel, {}).keys())
-                up_kelas = st.selectbox("🎓 Tingkat Kelas:", k_list if k_list else ["Pilih Kelas"], key="adm_kelas")
-            
-            c3, c4 = st.columns(2)
-            with c3: 
-                b_list = list(DATA_MATERI.get(up_mapel, {}).get(up_kelas, {}).keys())
-                up_bab = st.selectbox("📑 Sektor Bab:", b_list if b_list else ["Pilih Bab"], key="adm_bab")
-            with c4: 
-                s_list = []
-                try: s_list = DATA_MATERI[up_mapel][up_kelas][up_bab].get("sub_bab", [])
-                except: pass
-                up_sub = st.selectbox("🔖 Sub-bab Spesifik:", s_list if s_list else ["Pilih Sub-bab"], key="adm_sub")
+        with tab_stat:
+            cursor.execute("SELECT COUNT(*), SUM(points), MAX(streak) FROM users_v2")
+            data_stat = cursor.fetchone()
+            c1, c2, c3 = st.columns(3)
+            c1.metric("Total Petarung (Akun)", data_stat[0])
+            c2.metric("Total XP Beredar", data_stat[1] if data_stat[1] else 0)
+            c3.metric("Rekor Streak Tertinggi", data_stat[2] if data_stat[2] else 0)
             
             st.write("<br>", unsafe_allow_html=True)
-            up_file = st.file_uploader("Pilih Berkas (PDF/PPT):", type=['pdf', 'docx', 'xlsx', 'pptx'])
-            if up_file and st.button("🚀 UNGGAH KE SERVER CLOUD"):
-                ft = os.path.join("uploads", bersihkan_nama(up_mapel), bersihkan_nama(up_kelas), bersihkan_nama(up_bab), bersihkan_nama(up_sub))
-                if not os.path.exists(ft): os.makedirs(ft)
-                with open(os.path.join(ft, up_file.name), "wb") as f: f.write(up_file.getbuffer())
-                st.toast("Upload Sukses! Berkas telah masuk ke dalam server.", icon="✅")
-                
-        with tab_del:
-            st.markdown("### 🗑️ Penghapusan & Manajemen Dokumen Aktif")
-            if os.path.exists("uploads"):
-                for r, d, f_list in os.walk("uploads"):
-                    for file in f_list:
-                        path = os.path.join(r, file)
-                        c_a, c_b = st.columns([4,1])
-                        c_a.code(path)
-                        if c_b.button("🗑️ Del", key=path): os.remove(path); st.rerun()
-            else:
-                st.info("Server sedang bersih. Tidak ada file di penyimpanan.")
-                
-        st.write("<br>", unsafe_allow_html=True)
+            st.info("💡 Karena kita telah menggunakan arsitektur Profesional (Cloud Storage), fitur Upload File lokal telah dihapus untuk meringankan beban server. Semua modul kini dapat diakses langsung via link Google Drive di menu Drill & Latihan.")
+        
+        with tab_db:
+            st.markdown("### 📋 Tabel Data Pengguna Real-Time")
+            df_users = pd.read_sql_query("SELECT username as 'Nama Akun', title as 'Kasta/Gelar', points as 'Total XP', streak as 'Login Beruntun' FROM users_v2 ORDER BY points DESC", conn)
+            st.dataframe(df_users, use_container_width=True, hide_index=True)
+            
+        st.write("<br><br>", unsafe_allow_html=True)
         st.markdown("<div class='btn-red'>", unsafe_allow_html=True)
-        if st.button("🔴 TUTUP KONSOL ADMIN"): st.session_state.is_admin = False; st.rerun()
+        if st.button("🔴 KUNCI & KELUAR DARI KONSOL"): st.session_state.is_admin = False; st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
 
 # ==========================================
