@@ -1,6 +1,6 @@
 # ==========================================
 # FILE: database_rangkuman.py
-# FUNGSI: Database Silabus Kurikulum Merdeka (Edisi Bebas Bug LaTeX)
+# FUNGSI: Database Silabus Kurikulum Merdeka (Edisi Bebas Bug)
 # ==========================================
 
 DATA_MATERI = {
@@ -19,7 +19,6 @@ Eksponen adalah perkalian berulang, sedangkan Logaritma adalah **invers (kebalik
 > **🧠 KONSEP HOTS UTBK:**
 > Di soal ujian, logaritma sering digabung dengan Persamaan Kuadrat. Jika melihat pangkat eksponen bertingkat, segera gunakan pemisalan variabel $p = a^x$!
 """
-                "link_drive": "https://drive.google.com/drive/folders/1sBINxjHzzlLTWI1wZuwIEcLVURrQUncY?usp=drive_link/view"
             },
             "Bab 2: Barisan dan Deret": {
                 "sub_bab": ["Barisan Aritmatika", "Barisan Geometri", "Deret Tak Hingga", "Aplikasi (Bunga, Anuitas)"],
@@ -34,7 +33,6 @@ Barisan adalah urutan angka dengan pola pasti. Aritmatika ditandai dengan **Beda
 > **💡 TRIK STUDI KASUS BISNIS:**
 > Deret tak hingga geometri berlimpah di soal tes PTN, terutama kasus bola pantul! Gunakan rumus cepat pantulan: $S_{\infty} = \frac{a(b+c)}{b-c}$ (di mana r = c/b).
 """
-                "link_drive": "https://drive.google.com/drive/folders/1oP0aA5GESoYShdo1SBeGQgb3Slo6q-uF?usp=drive_link"
             },
             "Bab 3: Vektor dan Operasinya": {
                 "sub_bab": ["Notasi Vektor", "Vektor di R2 and R3", "Operasi Vektor", "Cross & Dot Product"],
@@ -49,7 +47,6 @@ Vektor bukanlah sekadar angka; ia memiliki **Nilai (Besar)** dan **Arah**.
 > **🧠 TIPS UJIAN:**
 > Jika soal menyebutkan "Dua vektor saling tegak lurus", itu adalah kata sandi bahwa **Dot Product mereka bernilai NOL ($a \cdot b = 0$)**!
 """
-"link_drive": "https://drive.google.com/drive/folders/1ww_FFUqoMVBCNFrByARTYLLvpJfqY40S?usp=drive_link"
             },
             "Bab 4: Trigonometri": {
                 "sub_bab": ["Penamaan Sisi", "Perbandingan Trigonometri", "Sudut Berelasi", "Konteks Nyata"],
@@ -65,21 +62,19 @@ Trigonometri mengkaji hubungan antara sudut dan panjang sisi segitiga siku-siku.
 > **💡 ANALISIS HOTS:**
 > Sudut relasi kuadran sangat vital. Hafalkan "Semua - Sindikat - Tangannya - Kosong" (Kuadran I semua positif, II Sin positif, III Tan positif, IV Cos positif).
 """
-                "link_drive": "https://drive.google.com/drive/folders/1-N1gX50UJdxI2i04aqPtdRyk4-3iba7H?usp=drive_link"
             },
             "Bab 5: Sistem Persamaan Linear": {
                 "sub_bab": ["SPLDV", "SPLTV", "SPtLDV", "Model Matematika"],
                 "rangkuman": r"""
-#### 🚀 Bold Perubahan Variabel
+#### 🚀 Resolusi Konflik Variabel
 SPLDV (2 variabel) membentuk garis yang saling memotong, sedangkan SPLTV (3 variabel) berurusan dengan bidang tiga dimensi.
 
 #### 🔑 Langkah Penyelesaian
-Lakukan Kombinasi **Eliminasi** (menghilangkan satu variabel dengan menjumlah/mengurang) jika dirasa sulit dilanjutkan dengan teknik **Substitusi** (memasukkan nilai ke persamaan lain).
+Lakukan Kombinasi **Eliminasi** (menghilangkan satu variabel dengan menjumlah/mengurang) dilanjutkan dengan **Substitusi** (memasukkan nilai yang didapat ke persamaan lain).
 
 > **🧠 KUNCI MODEL MATEMATIKA:**
 > Langkah tersulit di UTBK bukan menghitungnya, melainkan menerjemahkan cerita soal menjadi bentuk $x$ dan $y$. Fokus pada kalimat "Total" atau "Maksimal".
 """
-                "link_drive": "https://drive.google.com/drive/folders/1KcHYn9-3ouoE6GEQtvHBxy_WfI0JAlHm?usp=drive_link"
             },
             "Bab 6: Fungsi Kuadrat": {
                 "sub_bab": ["Grafik Fungsi", "Mengonstruksi Fungsi", "Nilai Maks/Min", "Aplikasi"],
@@ -94,7 +89,6 @@ Fungsi kuadrat memiliki bentuk umum $f(x) = ax^2 + bx + c$. Jika $a > 0$ kurva t
 > **💡 TRIK KILAT:**
 > Jika fungsi kuadrat menyinggung sumbu X, artinya Diskriminan bernilai nol ($D = b^2 - 4ac = 0$).
 """
-                "link_drive": "https://drive.google.com/drive/folders/1tGZ0Wf5Cr5IuQdfH2QnZ9Li6-ddoZnQc?usp=drive_link"
             },
             "Bab 7: Statistika": {
                 "sub_bab": ["Distribusi Frekuensi", "Histogram/Ogive", "Pemusatan Data", "Letak Data", "Penyebaran Data"],
@@ -110,7 +104,6 @@ Statistika adalah seni mengubah data acak menjadi informasi berharga.
 > **🧠 TIPS UTBK STATISTIKA:**
 > Hati-hati dengan konsep Simpangan Baku. Jika semua data dikali 2, maka rata-rata ikut dikali 2, TETAPI varians akan dikali $2^2$ (kuadratnya)!
 """
-                "link_drive": "https://drive.google.com/drive/folders/1awA-Lv_X_X7emg1WZ0UIFLEtgMxGRgyo?usp=drive_link"
             },
             "Bab 8: Peluang": {
                 "sub_bab": ["Ruang Sampel", "Peluang Kejadian", "Frekuensi Harapan", "Saling Lepas/Bebas"],
@@ -125,7 +118,6 @@ Peluang adalah rasio antara kejadian yang diharapkan (Titik Sampel) dengan total
 > **💡 KUNCI CEPAT:**
 > Jika soal memakai kata hubung **"DAN"**, kalikan peluangnya. Jika menggunakan kata hubung **"ATAU"**, jumlahkan peluangnya!
 """
-                "link_drive": "https://drive.google.com/drive/folders/1ZMmZwbI6yp1mFykwn7u_zhm-Jf1w_eCU?usp=drive_link"
             }
         },
         "Kelas 11": {
@@ -228,9 +220,8 @@ Integral Tak Tentu menghasilkan fungsi asal (+ C), sedangkan Integral Tentu meng
 Beda alat, beda ketelitian. Jangka sorong punya ketelitian 0,01 cm, sedangkan Mikrometer Sekrup sangat akurat di 0,001 cm!
 
 > **🔑 ATURAN ANGKA PENTING:**
-> Saat mengalikan atau membagi, hasil finals HANYA BOLEH mengandung Angka Penting paling sedikit dari komponen yang dihitung!
+> Saat mengalikan atau membagi, hasil akhir HANYA BOLEH mengandung Angka Penting paling sedikit dari komponen yang dihitung!
 """
-                "link_drive": "https://drive.google.com/drive/folders/1RdLl6_wdI0mnMWDHaQ6jIIPHj0ya4YFe?usp=drive_link"
             },
             "Bab 2: Energi Terbarukan": {
                 "sub_bab": ["Bentuk Energi", "Hukum Kekekalan Energi", "Sumber Fosil vs Terbarukan", "Dampak Lingkungan"],
@@ -238,7 +229,6 @@ Beda alat, beda ketelitian. Jangka sorong punya ketelitian 0,01 cm, sedangkan Mi
 #### 🚀 Transisi Hijau
 Energi mekanik ($E_M$) selalu kekal, di mana $E_M = E_{Potensial} + E_{Kinetik}$. Saat di titik tertinggi, Ek bernilai nol. Saat menyentuh tanah, Ep bernilai nol.
 """
-                "link_drive": "https://drive.google.com/drive/folders/1ZVqKQoeaHyfRg92F1kKyOUyubtJhtMGa?usp=drive_link" 
             }
         },
         "Kelas 11": {
@@ -255,7 +245,7 @@ Gabungan GLB (sumbu x horizontal) dan GLBB (sumbu y vertikal yang ditarik gravit
 #### 🚀 Misteri Dibalik Gerakan
 - **Newton 1:** Kelembaman ($\Sigma F = 0$, benda diam akan tetap diam).
 - **Newton 2:** Percepatan ($\Sigma F = m \cdot a$).
-- **Newton 3:** Action = -Reaction.
+- **Newton 3:** Aksi = -Reaksi.
 
 > **🧠 TIPS BIDANG MIRING:**
 > Gaya yang menarik balok turun sejajar bidang miring selalu bernilai $W \cdot \sin \theta$, sedangkan Gaya Normalnya adalah $W \cdot \cos \theta$.
@@ -327,7 +317,6 @@ Waktu dan panjang ruang tidaklah mutlak! Saat kita bergerak mendekati kecepatan 
 #### 🚀 Solusi Atas Polusi
 Kimia hijau berupaya menciptakan desain proses kimiawi yang mengurangi atau membuang penggunaan bahan beracun demi menekan pemanasan global.
 """
-                "link_drive": "https://drive.google.com/drive/folders/1K06zk8SkE3W7XyYZSAgnP8Sw06UMN24Q?usp=drive_link" 
             },
             "Bab 2: Struktur Atom & Hukum Dasar": {
                 "sub_bab": ["Model Atom", "Partikel Penyusun", "Isotop/Isobar", "Hukum Dasar Kimia"],
@@ -335,7 +324,6 @@ Kimia hijau berupaya menciptakan desain proses kimiawi yang mengurangi atau memb
 #### 🚀 Partikel Fundamental & Hukum Lavoisier
 Massa reaktan sebelum bereaksi SELALU SAMA dengan massa produk sesudah bereaksi di ruang tertutup. Jika sisa abu kayu lebih ringan dari kayunya, itu karena sebagian massanya menguap menjadi gas CO2!
 """
-                "link_drive": "https://drive.google.com/drive/folders/1r0E-DCPmEphKuEGIsOasK0IZi-QZeZsk?usp=drive_link" 
             }
         },
         "Kelas 11": {
@@ -420,7 +408,6 @@ Karbon (C) memiliki kekhasan sangat unik: Punya 4 "tangan" (elektron valensi) ya
 #### 🚀 Pesona Kehati Nusantara
 Kehati dipengaruhi Genetik, Spesies, dan Ekosistem. Indonesia terbagi oleh **Garis Wallace** (Asiatis vs Peralihan) dan **Garis Weber** (Peralihan vs Australis).
 """
-                "link_drive": "https://drive.google.com/drive/folders/1KvwAPEENgvGkLSIjhnal9bZR3aDrUo45?usp=drive_link"
             },
             "Bab 2: Virus": {
                 "sub_bab": ["Struktur Virus", "Siklus Litik/Lisogenik", "Peranan Virus", "Pencegahan"],
@@ -428,7 +415,6 @@ Kehati dipengaruhi Genetik, Spesies, dan Ekosistem. Indonesia terbagi oleh **Gar
 #### 🚀 Si Partikel Aseluler Mematikan
 Virus adalah parasit sejati yang hanya memiliki 1 kode instruksi: RNA atau DNA. Reproduksinya dilakukan dengan membajak pabrik sel tubuh kita lewat siklus Litik (Hancur) atau Lisogenik (Bersembunyi).
 """
-                "link_drive": "https://drive.google.com/drive/folders/1gLlUlZXy0K_rstHkMvHlBXCZp-Y79n7N?usp=drive_link"
             },
             "Bab 3: Lingkungan & Ekosistem": {
                 "sub_bab": ["Komponen Ekosistem", "Jaring Makanan", "Daur Biogeokimia", "Pencemaran"],
@@ -436,7 +422,6 @@ Virus adalah parasit sejati yang hanya memiliki 1 kode instruksi: RNA atau DNA. 
 #### 🚀 Jaring Siklus Rantai Alam
 Dalam Piramida Ekologi, semakin tinggi level predatornya (Puncak piramida), energi yang ditransfer dari level dasar menjadi semakin sedikit (hanya sekitar 10%).
 """
-                 "link_drive": "https://drive.google.com/drive/folders/1Tq34E33zPA3bIloRIMsFpcaFfVZgz4LN?usp=drive_link"
             }
         },
         "Kelas 11": {
@@ -512,7 +497,6 @@ Bioteknologi modern memanipulasi kode DNA mikroba. Contohnya menyisipkan Gen pen
 - **Diakronik:** Menganalisis sejarah memanjang dalam garis waktu kronologis, tapi ruangnya sempit.
 - **Sinkronik:** Menganalisis sejarah melebar membedah struktur kondisinya secara detail, tetapi di satu waktu tertentu saja.
 """
-                "link_drive": "https://drive.google.com/drive/folders/1mfk5lUCU0hErOin0Lh3o4DDWJBXdptUC?usp=drive_link"
             },
             "Bab 2: Jalur Rempah & Hindu-Buddha": {
                 "sub_bab": ["Teori Masuknya", "Kerajaan Besar", "Sosial-Budaya", "Jalur Rempah"],
@@ -520,7 +504,6 @@ Bioteknologi modern memanipulasi kode DNA mikroba. Contohnya menyisipkan Gen pen
 #### 🚀 Kedatuan Emas Nusantara
 Kerajaan Sriwijaya menguasai Selat Malaka sebagai poros maritim, disusul kebesaran Majapahit yang menyatukan kepulauan Nusantara berkat Sumpah Palapa Gajah Mada.
 """
-                "link_drive": "https://drive.google.com/drive/folders/1S20fzBVa-8mls0ZTJL8s3flfyJagr5DO?usp=drive_link"
             },
             "Bab 3: Islamisasi di Nusantara": {
                 "sub_bab": ["Teori Masuk", "Saluran Islamisasi", "Kerajaan Islam", "Akulturasi Budaya"],
@@ -528,7 +511,6 @@ Kerajaan Sriwijaya menguasai Selat Malaka sebagai poros maritim, disusul kebesar
 #### 🚀 Tsunami Akulturasi Halus
 Proses masuknya Islam sangat damai via perdagangan (Gujarat), pernikahan, dan pagelaran Wayang adaptasi oleh Walisongo. Masjid Demak menjadi bukti akulturasi budaya.
 """
-                "link_drive": "https://drive.google.com/drive/folders/1BcD9bXK5pFMPPmGADyU4mg7AhuS0MIZd?usp=drive_link"
             }
         },
         "Kelas 11": {
@@ -594,7 +576,6 @@ Indonesia memelopori Konferensi Asia Afrika (KAA) di Bandung 1955. Kita mengkamp
 #### 🚀 Biaya Kesempatan (Opportunity Cost)
 Ilmu memilih karena kelangkaan. Jika kamu memilih menghabiskan uang untuk tiket hiburan dibanding makan siang, maka makan siang itulah yang disebut *Biaya Peluang* yang dikorbankan.
 """
-                "link_drive": "https://drive.google.com/drive/folders/1_Qb87-AYA5fmwhoZuBOuY4Po7urY0tbT?usp=drive_link"
             },
             "Bab 2: Kegiatan & Pelaku Ekonomi": {
                 "sub_bab": ["Produksi & Konsumsi", "Pelaku Ekonomi", "Circular Flow Diagram"],
@@ -602,7 +583,6 @@ Ilmu memilih karena kelangkaan. Jika kamu memilih menghabiskan uang untuk tiket 
 #### 🚀 Siklus Uang Melingkar
 Alur dari Rumah Tangga Produsen memberikan barang ke Rumah Tangga Konsumen, dan Konsumen memberikan faktor produksi (Tenaga Kerja) ke Pabrik untuk digaji.
 """
-                "link_drive": "https://drive.google.com/drive/folders/1QF0IzTdYWClHmsmzFu-LSfpp7oYbyX6_?usp=drive_link"
             },
             "Bab 3: Pasar & Harga": {
                 "sub_bab": ["Permintaan", "Penawaran", "Harga Keseimbangan", "Elastisitas", "Struktur Pasar"],
@@ -611,7 +591,6 @@ Alur dari Rumah Tangga Produsen memberikan barang ke Rumah Tangga Konsumen, dan 
 Hukum Permintaan: Harga naik, warga malas beli (berbanding terbalik).
 Hukum Penawaran: Harga naik, pabrik malah bersemangat memproduksi karena ingin untung besar.
 """
-                "link_drive": "https://drive.google.com/drive/folders/1SyQ8HGfK59qrgWX1RR2VVkjPluYqwrVa?usp=drive_link"
             },
             "Bab 4: Lembaga Keuangan": {
                 "sub_bab": ["OJK", "Perbankan", "Lembaga Non-Bank"],
@@ -619,7 +598,6 @@ Hukum Penawaran: Harga naik, pabrik malah bersemangat memproduksi karena ingin u
 #### 🚀 Para Penjaga Kestabilan Finansial
 OJK lahir sebagai wasit independen yang mengawasi seluruh kegiatan asuransi, kredit, investasi, dan perbankan di Indonesia agar warga tidak tertipu investasi bodong.
 """
-                "link_drive": "https://drive.google.com/drive/folders/1cUvIMzH9qt0tqr7uKb0jWnJa6DtJ92Fr?usp=drive_link"
             }
         },
         "Kelas 11": {
@@ -680,7 +658,6 @@ Beda dengan perusahan Jasa, perusahaan dagang memiliki siklus barang fisik. Mene
 #### 🚀 Kacamata Pembedah Masyarakat
 Auguste Comte adalah bapak sosiologi. Ilmu Sosiologi bersifat *Non-Etis*, artinya tidak memihak baik-buruknya suatu fakta, melainkan menjelaskan fakta tersebut secara analitis.
 """
-                "link_drive": "https://drive.google.com/drive/folders/16sO5HaD9xGMfyYK6dlbif3qv4_-74opM?usp=drive_link"
             },
             "Bab 2: Interaksi & Hubungan Sosial": {
                 "sub_bab": ["Identitas Diri", "Tindakan Sosial", "Syarat Interaksi", "Bentuk Interaksi"],
@@ -688,7 +665,6 @@ Auguste Comte adalah bapak sosiologi. Ilmu Sosiologi bersifat *Non-Etis*, artiny
 #### 🚀 Simulasi Empati Sosial
 Interaksi sosial mensyaratkan dua gerbang utama: **Kontak Sosial** (Pertemuan fisik/virtual) dan **Komunikasi** (Pertukaran makna).
 """
-                "link_drive": "https://drive.google.com/drive/folders/1VNySHb740deD9LM4YcsBK5DZUKMI8FnW?usp=drive_link"
             },
             "Bab 3: Lembaga, Nilai, & Norma": {
                 "sub_bab": ["Nilai & Norma", "Jenis Norma", "Lembaga Sosial"],
@@ -698,7 +674,6 @@ Interaksi sosial mensyaratkan dua gerbang utama: **Kontak Sosial** (Pertemuan fi
 - **Mores:** Norma tata kelakuan luhur/moral tinggi.
 - **Customs (Adat):** Adat sanksi keras bagi pelanggarnya.
 """
-                "link_drive": "https://drive.google.com/drive/folders/1PERDuQW365qDfcRH22dUJI7V8MTms7_L?usp=drive_link"
             }
         },
         "Kelas 11": {
