@@ -19,6 +19,7 @@ Eksponen adalah perkalian berulang, sedangkan Logaritma adalah **invers (kebalik
 > **🧠 KONSEP HOTS UTBK:**
 > Di soal ujian, logaritma sering digabung dengan Persamaan Kuadrat. Jika melihat pangkat eksponen bertingkat, segera gunakan pemisalan variabel $p = a^x$!
 """
+                "link_drive": "https://drive.google.com/drive/folders/1sBINxjHzzlLTWI1wZuwIEcLVURrQUncY?usp=drive_link"
             },
             "Bab 2: Barisan dan Deret": {
                 "sub_bab": ["Barisan Aritmatika", "Barisan Geometri", "Deret Tak Hingga", "Aplikasi (Bunga, Anuitas)"],
@@ -33,6 +34,7 @@ Barisan adalah urutan angka dengan pola pasti. Aritmatika ditandai dengan **Beda
 > **💡 TRIK STUDI KASUS BISNIS:**
 > Deret tak hingga geometri berlimpah di soal tes PTN, terutama kasus bola pantul! Gunakan rumus cepat pantulan: $S_{\infty} = \frac{a(b+c)}{b-c}$ (di mana r = c/b).
 """
+                "link_drive": "https://drive.google.com/drive/folders/1oP0aA5GESoYShdo1SBeGQgb3Slo6q-uF?usp=drive_link"
             },
             "Bab 3: Vektor dan Operasinya": {
                 "sub_bab": ["Notasi Vektor", "Vektor di R2 and R3", "Operasi Vektor", "Cross & Dot Product"],
@@ -47,6 +49,7 @@ Vektor bukanlah sekadar angka; ia memiliki **Nilai (Besar)** dan **Arah**.
 > **🧠 TIPS UJIAN:**
 > Jika soal menyebutkan "Dua vektor saling tegak lurus", itu adalah kata sandi bahwa **Dot Product mereka bernilai NOL ($a \cdot b = 0$)**!
 """
+"link_drive": "https://drive.google.com/drive/folders/1ww_FFUqoMVBCNFrByARTYLLvpJfqY40S?usp=drive_link"
             },
             "Bab 4: Trigonometri": {
                 "sub_bab": ["Penamaan Sisi", "Perbandingan Trigonometri", "Sudut Berelasi", "Konteks Nyata"],
@@ -62,6 +65,7 @@ Trigonometri mengkaji hubungan antara sudut dan panjang sisi segitiga siku-siku.
 > **💡 ANALISIS HOTS:**
 > Sudut relasi kuadran sangat vital. Hafalkan "Semua - Sindikat - Tangannya - Kosong" (Kuadran I semua positif, II Sin positif, III Tan positif, IV Cos positif).
 """
+                "link_drive": "https://drive.google.com/drive/folders/1-N1gX50UJdxI2i04aqPtdRyk4-3iba7H?usp=drive_link"
             },
             "Bab 5: Sistem Persamaan Linear": {
                 "sub_bab": ["SPLDV", "SPLTV", "SPtLDV", "Model Matematika"],
@@ -75,6 +79,7 @@ Lakukan Kombinasi **Eliminasi** (menghilangkan satu variabel dengan menjumlah/me
 > **🧠 KUNCI MODEL MATEMATIKA:**
 > Langkah tersulit di UTBK bukan menghitungnya, melainkan menerjemahkan cerita soal menjadi bentuk $x$ dan $y$. Fokus pada kalimat "Total" atau "Maksimal".
 """
+                "link_drive": "https://drive.google.com/drive/folders/1KcHYn9-3ouoE6GEQtvHBxy_WfI0JAlHm?usp=drive_link"
             },
             "Bab 6: Fungsi Kuadrat": {
                 "sub_bab": ["Grafik Fungsi", "Mengonstruksi Fungsi", "Nilai Maks/Min", "Aplikasi"],
@@ -89,6 +94,7 @@ Fungsi kuadrat memiliki bentuk umum $f(x) = ax^2 + bx + c$. Jika $a > 0$ kurva t
 > **💡 TRIK KILAT:**
 > Jika fungsi kuadrat menyinggung sumbu X, artinya Diskriminan bernilai nol ($D = b^2 - 4ac = 0$).
 """
+                "link_drive": "https://drive.google.com/drive/folders/1tGZ0Wf5Cr5IuQdfH2QnZ9Li6-ddoZnQc?usp=drive_link"
             },
             "Bab 7: Statistika": {
                 "sub_bab": ["Distribusi Frekuensi", "Histogram/Ogive", "Pemusatan Data", "Letak Data", "Penyebaran Data"],
@@ -104,6 +110,7 @@ Statistika adalah seni mengubah data acak menjadi informasi berharga.
 > **🧠 TIPS UTBK STATISTIKA:**
 > Hati-hati dengan konsep Simpangan Baku. Jika semua data dikali 2, maka rata-rata ikut dikali 2, TETAPI varians akan dikali $2^2$ (kuadratnya)!
 """
+                "link_drive": "https://drive.google.com/drive/folders/1awA-Lv_X_X7emg1WZ0UIFLEtgMxGRgyo?usp=drive_link"
             },
             "Bab 8: Peluang": {
                 "sub_bab": ["Ruang Sampel", "Peluang Kejadian", "Frekuensi Harapan", "Saling Lepas/Bebas"],
@@ -118,6 +125,7 @@ Peluang adalah rasio antara kejadian yang diharapkan (Titik Sampel) dengan total
 > **💡 KUNCI CEPAT:**
 > Jika soal memakai kata hubung **"DAN"**, kalikan peluangnya. Jika menggunakan kata hubung **"ATAU"**, jumlahkan peluangnya!
 """
+                "link_drive": "https://drive.google.com/drive/folders/1ZMmZwbI6yp1mFykwn7u_zhm-Jf1w_eCU?usp=drive_link"
             }
         },
         "Kelas 11": {
