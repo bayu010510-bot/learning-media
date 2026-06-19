@@ -19,7 +19,7 @@ Eksponen adalah perkalian berulang, sedangkan Logaritma adalah **invers (kebalik
 > **🧠 KONSEP HOTS UTBK:**
 > Di soal ujian, logaritma sering digabung dengan Persamaan Kuadrat. Jika melihat pangkat eksponen bertingkat, segera gunakan pemisalan variabel $p = a^x$!
 """
-                "link_drive": "https://drive.google.com/drive/folders/1sBINxjHzzlLTWI1wZuwIEcLVURrQUncY?usp=drive_link"
+                "link_drive": "https://drive.google.com/drive/folders/1sBINxjHzzlLTWI1wZuwIEcLVURrQUncY?usp=drive_link/view"
             },
             "Bab 2: Barisan dan Deret": {
                 "sub_bab": ["Barisan Aritmatika", "Barisan Geometri", "Deret Tak Hingga", "Aplikasi (Bunga, Anuitas)"],
