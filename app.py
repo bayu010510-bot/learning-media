@@ -114,6 +114,10 @@ if "hasil_drill" not in st.session_state: st.session_state.hasil_drill = None
 
 PASSWORD_ADMIN = "LEARNWITHLM"
 
+# INI DIA FUNGSI YANG TADI HILANG!
+def hash_password(password): return hashlib.sha256(password.encode()).hexdigest()
+def bersihkan_nama(teks): return re.sub(r'[\\/*?:"<>|]', "", teks)
+
 # --- IMPORT DARI FILE EKSTERNAL ---
 try:
     from database_rangkuman import DATA_MATERI
@@ -197,7 +201,6 @@ if not st.session_state.logged_in:
                     elif user_record:
                         st.error("❌ Kata Sandi salah!")
                     else:
-                        # Pesan error merah jika user_record berupa pesan error Supabase sudah ditampilkan oleh fungsi db_get_user
                         if not st.session_state.get('error_db_shown'):
                             st.error("❌ Username tidak ditemukan di Cloud Database!")
                 else: st.warning("Isi semua kolom!")
@@ -207,7 +210,6 @@ if not st.session_state.logged_in:
             r_pass = st.text_input("Buat Kata Sandi:", type="password", key="r_pwd").strip()
             if st.button("✨ DAFTAR BARU"):
                 if r_user and r_pass:
-                    # Validasi apakah username sudah ada
                     existing = db_get_user(r_user)
                     if existing: 
                         st.error("⚠️ Username sudah dipakai petarung lain!")
@@ -224,7 +226,6 @@ if not st.session_state.logged_in:
 player = st.session_state.username
 user_data = db_get_user(player)
 
-# Keamanan jika tiba-tiba akun hilang dari cloud
 if not user_data:
     st.session_state.logged_in = False
     st.rerun()
@@ -524,7 +525,6 @@ elif menu == "⚙️ Konsol Admin Pro":
         with tab_db:
             if users_admin:
                 df = pd.DataFrame(users_admin)
-                # Menyaring hanya kolom yang ingin ditampilkan agar rapi
                 df = df[["username", "title", "points", "streak"]]
                 df.columns = ["Nama Akun", "Julukan", "Total XP", "Login Streak"]
                 st.dataframe(df, use_container_width=True, hide_index=True)
