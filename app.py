@@ -12,8 +12,8 @@ import requests
 st.set_page_config(page_title="Learning Media | Edisi Cloud Pro", page_icon="⚡", layout="wide", initial_sidebar_state="expanded")
 
 # --- KONEKSI GLOBAL SUPABASE (API REST) ---
-SUPABASE_URL = st.secrets["SUPABASE_URL"]
-SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
+SUPABASE_URL = st.secrets["SUPABASE_URL"].strip()
+SUPABASE_KEY = st.secrets["SUPABASE_KEY"].strip()
 
 HEADERS = {
     "apikey": SUPABASE_KEY,
@@ -22,11 +22,19 @@ HEADERS = {
     "Prefer": "return=representation"
 }
 
-# --- FUNGSI UTILITAS DATABASE (REST API SUPABASE ENGINE) ---
+# --- FUNGSI UTILITAS DATABASE (ANTI-CRASH) ---
 def db_get_user(username):
     url = f"{SUPABASE_URL}/rest/v1/users_cloud?username=ilike.{username}"
-    res = requests.get(url, headers=HEADERS).json()
-    return res[0] if res else None
+    try:
+        res = requests.get(url, headers=HEADERS).json()
+        if isinstance(res, list): 
+            return res[0] if len(res) > 0 else None
+        else:
+            st.error(f"🚨 Supabase Menolak Akses: {res}")
+            return None
+    except Exception as e:
+        st.error(f"🚨 Koneksi Gagal: {e}")
+        return None
 
 def db_create_user(username, hashed_pwd):
     url = f"{SUPABASE_URL}/rest/v1/users_cloud"
@@ -37,7 +45,9 @@ def db_create_user(username, hashed_pwd):
         "sejarah": 10, "ekonomi": 10, "sosiologi": 10, "seni_budaya": 10,
         "geografi": 10, "prakarya_dan_kewirausahaan": 10
     }
-    requests.post(url, headers=HEADERS, json=data)
+    res = requests.post(url, headers=HEADERS, json=data)
+    if res.status_code not in [200, 201, 204]:
+        st.error(f"🚨 Gagal membuat akun (Cek SQL / RLS Supabase): {res.text}")
 
 def db_update_points(username, new_points):
     url = f"{SUPABASE_URL}/rest/v1/users_cloud?username=eq.{username}"
@@ -51,16 +61,15 @@ def db_update_title(username, title, cost=0):
     url = f"{SUPABASE_URL}/rest/v1/users_cloud?username=eq.{username}"
     payload = {"title": title}
     if cost > 0:
-        # Ambil poin saat ini lalu kurangi
         current = db_get_user(username)
-        if current:
-            payload["points"] = current["points"] - cost
+        if current: payload["points"] = current["points"] - cost
     requests.patch(url, headers=HEADERS, json=payload)
 
 def db_get_learned_history(username):
     url = f"{SUPABASE_URL}/rest/v1/kuis_history_cloud?username=eq.{username}"
     res = requests.get(url, headers=HEADERS).json()
-    return set([row["id_kuis"] for row in res])
+    if isinstance(res, list): return set([row["id_kuis"] for row in res])
+    return set()
 
 def db_add_kuis_history(username, id_kuis):
     url = f"{SUPABASE_URL}/rest/v1/kuis_history_cloud"
@@ -68,16 +77,21 @@ def db_add_kuis_history(username, id_kuis):
 
 def db_get_leaderboard():
     url = f"{SUPABASE_URL}/rest/v1/users_cloud?select=username,points,title&order=points.desc&limit=5"
-    return requests.get(url, headers=HEADERS).json()
+    res = requests.get(url, headers=HEADERS).json()
+    if isinstance(res, list): return res
+    return []
 
 def db_get_all_users_admin():
     url = f"{SUPABASE_URL}/rest/v1/users_cloud?select=username,title,points,streak&order=points.desc"
-    return requests.get(url, headers=HEADERS).json()
+    res = requests.get(url, headers=HEADERS).json()
+    if isinstance(res, list): return res
+    return []
 
 def db_get_random_opponent(exclude_username):
     url = f"{SUPABASE_URL}/rest/v1/users_cloud?username=neq.{exclude_username}&limit=10"
     res = requests.get(url, headers=HEADERS).json()
-    return random.choice(res) if res else None
+    if isinstance(res, list) and len(res) > 0: return random.choice(res)
+    return None
 
 def db_update_pvp_win(winner, loser, winner_current_pts, loser_current_pts):
     url_w = f"{SUPABASE_URL}/rest/v1/users_cloud?username=eq.{winner}"
@@ -100,12 +114,14 @@ if "hasil_drill" not in st.session_state: st.session_state.hasil_drill = None
 
 PASSWORD_ADMIN = "LEARNWITHLM"
 
-def hash_password(password): return hashlib.sha256(password.encode()).hexdigest()
-def bersihkan_nama(teks): return re.sub(r'[\\/*?:"<>|]', "", teks)
-
 # --- IMPORT DARI FILE EKSTERNAL ---
-from database_rangkuman import DATA_MATERI
-from database_soal import BANK_SOAL_PRO
+try:
+    from database_rangkuman import DATA_MATERI
+    from database_soal import BANK_SOAL_PRO
+except ImportError:
+    DATA_MATERI = {}
+    BANK_SOAL_PRO = {}
+    st.warning("⚠️ File database_rangkuman.py atau database_soal.py tidak ditemukan!")
 
 DAFTAR_GELAR = {"⚡ Petarung Cepat": 150, "🧪 Alkemis Gila": 200, "👑 Raja Duel": 400, "🌌 Penguasa Server": 1000}
 
@@ -174,11 +190,16 @@ if not st.session_state.logged_in:
             if st.button("🚀 LOGIN SEKARANG"):
                 if l_user and l_pass:
                     user_record = db_get_user(l_user)
-                    if user_record and user_record["password"] == hash_password(l_pass):
+                    if user_record and user_record.get("password") == hash_password(l_pass):
                         st.session_state.username = user_record["username"] 
                         st.session_state.logged_in = True
                         st.rerun()
-                    else: st.error("❌ Username atau Sandi salah!")
+                    elif user_record:
+                        st.error("❌ Kata Sandi salah!")
+                    else:
+                        # Pesan error merah jika user_record berupa pesan error Supabase sudah ditampilkan oleh fungsi db_get_user
+                        if not st.session_state.get('error_db_shown'):
+                            st.error("❌ Username tidak ditemukan di Cloud Database!")
                 else: st.warning("Isi semua kolom!")
                 
         with tab_reg:
@@ -186,7 +207,10 @@ if not st.session_state.logged_in:
             r_pass = st.text_input("Buat Kata Sandi:", type="password", key="r_pwd").strip()
             if st.button("✨ DAFTAR BARU"):
                 if r_user and r_pass:
-                    if db_get_user(r_user): st.error("⚠️ Username sudah dipakai petarung lain!")
+                    # Validasi apakah username sudah ada
+                    existing = db_get_user(r_user)
+                    if existing: 
+                        st.error("⚠️ Username sudah dipakai petarung lain!")
                     else:
                         db_create_user(r_user, hash_password(r_pass))
                         st.success("🎉 Profil Berhasil Ditempa Cloud! Silakan beralih ke tab '🔐 MASUK ARENA'.")
@@ -199,7 +223,16 @@ if not st.session_state.logged_in:
 # ==========================================
 player = st.session_state.username
 user_data = db_get_user(player)
-avatar_db, title_db, points_db, streak_db = user_data["avatar_name"], user_data["title"], user_data["points"], user_data["streak"]
+
+# Keamanan jika tiba-tiba akun hilang dari cloud
+if not user_data:
+    st.session_state.logged_in = False
+    st.rerun()
+
+avatar_db = user_data.get("avatar_name", "Geni Us")
+title_db = user_data.get("title", "🏅 Pemula")
+points_db = user_data.get("points", 0)
+streak_db = user_data.get("streak", 1)
 
 learned_db = db_get_learned_history(player)
 user_level = (points_db // 100) + 1
@@ -272,8 +305,8 @@ if menu == "🏠 Beranda Server":
         bdr_color = "rgba(255, 215, 0, 0.5)" if i==0 else "rgba(255,255,255,0.08)"
         st.markdown(f"""
         <div style='background: {bg_color}; border: 1px solid {bdr_color}; border-radius: 15px; padding: 15px 25px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;'>
-            <h3 style='margin:0;'>{medali} {row["username"]} <span style='font-size:14px; font-weight:normal; color:#94A3B8;'>({row["title"]})</span></h3>
-            <h3 style='margin:0; color:#00C6FF;'>⭐ {row["points"]} XP</h3>
+            <h3 style='margin:0;'>{medali} {row.get("username", "Anonim")} <span style='font-size:14px; font-weight:normal; color:#94A3B8;'>({row.get("title", "")})</span></h3>
+            <h3 style='margin:0; color:#00C6FF;'>⭐ {row.get("points", 0)} XP</h3>
         </div>
         """, unsafe_allow_html=True)
 
@@ -307,7 +340,7 @@ elif menu == "⚔️ Mode Duel Ranked (PvP)":
         if st.button("🔍 CARI LAWAN ACURATE"):
             lawan = db_get_random_opponent(player)
             if lawan and len(pool_pvp[mapel_duel]) > 0:
-                st.session_state.lawan_duel = (lawan["username"], lawan["points"])
+                st.session_state.lawan_duel = (lawan["username"], lawan.get("points", 0))
                 st.session_state.kuis_duel = True
                 soal_asli = random.choice(pool_pvp[mapel_duel])
                 opsi_acak = soal_asli["opsi"].copy()
@@ -480,8 +513,8 @@ elif menu == "⚙️ Konsol Admin Pro":
         
         with tab_stat:
             total_akun = len(users_admin)
-            total_xp = sum([r["points"] for r in users_admin])
-            max_streak = max([r["streak"] for r in users_admin]) if users_admin else 0
+            total_xp = sum([r.get("points", 0) for r in users_admin])
+            max_streak = max([r.get("streak", 0) for r in users_admin]) if users_admin else 0
             
             c1, c2, c3 = st.columns(3)
             c1.metric("Siswa Terdaftar", f"{total_akun} Akun")
@@ -491,6 +524,8 @@ elif menu == "⚙️ Konsol Admin Pro":
         with tab_db:
             if users_admin:
                 df = pd.DataFrame(users_admin)
+                # Menyaring hanya kolom yang ingin ditampilkan agar rapi
+                df = df[["username", "title", "points", "streak"]]
                 df.columns = ["Nama Akun", "Julukan", "Total XP", "Login Streak"]
                 st.dataframe(df, use_container_width=True, hide_index=True)
             else: st.info("Database Kosong.")
