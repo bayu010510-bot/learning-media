@@ -128,11 +128,14 @@ def db_get_quiz_session(code):
     res = requests.get(f"{SUPABASE_URL}/rest/v1/quiz_sessions?session_code=eq.{code}", headers=HEADERS).json()
     return res[0] if isinstance(res, list) and len(res) > 0 else None
 
+def db_get_waiting_sessions():
+    res = requests.get(f"{SUPABASE_URL}/rest/v1/quiz_sessions?status=eq.waiting", headers=HEADERS).json()
+    return res if isinstance(res, list) else []
+
 def db_update_session_status(code, status):
     requests.patch(f"{SUPABASE_URL}/rest/v1/quiz_sessions?session_code=eq.{code}", headers=HEADERS, json={"status": status})
 
 def db_join_session(code, username):
-    # Cek apakah sudah join sebelumnya agar tidak duplikat
     check = requests.get(f"{SUPABASE_URL}/rest/v1/session_players?session_code=eq.{code}&username=eq.{username}", headers=HEADERS).json()
     if isinstance(check, list) and len(check) == 0:
         data = {"session_code": code, "username": username, "score": 0, "status": "joined"}
@@ -332,7 +335,7 @@ elif menu == "⚡ Live Arena Quiz (NEW!)":
     
     # JIKA TIDAK SEDANG BERMAIN / HOSTING
     if not st.session_state.quizizz_aktif and not st.session_state.qz_selesai and not st.session_state.current_room_code:
-        tab_solo, tab_murid, tab_guru = st.tabs(["🎮 MODE SOLO (LATIHAN)", "🎒 MODE MURID (MASUK KODE)", "👑 MODE GURU (BUAT KAMAR)"])
+        tab_solo, tab_join, tab_host = st.tabs(["🎮 LATIHAN SOLO", "👥 DAFTAR KAMAR (GABUNG)", "👑 BUAT KAMAR BARU (HOST)"])
         
         with tab_solo:
             st.markdown("<div class='glass-card' style='text-align:left;'>", unsafe_allow_html=True)
@@ -354,11 +357,42 @@ elif menu == "⚡ Live Arena Quiz (NEW!)":
                 else: st.error("Soal tidak cukup!")
             st.markdown("</div></div>", unsafe_allow_html=True)
             
-        with tab_murid:
-            st.markdown("<div class='glass-card' style='text-align:center;'>", unsafe_allow_html=True)
-            st.markdown("<h3>🎫 PIN MASUK SEAT KUIS</h3>", unsafe_allow_html=True)
-            kode_input = st.text_input("Ketik 6 Digit Kode dari Guru:", max_chars=6, placeholder="Contoh: 849204").strip()
-            if st.button("🚪 MASUK KAMAR KUIS", use_container_width=True):
+        with tab_join:
+            st.markdown("<div class='glass-card' style='text-align:left;'>", unsafe_allow_html=True)
+            st.markdown("<h3 style='text-align:center;'>🌐 LOBBY KAMAR MULTIPLAYER</h3>", unsafe_allow_html=True)
+            
+            c_ref, _ = st.columns([1, 3])
+            with c_ref:
+                if st.button("🔄 Refresh Server"): st.rerun()
+                
+            st.write("<br>", unsafe_allow_html=True)
+            active_rooms = db_get_waiting_sessions()
+            
+            if active_rooms:
+                for room in active_rooms:
+                    st.markdown(f"""
+                    <div style='background:rgba(255,255,255,0.05); border:1px solid rgba(0, 198, 255, 0.4); border-radius:10px; padding:15px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;'>
+                        <div>
+                            <h4 style='margin:0; color:#00C6FF;'>📚 {room['mapel']}</h4>
+                            <span style='font-size:14px; color:#94A3B8;'>Host: {room['host_username']} | PIN: {room['session_code']}</span>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    # Tombol gabung per room
+                    if st.button(f"🚪 GABUNG", key=f"join_{room['session_code']}"):
+                        db_join_session(room['session_code'], player)
+                        st.session_state.current_room_code = room['session_code']
+                        st.session_state.is_host = False
+                        st.success("🎯 Berhasil masuk lobby!")
+                        st.rerun()
+                    st.write("<br>", unsafe_allow_html=True)
+            else:
+                st.info("📭 Server saat ini sepi. Belum ada kamar kuis yang dibuat. Jadilah yang pertama membuat kamar!")
+                
+            st.markdown("<hr style='border:1px solid rgba(255,255,255,0.1);'>", unsafe_allow_html=True)
+            st.caption("Atau masukkan PIN secara manual (untuk kamar Private/Rahasia):")
+            kode_input = st.text_input("Ketik 6 Digit PIN Kamar:", max_chars=6, placeholder="Contoh: 849204").strip()
+            if st.button("🚪 MASUK VIA PIN", use_container_width=True):
                 if kode_input:
                     room = db_get_quiz_session(kode_input)
                     if room:
@@ -373,11 +407,13 @@ elif menu == "⚡ Live Arena Quiz (NEW!)":
                     else: st.error("❌ Kode Kamar tidak ditemukan di database cloud!")
             st.markdown("</div>", unsafe_allow_html=True)
             
-        with tab_guru:
+        with tab_host:
             st.markdown("<div class='glass-card' style='text-align:left;'>", unsafe_allow_html=True)
+            st.markdown("<h3>👑 JADI HOST KAMAR BARU</h3>", unsafe_allow_html=True)
+            st.caption("Buat kamar kuis yang bisa dilihat dan diikuti oleh siapapun yang sedang online di server!")
             mapel_guru = st.selectbox("🎯 Pilih Mata Pelajaran Yang Akan Diujikan:", list(BANK_SOAL_PRO.keys()) if BANK_SOAL_PRO else ["-"], key="guru_m")
             st.markdown("<br>", unsafe_allow_html=True)
-            if st.button("👑 GENERATE ROOM & KODE PIN", use_container_width=True):
+            if st.button("👑 GENERATE ROOM PUBLIK", use_container_width=True):
                 random_code = str(random.randint(100000, 999999))
                 db_create_quiz_session(random_code, player, mapel_guru)
                 st.session_state.current_room_code = random_code
@@ -385,7 +421,7 @@ elif menu == "⚡ Live Arena Quiz (NEW!)":
                 st.rerun()
             st.markdown("</div>", unsafe_allow_html=True)
 
-    # --- LOBBY RUANG TUNGGU (GURU & SISWA) ---
+    # --- LOBBY RUANG TUNGGU (HOST & PLAYER) ---
     elif st.session_state.current_room_code and not st.session_state.quizizz_aktif and not st.session_state.qz_selesai:
         code = st.session_state.current_room_code
         room_info = db_get_quiz_session(code)
@@ -393,16 +429,16 @@ elif menu == "⚡ Live Arena Quiz (NEW!)":
         
         st.markdown(f"<div class='glass-card' style='border-color:#00C6FF; padding:40px;'>", unsafe_allow_html=True)
         st.markdown(f"<h4>Kamar Kuis Aktif: <span style='color:#00C6FF;'>{room_info['mapel']}</span></h4>", unsafe_allow_html=True)
-        st.markdown(f"<p style='font-size:20px; color:#94A3B8; margin:0;'>BAGIKAN KODE PIN INI KEPADA SISWA:</p>", unsafe_allow_html=True)
+        st.markdown(f"<p style='font-size:20px; color:#94A3B8; margin:0;'>KODE PIN KAMAR (UNTUK PRIVATE):</p>", unsafe_allow_html=True)
         st.markdown(f"<h1 style='font-size:75px; font-weight:900; color:#F59E0B; letter-spacing:5px; text-shadow:0 0 30px rgba(245,158,11,0.4); margin:10px 0;'>{code}</h1>", unsafe_allow_html=True)
-        st.markdown(f"<h5>👥 Siswa di Dalam Lobby ({len(players)} Orang)</h5>", unsafe_allow_html=True)
+        st.markdown(f"<h5>👥 Pemain di Dalam Lobby ({len(players)} Orang)</h5>", unsafe_allow_html=True)
         
         # Tampilkan daftar murid yang masuk
         if players:
             names = ", ".join([p["username"] for p in players])
             st.markdown(f"<div style='background:rgba(0,0,0,0.3); padding:15px; border-radius:10px; color:#10B981; font-weight:bold;'>{names}</div>", unsafe_allow_html=True)
         else:
-            st.caption("Menunggu siswa mengetik kode PIN...")
+            st.caption("Menunggu petarung bergabung...")
             
         st.write("<br>", unsafe_allow_html=True)
         c_ref, c_act = st.columns(2)
@@ -413,12 +449,12 @@ elif menu == "⚡ Live Arena Quiz (NEW!)":
             if st.session_state.is_host:
                 if st.button("🚀 MULAI PERMAINAN KUIS (START)"):
                     if len(players) == 0:
-                        st.error("Minimal harus ada 1 siswa di lobby untuk memulai!")
+                        st.error("Minimal harus ada 1 pemain di lobby untuk memulai!")
                     else:
                         db_update_session_status(code, "active")
                         st.rerun()
             else:
-                st.info("⏱️ Harap tenang, kuis akan segera dimulai ketika Guru menekan tombol Start.")
+                st.info("⏱️ Harap tenang, kuis akan segera dimulai ketika Host menekan tombol Start.")
                 if room_info["status"] == "active":
                     # Otomatis tarik soal untuk murid
                     semua_soal = []
@@ -440,12 +476,12 @@ elif menu == "⚡ Live Arena Quiz (NEW!)":
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
 
-        # LIVE LEADERBOARD UNTUK GURU SAAT KUIS BERJALAN
+        # LIVE LEADERBOARD UNTUK HOST SAAT KUIS BERJALAN
         if st.session_state.is_host and room_info["status"] == "active":
             st.write("<br>", unsafe_allow_html=True)
             st.markdown("### 📈 LIVE REAL-TIME LEADERBOARD SISWA")
             for rank, p in enumerate(players):
-                status_icon = "✅ Selesai" if p["status"] == "finished" else "⏳ Mengerjakan"
+                status_icon = "✅ Selesai" if p["status"] == "finished" else "⏳ Bertarung"
                 st.markdown(f"""
                 <div style='background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:10px; padding:10px 20px; margin-bottom:8px; display:flex; justify-content:space-between;'>
                     <b>#{rank+1} {p['username']} ({status_icon})</b>
@@ -483,7 +519,7 @@ elif menu == "⚡ Live Arena Quiz (NEW!)":
             if st.session_state.qz_index >= total_soal:
                 st.session_state.quizizz_aktif = False
                 st.session_state.qz_selesai = True
-                # Jika dia siswa di dalam room, simpan skor ke database agar guru bisa melihatnya
+                # Jika dia siswa di dalam room, simpan skor ke database agar host bisa melihatnya
                 if st.session_state.current_room_code:
                     db_update_player_score(st.session_state.current_room_code, player, st.session_state.qz_score)
             time.sleep(0.3)
