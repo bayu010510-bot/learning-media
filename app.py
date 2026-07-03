@@ -68,7 +68,7 @@ except Exception:
     st.stop()
 
 # ==========================================
-# 3. FUNGSI DATABASE ANTI-CRASH
+# 3. FUNGSI DATABASE LENGKAP
 # ==========================================
 def db_get_user(username):
     try:
@@ -119,7 +119,7 @@ def db_update_pvp_win(winner, loser, winner_current_pts, loser_current_pts):
 def db_update_pvp_lose(loser, loser_current_pts):
     requests.patch(f"{SUPABASE_URL}/rest/v1/users_cloud?username=eq.{loser}", headers=HEADERS, json={"points": max(0, loser_current_pts - 30)})
 
-# --- FUNGSI BARU: GAME MULTIPLAYER LOBBY SYSTEM ---
+# --- FUNGSI MULTIPLAYER LOBBY SYSTEM ---
 def db_create_quiz_session(code, host, mapel):
     data = {"session_code": code, "host_username": host, "mapel": mapel, "status": "waiting"}
     requests.post(f"{SUPABASE_URL}/rest/v1/quiz_sessions", headers=HEADERS, json=data)
@@ -149,6 +149,19 @@ def db_update_player_score(code, username, score):
     url = f"{SUPABASE_URL}/rest/v1/session_players?session_code=eq.{code}&username=eq.{username}"
     requests.patch(url, headers=HEADERS, json={"score": score, "status": "finished"})
 
+# --- FUNGSI CUSTOM QUIZ (PABRIK SOAL) ---
+def db_save_custom_quiz(title, creator, questions):
+    data = {"title": title, "creator": creator, "questions": questions}
+    requests.post(f"{SUPABASE_URL}/rest/v1/custom_quizzes", headers=HEADERS, json=data)
+
+def db_get_all_custom_quizzes():
+    res = requests.get(f"{SUPABASE_URL}/rest/v1/custom_quizzes", headers=HEADERS).json()
+    return res if isinstance(res, list) else []
+
+def db_get_custom_quiz_by_title(title):
+    res = requests.get(f"{SUPABASE_URL}/rest/v1/custom_quizzes?title=eq.{title}", headers=HEADERS).json()
+    return res[0] if isinstance(res, list) and len(res) > 0 else None
+
 # ==========================================
 # 4. INISIALISASI SESSION & UTILITAS
 # ==========================================
@@ -169,6 +182,7 @@ if "qz_score" not in st.session_state: st.session_state.qz_score = 0
 if "qz_selesai" not in st.session_state: st.session_state.qz_selesai = False
 if "current_room_code" not in st.session_state: st.session_state.current_room_code = ""
 if "is_host" not in st.session_state: st.session_state.is_host = False
+if "temp_q" not in st.session_state: st.session_state.temp_q = []
 
 PASSWORD_ADMIN = "LEARNWITHLM"
 DAFTAR_GELAR = {"⚡ Petarung Cepat": 150, "🧪 Alkemis Gila": 200, "👑 Raja Duel": 400, "🌌 Penguasa Server": 1000}
@@ -328,57 +342,62 @@ if menu == "🏠 Dashboard Utama":
         """, unsafe_allow_html=True)
 
 # ==========================================
-# HALAMAN 2: LIVE ARENA QUIZ (KAHOOT / QUIZIZZ ROOM SYSTEM)
+# HALAMAN 2: LIVE ARENA QUIZ (ROOMS + UGC)
 # ==========================================
 elif menu == "⚡ Live Arena Quiz (NEW!)":
     st.markdown("<h1>⚡ <span class='gradient-text'>LIVE ARENA QUIZIZZ ROOMS</span></h1>", unsafe_allow_html=True)
     
-    # JIKA TIDAK SEDANG BERMAIN / HOSTING
+    # Ambil data kuis buatan komunitas
+    custom_quizzes_db = db_get_all_custom_quizzes()
+    list_custom_titles = [f"🌟 {q['title']} (by {q['creator']})" for q in custom_quizzes_db]
+    pilihan_mapel_gabungan = list(BANK_SOAL_PRO.keys()) + list_custom_titles
+
     if not st.session_state.quizizz_aktif and not st.session_state.qz_selesai and not st.session_state.current_room_code:
-        tab_solo, tab_join, tab_host = st.tabs(["🎮 LATIHAN SOLO", "👥 DAFTAR KAMAR (GABUNG)", "👑 BUAT KAMAR BARU (HOST)"])
+        tab_solo, tab_join, tab_host, tab_create = st.tabs(["🎮 LATIHAN SOLO", "👥 GABUNG KAMAR", "👑 HOST KAMAR", "🛠️ PABRIK SOAL (BARU)"])
         
+        # --- TAB LATIHAN SOLO ---
         with tab_solo:
             st.markdown("<div class='glass-card' style='text-align:left;'>", unsafe_allow_html=True)
-            mapel_kuis = st.selectbox("🎯 Pilih Zona Mata Pelajaran:", list(BANK_SOAL_PRO.keys()) if BANK_SOAL_PRO else ["-"], key="solo_m")
+            mapel_solo = st.selectbox("🎯 Pilih Kuis:", pilihan_mapel_gabungan, key="solo_m")
             st.markdown("<br><div class='btn-green'>", unsafe_allow_html=True)
-            if st.button("🚀 MULAI KUIS SOLO", key="btn_solo"):
-                semua_soal = []
-                for kl, d_bab in BANK_SOAL_PRO[mapel_kuis].items():
-                    for bb, d_sub in d_bab.items():
-                        for sub, list_soal in d_sub.items():
-                            semua_soal.extend(list_soal)
-                if len(semua_soal) >= 5:
-                    st.session_state.qz_soal = random.sample(semua_soal, 5)
+            if st.button("🚀 MULAI LATIHAN SOLO", key="btn_solo"):
+                if mapel_solo.startswith("🌟 "):
+                    title_only = mapel_solo.replace("🌟 ", "").split(" (by ")[0]
+                    cq = db_get_custom_quiz_by_title(title_only)
+                    semua_soal = cq["questions"]
+                else:
+                    semua_soal = []
+                    for kl, d_bab in BANK_SOAL_PRO.get(mapel_solo, {}).items():
+                        for bb, d_sub in d_bab.items():
+                            for sub, list_soal in d_sub.items(): semua_soal.extend(list_soal)
+                
+                if len(semua_soal) >= 3:
+                    st.session_state.qz_soal = random.sample(semua_soal, min(5, len(semua_soal)))
                     st.session_state.qz_index = 0
                     st.session_state.qz_score = 0
                     st.session_state.quizizz_aktif = True
                     st.session_state.is_host = False
                     st.rerun()
-                else: st.error("Soal tidak cukup!")
+                else: st.error("Soal di kuis ini terlalu sedikit!")
             st.markdown("</div></div>", unsafe_allow_html=True)
             
+        # --- TAB GABUNG KAMAR ---
         with tab_join:
             st.markdown("<div class='glass-card' style='text-align:left;'>", unsafe_allow_html=True)
             st.markdown("<h3 style='text-align:center;'>🌐 LOBBY KAMAR MULTIPLAYER</h3>", unsafe_allow_html=True)
-            
             c_ref, _ = st.columns([1, 3])
             with c_ref:
-                if st.button("🔄 Refresh Server"): st.rerun()
-                
+                if st.button("🔄 Refresh Daftar Kamar Server"): st.rerun()
             st.write("<br>", unsafe_allow_html=True)
-            active_rooms = db_get_waiting_sessions()
             
+            active_rooms = db_get_waiting_sessions()
             if active_rooms:
                 for room in active_rooms:
                     st.markdown(f"""
                     <div style='background:rgba(255,255,255,0.05); border:1px solid rgba(0, 198, 255, 0.4); border-radius:10px; padding:15px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;'>
-                        <div>
-                            <h4 style='margin:0; color:#00C6FF;'>📚 {room['mapel']}</h4>
-                            <span style='font-size:14px; color:#94A3B8;'>Host: {room['host_username']} | PIN: {room['session_code']}</span>
-                        </div>
+                        <div><h4 style='margin:0; color:#00C6FF;'>📚 {room['mapel']}</h4><span style='font-size:14px; color:#94A3B8;'>Host: {room['host_username']} | PIN: {room['session_code']}</span></div>
                     </div>
                     """, unsafe_allow_html=True)
-                    # Tombol gabung per room
                     if st.button(f"🚪 GABUNG", key=f"join_{room['session_code']}"):
                         db_join_session(room['session_code'], player)
                         st.session_state.current_room_code = room['session_code']
@@ -387,17 +406,16 @@ elif menu == "⚡ Live Arena Quiz (NEW!)":
                         st.rerun()
                     st.write("<br>", unsafe_allow_html=True)
             else:
-                st.info("📭 Server saat ini sepi. Belum ada kamar kuis yang dibuat. Jadilah yang pertama membuat kamar!")
+                st.info("📭 Server saat ini sepi. Belum ada kamar kuis yang dibuat.")
                 
             st.markdown("<hr style='border:1px solid rgba(255,255,255,0.1);'>", unsafe_allow_html=True)
-            st.caption("Atau masukkan PIN secara manual (untuk kamar Private/Rahasia):")
+            st.caption("Atau masukkan PIN secara manual (untuk kamar Private):")
             kode_input = st.text_input("Ketik 6 Digit PIN Kamar:", max_chars=6, placeholder="Contoh: 849204").strip()
             if st.button("🚪 MASUK VIA PIN", use_container_width=True):
                 if kode_input:
                     room = db_get_quiz_session(kode_input)
                     if room:
-                        if room["status"] == "finished":
-                            st.error("❌ Kamar kuis ini sudah selesai dilaksanakan!")
+                        if room["status"] == "finished": st.error("❌ Kamar kuis ini sudah selesai dilaksanakan!")
                         else:
                             db_join_session(kode_input, player)
                             st.session_state.current_room_code = kode_input
@@ -407,11 +425,11 @@ elif menu == "⚡ Live Arena Quiz (NEW!)":
                     else: st.error("❌ Kode Kamar tidak ditemukan di database cloud!")
             st.markdown("</div>", unsafe_allow_html=True)
             
+        # --- TAB HOST KAMAR ---
         with tab_host:
             st.markdown("<div class='glass-card' style='text-align:left;'>", unsafe_allow_html=True)
             st.markdown("<h3>👑 JADI HOST KAMAR BARU</h3>", unsafe_allow_html=True)
-            st.caption("Buat kamar kuis yang bisa dilihat dan diikuti oleh siapapun yang sedang online di server!")
-            mapel_guru = st.selectbox("🎯 Pilih Mata Pelajaran Yang Akan Diujikan:", list(BANK_SOAL_PRO.keys()) if BANK_SOAL_PRO else ["-"], key="guru_m")
+            mapel_guru = st.selectbox("🎯 Pilih Kuis Yang Akan Diujikan:", pilihan_mapel_gabungan, key="guru_m")
             st.markdown("<br>", unsafe_allow_html=True)
             if st.button("👑 GENERATE ROOM PUBLIK", use_container_width=True):
                 random_code = str(random.randint(100000, 999999))
@@ -420,6 +438,50 @@ elif menu == "⚡ Live Arena Quiz (NEW!)":
                 st.session_state.is_host = True
                 st.rerun()
             st.markdown("</div>", unsafe_allow_html=True)
+
+        # --- TAB PABRIK SOAL (UGC) ---
+        with tab_create:
+            st.markdown("<div class='glass-card' style='text-align:left; border-color:#10B981;'>", unsafe_allow_html=True)
+            st.markdown("<h3>🛠️ PABRIK KUIS KOMUNITAS</h3>", unsafe_allow_html=True)
+            st.caption("Kuis yang kamu buat di sini akan permanen masuk ke dalam server dan bisa dipilih oleh semua orang sebagai arena bertarung!")
+            
+            judul_baru = st.text_input("📝 Berikan Judul Kuis Kamu (Contoh: Tebak Karakter Anime):").strip()
+            
+            st.markdown("---")
+            for i, q in enumerate(st.session_state.temp_q):
+                st.info(f"✅ Soal {i+1} Tersimpan: {q['soal']} (Jawaban: {q['jawaban']})")
+                
+            with st.form("form_tambah_soal", clear_on_submit=True):
+                st.markdown("#### ➕ Tambah Soal Baru")
+                soal_text = st.text_area("Pertanyaan:", height=100)
+                c1, c2 = st.columns(2)
+                op_benar = c1.text_input("Opsi 1 (Ketik Jawaban BENAR di sini):", placeholder="Wajib jawaban benar")
+                op_salah1 = c2.text_input("Opsi 2 (Pengecoh):")
+                op_salah2 = c1.text_input("Opsi 3 (Pengecoh):")
+                op_salah3 = c2.text_input("Opsi 4 (Pengecoh):")
+                
+                if st.form_submit_button("SIMPAN SOAL INI KE DALAM DRAFT"):
+                    if soal_text and op_benar and op_salah1 and op_salah2 and op_salah3:
+                        st.session_state.temp_q.append({
+                            "soal": soal_text,
+                            "opsi": [op_benar, op_salah1, op_salah2, op_salah3],
+                            "jawaban": op_benar
+                        })
+                        st.rerun()
+                    else: st.warning("Harap isi semua opsi A, B, C, D!")
+            
+            st.markdown("<br><div class='btn-green'>", unsafe_allow_html=True)
+            if st.button("🚀 PUBLISH KUIS KE SERVER GLOBAL"):
+                if not judul_baru: st.error("Judul Kuis tidak boleh kosong!")
+                elif db_get_custom_quiz_by_title(judul_baru): st.error("Judul ini sudah dipakai orang lain! Pilih judul yang lebih unik.")
+                elif len(st.session_state.temp_q) < 3: st.error("Minimal harus membuat 3 soal!")
+                else:
+                    db_save_custom_quiz(judul_baru, player, st.session_state.temp_q)
+                    st.session_state.temp_q = []
+                    st.success("🎉 Kuis Berhasil Diterbitkan ke Server Publik! Silakan cek di tab Host Kamar.")
+                    time.sleep(2)
+                    st.rerun()
+            st.markdown("</div></div>", unsafe_allow_html=True)
 
     # --- LOBBY RUANG TUNGGU (HOST & PLAYER) ---
     elif st.session_state.current_room_code and not st.session_state.quizizz_aktif and not st.session_state.qz_selesai:
@@ -433,7 +495,6 @@ elif menu == "⚡ Live Arena Quiz (NEW!)":
         st.markdown(f"<h1 style='font-size:75px; font-weight:900; color:#F59E0B; letter-spacing:5px; text-shadow:0 0 30px rgba(245,158,11,0.4); margin:10px 0;'>{code}</h1>", unsafe_allow_html=True)
         st.markdown(f"<h5>👥 Pemain di Dalam Lobby ({len(players)} Orang)</h5>", unsafe_allow_html=True)
         
-        # Tampilkan daftar murid yang masuk
         if players:
             names = ", ".join([p["username"] for p in players])
             st.markdown(f"<div style='background:rgba(0,0,0,0.3); padding:15px; border-radius:10px; color:#10B981; font-weight:bold;'>{names}</div>", unsafe_allow_html=True)
@@ -448,27 +509,31 @@ elif menu == "⚡ Live Arena Quiz (NEW!)":
         with c_act:
             if st.session_state.is_host:
                 if st.button("🚀 MULAI PERMAINAN KUIS (START)"):
-                    if len(players) == 0:
-                        st.error("Minimal harus ada 1 pemain di lobby untuk memulai!")
+                    if len(players) == 0: st.error("Minimal harus ada 1 pemain di lobby untuk memulai!")
                     else:
                         db_update_session_status(code, "active")
                         st.rerun()
             else:
                 st.info("⏱️ Harap tenang, kuis akan segera dimulai ketika Host menekan tombol Start.")
                 if room_info["status"] == "active":
-                    # Otomatis tarik soal untuk murid
-                    semua_soal = []
-                    for kl, d_bab in BANK_SOAL_PRO[room_info["mapel"]].items():
-                        for bb, d_sub in d_bab.items():
-                            for sub, list_soal in d_sub.items():
-                                semua_soal.extend(list_soal)
+                    # LOGIKA PENGAMBILAN SOAL UNTUK MURID SAAT KUIS DIMULAI
+                    m_aktif = room_info["mapel"]
+                    if m_aktif.startswith("🌟 "):
+                        title_only = m_aktif.replace("🌟 ", "").split(" (by ")[0]
+                        cq = db_get_custom_quiz_by_title(title_only)
+                        semua_soal = cq["questions"]
+                    else:
+                        semua_soal = []
+                        for kl, d_bab in BANK_SOAL_PRO.get(m_aktif, {}).items():
+                            for bb, d_sub in d_bab.items():
+                                for sub, list_soal in d_sub.items(): semua_soal.extend(list_soal)
+                                
                     st.session_state.qz_soal = random.sample(semua_soal, min(5, len(semua_soal)))
                     st.session_state.qz_index = 0
                     st.session_state.qz_score = 0
                     st.session_state.quizizz_aktif = True
                     st.rerun()
                     
-        # Tombol Batal Keluar Room
         st.write("<br>", unsafe_allow_html=True)
         if st.button("❌ KELUAR / BUBARKAN KAMAR", key="exit_rm"):
             if st.session_state.is_host: db_update_session_status(code, "finished")
@@ -476,7 +541,6 @@ elif menu == "⚡ Live Arena Quiz (NEW!)":
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
 
-        # LIVE LEADERBOARD UNTUK HOST SAAT KUIS BERJALAN
         if st.session_state.is_host and room_info["status"] == "active":
             st.write("<br>", unsafe_allow_html=True)
             st.markdown("### 📈 LIVE REAL-TIME LEADERBOARD SISWA")
@@ -500,6 +564,7 @@ elif menu == "⚡ Live Arena Quiz (NEW!)":
         
         soal_aktif = st.session_state.qz_soal[idx]
         opsi_acak = soal_aktif["opsi"].copy()
+        random.shuffle(opsi_acak)
         
         st.write("<br>", unsafe_allow_html=True)
         st.markdown(f"<div class='glass-card' style='font-size:24px; font-weight:800; padding:40px; border-color:#00C6FF;'>{soal_aktif['soal']}</div><br>", unsafe_allow_html=True)
@@ -519,7 +584,6 @@ elif menu == "⚡ Live Arena Quiz (NEW!)":
             if st.session_state.qz_index >= total_soal:
                 st.session_state.quizizz_aktif = False
                 st.session_state.qz_selesai = True
-                # Jika dia siswa di dalam room, simpan skor ke database agar host bisa melihatnya
                 if st.session_state.current_room_code:
                     db_update_player_score(st.session_state.current_room_code, player, st.session_state.qz_score)
             time.sleep(0.3)
@@ -539,7 +603,7 @@ elif menu == "⚡ Live Arena Quiz (NEW!)":
     # --- HALAMAN FINISH SCOREBOARD ---
     elif st.session_state.qz_selesai:
         final_xp = st.session_state.qz_score
-        akurasi = int((final_xp / 100) * 100)
+        akurasi = int((final_xp / 100) * 100) if total_soal > 0 else 0
         
         if akurasi > 70: st.balloons()
         else: st.snow()
