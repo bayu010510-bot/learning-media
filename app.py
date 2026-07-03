@@ -77,7 +77,7 @@ def db_get_user(username):
     except: return None
 
 def db_create_user(username, hashed_pwd):
-    data = {"username": username, "password": hashed_pwd, "avatar_name": "Geni Us", "title": "🏅 Pemula", "points": 0, "streak": 1}
+    data = {"username": username, "password": hashed_pwd, "avatar_name": "Geni Us", "title": "🏅 Pemula", "points": 0, "streak": 1, "display_name": username}
     requests.post(f"{SUPABASE_URL}/rest/v1/users_cloud", headers=HEADERS, json=data)
 
 def db_update_points(username, new_points):
@@ -93,6 +93,13 @@ def db_update_title(username, title, cost=0):
         if current: payload["points"] = current["points"] - cost
     requests.patch(f"{SUPABASE_URL}/rest/v1/users_cloud?username=eq.{username}", headers=HEADERS, json=payload)
 
+# FUNGSI BARU: Simpan Foto Profil & Nama Tampilan
+def db_update_profile(username, display_name, custom_avatar=None):
+    payload = {"display_name": display_name}
+    if custom_avatar:
+        payload["custom_avatar"] = custom_avatar
+    requests.patch(f"{SUPABASE_URL}/rest/v1/users_cloud?username=eq.{username}", headers=HEADERS, json=payload)
+
 def db_get_learned_history(username):
     res = requests.get(f"{SUPABASE_URL}/rest/v1/kuis_history_cloud?username=eq.{username}", headers=HEADERS).json()
     return set([row["id_kuis"] for row in res]) if isinstance(res, list) else set()
@@ -101,7 +108,7 @@ def db_add_kuis_history(username, id_kuis):
     requests.post(f"{SUPABASE_URL}/rest/v1/kuis_history_cloud", headers=HEADERS, json={"username": username, "id_kuis": id_kuis})
 
 def db_get_leaderboard():
-    res = requests.get(f"{SUPABASE_URL}/rest/v1/users_cloud?select=username,points,title&order=points.desc&limit=10", headers=HEADERS).json()
+    res = requests.get(f"{SUPABASE_URL}/rest/v1/users_cloud?select=username,display_name,points,title&order=points.desc&limit=10", headers=HEADERS).json()
     return res if isinstance(res, list) else []
 
 def db_get_all_users_admin():
@@ -170,11 +177,6 @@ if "username" not in st.session_state: st.session_state.username = ""
 if "gacha_claimed" not in st.session_state: st.session_state.gacha_claimed = False
 if "is_admin" not in st.session_state: st.session_state.is_admin = False
 
-# State untuk Arena Drill
-if "drill_aktif" not in st.session_state: st.session_state.drill_aktif = False
-if "hasil_drill" not in st.session_state: st.session_state.hasil_drill = None
-
-# State untuk Live Quizizz Mode
 if "quizizz_aktif" not in st.session_state: st.session_state.quizizz_aktif = False
 if "qz_soal" not in st.session_state: st.session_state.qz_soal = []
 if "qz_index" not in st.session_state: st.session_state.qz_index = 0
@@ -200,7 +202,7 @@ except ImportError:
 if not st.session_state.logged_in:
     st.markdown("""<style>[data-testid="collapsedControl"] {display: none;} [data-testid="stSidebar"] {display: none;}</style>""", unsafe_allow_html=True)
 
-def tampilkan_avatar(keyword, ukuran="130px"):
+def tampilkan_avatar(keyword):
     st.markdown(f"<div style='text-align:center; font-size:80px; animation: pulse 3s infinite;'>{'👨‍🎓' if keyword=='genius' else '👩‍🎓'}</div>", unsafe_allow_html=True)
 
 # ==========================================
@@ -254,6 +256,11 @@ title_db = user_data.get("title", "🏅 Pemula")
 points_db = user_data.get("points", 0)
 streak_db = user_data.get("streak", 1)
 
+# Mengambil Data Profil Kustom
+display_name_db = user_data.get("display_name")
+if not display_name_db: display_name_db = player
+custom_avatar_db = user_data.get("custom_avatar")
+
 learned_db = db_get_learned_history(player)
 user_level = (points_db // 100) + 1
 
@@ -265,11 +272,17 @@ def get_tier(lvl):
     else: return "🌌 Mythic", "#9D00FF"
 tier_name, tier_color = get_tier(user_level)
 
-# --- SIDEBAR NAVIGASI ---
+# --- SIDEBAR NAVIGASI (DIPERBARUI DENGAN FOTO & NAMA KUSTOM) ---
 with st.sidebar:
     st.write("<br>", unsafe_allow_html=True)
-    tampilkan_avatar("genius" if avatar_db == "Geni Us" else "smart")
-    st.markdown(f"<h2 style='text-align:center; margin-top:10px; margin-bottom:0;' class='gradient-text'>{player}</h2>", unsafe_allow_html=True)
+    
+    # Render Avatar (Foto Sendiri atau Kartun)
+    if custom_avatar_db:
+        st.markdown(f"<div style='text-align:center;'><img src='{custom_avatar_db}' style='width:130px; height:130px; border-radius:50%; object-fit:cover; border:2px solid #00C6FF; box-shadow: 0 0 15px #00C6FF; margin-bottom:10px;'></div>", unsafe_allow_html=True)
+    else:
+        tampilkan_avatar("genius" if avatar_db == "Geni Us" else "smart")
+        
+    st.markdown(f"<h2 style='text-align:center; margin-top:10px; margin-bottom:0;' class='gradient-text'>{display_name_db}</h2>", unsafe_allow_html=True)
     st.markdown(f"<div style='text-align:center; margin-top:5px;'><span style='background:rgba(0,198,255,0.1); color:#00C6FF; padding:4px 15px; border-radius:20px; font-weight:bold; border:1px solid #00C6FF;'>{title_db}</span></div>", unsafe_allow_html=True)
     st.markdown(f"<div style='text-align:center; margin-top:10px;'><span style='background:{tier_color}30; color:{tier_color}; padding:4px 15px; border-radius:20px; font-weight:bold; border:1px solid {tier_color};'>{tier_name}</span></div>", unsafe_allow_html=True)
     
@@ -304,7 +317,7 @@ with st.sidebar:
 # HALAMAN 1: DASHBOARD UTAMA
 # ==========================================
 if menu == "🏠 Dashboard Utama":
-    st.markdown(f"<h1>SELAMAT DATANG KEMBALI, <span class='gradient-text'>{player.upper()}</span>! 🚀</h1>", unsafe_allow_html=True)
+    st.markdown(f"<h1>SELAMAT DATANG KEMBALI, <span class='gradient-text'>{display_name_db.upper()}</span>! 🚀</h1>", unsafe_allow_html=True)
     
     if not st.session_state.gacha_claimed:
         st.markdown("<div class='glass-card' style='border-color:#F59E0B; background:rgba(245, 158, 11, 0.1);'>", unsafe_allow_html=True)
@@ -334,9 +347,13 @@ if menu == "🏠 Dashboard Utama":
         elif i == 2: medali, bg_color, bdr_color = "🥉", "rgba(205, 127, 50, 0.1)", "rgba(205, 127, 50, 0.5)"
         else: medali, bg_color, bdr_color = f"#{i+1}", "rgba(255,255,255,0.02)", "rgba(255,255,255,0.05)"
         
+        # Ambil nama tampilan (jika tidak ada kembali ke username)
+        d_name = row.get("display_name")
+        if not d_name: d_name = row.get("username", "Anonim")
+        
         st.markdown(f"""
         <div style='background: {bg_color}; border: 1px solid {bdr_color}; border-radius: 12px; padding: 12px 25px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; transition: 0.3s;'>
-            <h3 style='margin:0;'>{medali} <span style='color:#F8FAFC; margin-left:10px;'>{row.get("username", "Anonim")}</span> <span style='font-size:14px; font-weight:normal; color:#94A3B8; background:rgba(0,0,0,0.3); padding:3px 10px; border-radius:10px;'>{row.get("title", "")}</span></h3>
+            <h3 style='margin:0;'>{medali} <span style='color:#F8FAFC; margin-left:10px;'>{d_name}</span> <span style='font-size:14px; font-weight:normal; color:#94A3B8; background:rgba(0,0,0,0.3); padding:3px 10px; border-radius:10px;'>{row.get("title", "")}</span></h3>
             <h3 style='margin:0; color:#00C6FF; font-weight:900;'>⭐ {row.get("points", 0)} XP</h3>
         </div>
         """, unsafe_allow_html=True)
@@ -347,7 +364,6 @@ if menu == "🏠 Dashboard Utama":
 elif menu == "⚡ Live Arena Quiz (NEW!)":
     st.markdown("<h1>⚡ <span class='gradient-text'>LIVE ARENA QUIZIZZ ROOMS</span></h1>", unsafe_allow_html=True)
     
-    # Ambil data kuis buatan komunitas
     custom_quizzes_db = db_get_all_custom_quizzes()
     list_custom_titles = [f"🌟 {q['title']} (by {q['creator']})" for q in custom_quizzes_db]
     pilihan_mapel_gabungan = list(BANK_SOAL_PRO.keys()) + list_custom_titles
@@ -355,7 +371,6 @@ elif menu == "⚡ Live Arena Quiz (NEW!)":
     if not st.session_state.quizizz_aktif and not st.session_state.qz_selesai and not st.session_state.current_room_code:
         tab_solo, tab_join, tab_host, tab_create = st.tabs(["🎮 LATIHAN SOLO", "👥 GABUNG KAMAR", "👑 HOST KAMAR", "🛠️ PABRIK SOAL (BARU)"])
         
-        # --- TAB LATIHAN SOLO ---
         with tab_solo:
             st.markdown("<div class='glass-card' style='text-align:left;'>", unsafe_allow_html=True)
             mapel_solo = st.selectbox("🎯 Pilih Kuis:", pilihan_mapel_gabungan, key="solo_m")
@@ -381,7 +396,6 @@ elif menu == "⚡ Live Arena Quiz (NEW!)":
                 else: st.error("Soal di kuis ini terlalu sedikit!")
             st.markdown("</div></div>", unsafe_allow_html=True)
             
-        # --- TAB GABUNG KAMAR ---
         with tab_join:
             st.markdown("<div class='glass-card' style='text-align:left;'>", unsafe_allow_html=True)
             st.markdown("<h3 style='text-align:center;'>🌐 LOBBY KAMAR MULTIPLAYER</h3>", unsafe_allow_html=True)
@@ -425,7 +439,6 @@ elif menu == "⚡ Live Arena Quiz (NEW!)":
                     else: st.error("❌ Kode Kamar tidak ditemukan di database cloud!")
             st.markdown("</div>", unsafe_allow_html=True)
             
-        # --- TAB HOST KAMAR ---
         with tab_host:
             st.markdown("<div class='glass-card' style='text-align:left;'>", unsafe_allow_html=True)
             st.markdown("<h3>👑 JADI HOST KAMAR BARU</h3>", unsafe_allow_html=True)
@@ -439,7 +452,6 @@ elif menu == "⚡ Live Arena Quiz (NEW!)":
                 st.rerun()
             st.markdown("</div>", unsafe_allow_html=True)
 
-        # --- TAB PABRIK SOAL (UGC) ---
         with tab_create:
             st.markdown("<div class='glass-card' style='text-align:left; border-color:#10B981;'>", unsafe_allow_html=True)
             st.markdown("<h3>🛠️ PABRIK KUIS KOMUNITAS</h3>", unsafe_allow_html=True)
@@ -483,7 +495,6 @@ elif menu == "⚡ Live Arena Quiz (NEW!)":
                     st.rerun()
             st.markdown("</div></div>", unsafe_allow_html=True)
 
-    # --- LOBBY RUANG TUNGGU (HOST & PLAYER) ---
     elif st.session_state.current_room_code and not st.session_state.quizizz_aktif and not st.session_state.qz_selesai:
         code = st.session_state.current_room_code
         room_info = db_get_quiz_session(code)
@@ -516,7 +527,6 @@ elif menu == "⚡ Live Arena Quiz (NEW!)":
             else:
                 st.info("⏱️ Harap tenang, kuis akan segera dimulai ketika Host menekan tombol Start.")
                 if room_info["status"] == "active":
-                    # LOGIKA PENGAMBILAN SOAL UNTUK MURID SAAT KUIS DIMULAI
                     m_aktif = room_info["mapel"]
                     if m_aktif.startswith("🌟 "):
                         title_only = m_aktif.replace("🌟 ", "").split(" (by ")[0]
@@ -553,7 +563,6 @@ elif menu == "⚡ Live Arena Quiz (NEW!)":
                 </div>
                 """, unsafe_allow_html=True)
 
-    # --- ANTARMUKA GAME BERJALAN (QUIZIZZ GRID 2x2 ACTION) ---
     elif st.session_state.quizizz_aktif:
         idx = st.session_state.qz_index
         total_soal = len(st.session_state.qz_soal)
@@ -600,7 +609,6 @@ elif menu == "⚡ Live Arena Quiz (NEW!)":
                 if st.button(opsi_acak[3], key=f"o3_{idx}"): cek_jawaban(opsi_acak[3])
         st.markdown("</div>", unsafe_allow_html=True)
 
-    # --- HALAMAN FINISH SCOREBOARD ---
     elif st.session_state.qz_selesai:
         final_xp = st.session_state.qz_score
         akurasi = int((final_xp / 100) * 100) if total_soal > 0 else 0
@@ -667,7 +675,7 @@ elif menu == "⚔️ Mode Duel Ranked (PvP)":
         st.markdown("<hr style='border:1px solid rgba(255,255,255,0.1);'>", unsafe_allow_html=True)
         
         c_p1, c_vs, c_p2 = st.columns([2,1,2])
-        with c_p1: st.markdown(f"<div class='glass-card' style='border-color:#00C6FF;'><h2 style='color:#00C6FF; margin:0;'>{player}</h2><p>⭐ {points_db} XP</p></div>", unsafe_allow_html=True)
+        with c_p1: st.markdown(f"<div class='glass-card' style='border-color:#00C6FF;'><h2 style='color:#00C6FF; margin:0;'>{display_name_db}</h2><p>⭐ {points_db} XP</p></div>", unsafe_allow_html=True)
         with c_vs: st.markdown("<div style='text-align:center; margin-top:20px;'><span class='vs-text'>VS</span></div>", unsafe_allow_html=True)
         with c_p2: st.markdown(f"<div class='glass-card' style='border-color:#FF416C;'><h2 style='color:#FF416C; margin:0;'>{l_nama}</h2><p>⭐ {l_pts} XP</p></div>", unsafe_allow_html=True)
         
@@ -740,11 +748,13 @@ elif menu == "📖 Ruang Belajar & Modul":
             st.info("📭 Admin belum menyuntikkan dokumen pendukung lokal untuk materi ini.")
 
 # ==========================================
-# HALAMAN 5: TOKO GELAR (BLACK MARKET)
+# HALAMAN 5: TOKO GELAR (BLACK MARKET) - TERMASUK EDIT PROFIL KUSTOM
 # ==========================================
 elif menu == "🛒 Black Market Profil":
     st.markdown("<h1>🛒 <span class='gradient-text'>BLACK MARKET PROFIL</span></h1>", unsafe_allow_html=True)
-    tab_av, tab_gl = st.tabs(["👤 Kostum Avatar", "👑 Bursa Gelar Elit"])
+    
+    # KITA TAMBAHKAN TAB "EDIT PROFIL PRIBADI" DI SINI
+    tab_av, tab_gl, tab_edit = st.tabs(["👤 Kostum Avatar", "👑 Bursa Gelar Elit", "⚙️ Edit Profil Pribadi"])
     
     with tab_av:
         c1, c2 = st.columns(2)
@@ -780,6 +790,31 @@ elif menu == "🛒 Black Market Profil":
                             st.toast(f"Status diperbarui menjadi {gelar}!", icon="👑"); st.rerun()
                         else: st.error("XP Tidak Cukup!")
         st.markdown("</div>", unsafe_allow_html=True)
+        
+    # --- TAB BARU: KUSTOMISASI IDENTITAS ---
+    with tab_edit:
+        st.markdown("<div class='glass-card' style='text-align:left;'>", unsafe_allow_html=True)
+        st.markdown("<h3>⚙️ Kustomisasi Identitas Bebas</h3>", unsafe_allow_html=True)
+        st.caption("Ubah nama dan foto profil aslimu di sini. Tenang saja, Username asli, XP, dan Gelar-mu tidak akan hilang!")
+        
+        new_display = st.text_input("Ganti Nama Tampilan (Display Name):", value=display_name_db, max_chars=20)
+        new_foto = st.file_uploader("Unggah Foto Profil (Maks 2MB, File JPG/PNG):", type=['png', 'jpg', 'jpeg'])
+        
+        st.write("<br>", unsafe_allow_html=True)
+        st.markdown("<div class='btn-green'>", unsafe_allow_html=True)
+        if st.button("💾 SIMPAN PERUBAHAN PROFIL"):
+            # Jika user tidak mengunggah foto baru, gunakan foto lama
+            b64_foto = custom_avatar_db 
+            
+            if new_foto:
+                # Mengubah file gambar menjadi Base64 string agar aman disimpan di Database
+                b64_foto = "data:" + new_foto.type + ";base64," + base64.b64encode(new_foto.read()).decode()
+            
+            db_update_profile(player, new_display, b64_foto)
+            st.toast("Identitas berhasil diperbarui ke server global!", icon="✅")
+            time.sleep(1)
+            st.rerun()
+        st.markdown("</div></div>", unsafe_allow_html=True)
 
 # ==========================================
 # HALAMAN 6: KONSOL ADMIN & PUSAT ANALITIK
