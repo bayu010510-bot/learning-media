@@ -104,7 +104,7 @@ except Exception:
     st.stop()
 
 # ==========================================
-# 3. FUNGSI DATABASE LENGKAP
+# 3. FUNGSI DATABASE LENGKAP (ANTI-LAG ENGINE INJECTED)
 # ==========================================
 def db_get_user(username):
     try:
@@ -142,10 +142,13 @@ def db_get_learned_history(username):
 def db_add_kuis_history(username, id_kuis):
     requests.post(f"{SUPABASE_URL}/rest/v1/kuis_history_cloud", headers=HEADERS, json={"username": username, "id_kuis": id_kuis})
 
+# ANTI-LAG FIX: Cache Leaderboard selama 60 detik agar server gratisan tidak choke
+@st.cache_data(ttl=60)
 def db_get_leaderboard():
     res = requests.get(f"{SUPABASE_URL}/rest/v1/users_cloud?select=username,display_name,points,title&order=points.desc&limit=10", headers=HEADERS).json()
     return res if isinstance(res, list) else []
 
+@st.cache_data(ttl=60)
 def db_get_all_users_admin():
     res = requests.get(f"{SUPABASE_URL}/rest/v1/users_cloud?select=username,title,points,streak&order=points.desc", headers=HEADERS).json()
     return res if isinstance(res, list) else []
@@ -196,6 +199,8 @@ def db_save_custom_quiz(title, creator, questions):
     data = {"title": title, "creator": creator, "questions": questions}
     requests.post(f"{SUPABASE_URL}/rest/v1/custom_quizzes", headers=HEADERS, json=data)
 
+# ANTI-LAG FIX: Cache Daftar Kuis Komunitas agar loading perpustakaan kilat
+@st.cache_data(ttl=60)
 def db_get_all_custom_quizzes():
     res = requests.get(f"{SUPABASE_URL}/rest/v1/custom_quizzes", headers=HEADERS).json()
     return res if isinstance(res, list) else []
@@ -220,8 +225,6 @@ if "qz_selesai" not in st.session_state: st.session_state.qz_selesai = False
 if "current_room_code" not in st.session_state: st.session_state.current_room_code = ""
 if "is_host" not in st.session_state: st.session_state.is_host = False
 if "temp_q" not in st.session_state: st.session_state.temp_q = []
-
-# Variabel Baru untuk Menampung Trigger Efek Suara (SFX)
 if "sfx" not in st.session_state: st.session_state.sfx = ""
 
 PASSWORD_ADMIN = "LEARNWITHLM"
@@ -286,10 +289,9 @@ if not st.session_state.logged_in:
 # ==========================================
 # 6. MEMUAT DATA PEMAIN & EFEK SUARA
 # ==========================================
-# --- LOGIKA RENDER EFEK SUARA (HTML5 AUDIO) ---
 if st.session_state.sfx == "benar":
     st.markdown('<audio autoplay style="display:none;"><source src="https://actions.google.com/sounds/v1/cartoon/magic_chime.ogg" type="audio/ogg"></audio>', unsafe_allow_html=True)
-    st.session_state.sfx = "" # Langsung bersihkan agar tidak berulang
+    st.session_state.sfx = ""
 elif st.session_state.sfx == "salah":
     st.markdown('<audio autoplay style="display:none;"><source src="https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg" type="audio/ogg"></audio>', unsafe_allow_html=True)
     st.session_state.sfx = ""
@@ -374,7 +376,7 @@ if menu == "🏠 Dashboard Utama":
             bonus = random.choice([20, 50, 100, 150, 200])
             db_update_points(player, points_db + bonus)
             st.session_state.gacha_claimed = True
-            st.session_state.sfx = "benar" # Memutar SFX Jackpot
+            st.session_state.sfx = "benar" 
             st.balloons()
             st.success(f"JACKPOT! Kamu mendapat +{bonus} XP!")
             time.sleep(1)
@@ -542,8 +544,10 @@ elif menu == "⚡ Live Arena Quiz (NEW!)":
                 else:
                     db_save_custom_quiz(judul_baru, player, st.session_state.temp_q)
                     st.session_state.temp_q = []
+                    # ANTI-LAG FIX: Paksa reset cache manual agar kuis baru langsung tampil tanpa nunggu 60 detik!
+                    st.cache_data.clear()
                     st.success("🎉 Kuis Berhasil Diterbitkan ke Server Publik! Silakan cek di tab Host Kamar.")
-                    time.sleep(2)
+                    time.sleep(1.5)
                     st.rerun()
             st.markdown("</div></div>", unsafe_allow_html=True)
 
@@ -631,7 +635,7 @@ elif menu == "⚡ Live Arena Quiz (NEW!)":
         random.shuffle(opsi_acak)
         
         st.write("<br>", unsafe_allow_html=True)
-        st.markdown(f"<div class='glass-card' style='font-size:28px; font-weight:900; padding:60px 40px; border-color:#00C6FF; box-shadow:0 0 30px rgba(0,198,255,0.2);'>{soal_aktif['soal']}</div><br><br>", unsafe_allow_html=True)
+        st.markdown(f"<div class='glass-card' style='font-size:28px; font-weight:900; padding:60px 40px; border-color:#00C6FF; box-shadow:0 0 30px rgba(0,198,255,0.2);'>{soal_aktif['soal']}</div>br><br>", unsafe_allow_html=True)
         
         st.markdown("<div class='quiz-btn'>", unsafe_allow_html=True)
         c1, c2 = st.columns(2)
@@ -641,10 +645,10 @@ elif menu == "⚡ Live Arena Quiz (NEW!)":
         def cek_jawaban(jawaban_dipilih):
             if jawaban_dipilih == soal_aktif["jawaban"]:
                 st.session_state.qz_score += 20
-                st.session_state.sfx = "benar" # Bunyikan Ding!
+                st.session_state.sfx = "benar" 
                 st.toast("🔥 JAWABAN BENAR! Combo +20 Skor!", icon="✅")
             else:
-                st.session_state.sfx = "salah" # Bunyikan Boing!
+                st.session_state.sfx = "salah" 
                 st.toast(f"❌ SALAH! Kunci: {soal_aktif['jawaban']}", icon="💀")
             
             st.session_state.qz_index += 1
@@ -669,6 +673,7 @@ elif menu == "⚡ Live Arena Quiz (NEW!)":
 
     elif st.session_state.qz_selesai:
         final_xp = st.session_state.qz_score
+        total_soal = len(st.session_state.qz_soal)
         akurasi = int((final_xp / 100) * 100) if total_soal > 0 else 0
         
         if akurasi > 70: st.balloons()
@@ -696,7 +701,7 @@ elif menu == "⚡ Live Arena Quiz (NEW!)":
 # ==========================================
 elif menu == "⚔️ Mode Duel Ranked (PvP)":
     st.markdown("<h1>⚔️ <span class='gradient-text'>ARENA DUEL MULTIPLAYER CLOUD</span></h1>", unsafe_allow_html=True)
-    st.caption("Pilih Mapel, temukan lawan acak di seluruh server, dan curi XP mereka dengan menjawab cepat!")
+    st.caption("Pilih Mapel, temukan lawan acak di seluruh server, dan curi XP mereka dengan answering fast!")
     
     pool_pvp = {}
     for mp, data_kelas in BANK_SOAL_PRO.items():
@@ -754,13 +759,13 @@ elif menu == "⚔️ Mode Duel Ranked (PvP)":
         if st.button("⚡ EKSEKUSI SERANGAN CLOUD"):
             if j_user == ds['jawaban']:
                 db_update_pvp_win(player, l_user, points_db, l_pts)
-                st.session_state.sfx = "benar" # SFX Menang!
+                st.session_state.sfx = "benar" 
                 st.toast("CRITICAL STRIKE! Serangan masuk!", icon="⚔️")
                 st.session_state.kuis_duel = False 
                 st.success(f"🎉 **KAMU MENANG!** +100 XP ditambahkan ke database. {l_nama} kehilangan 20 XP.")
             else:
                 db_update_pvp_lose(player, points_db)
-                st.session_state.sfx = "salah" # SFX Kalah!
+                st.session_state.sfx = "salah" 
                 st.toast("BLOCKED! Pertahanan lawan terlalu kuat.", icon="🛡️")
                 st.session_state.kuis_duel = False
                 st.error(f"💀 **KAMU KALAH!** Jawaban salah. Kamu kehilangan 30 XP.")
@@ -885,9 +890,10 @@ elif menu == "🛒 Black Market Profil":
                 try:
                     img = Image.open(new_foto)
                     img = img.convert("RGB") 
-                    img.thumbnail((200, 200))
+                    # ANTI-LAG FIX: Konversi foto dipangkas ke 150x150 & quality 65 agar string Base64 super ringan di Cloud
+                    img.thumbnail((150, 150))
                     buf = io.BytesIO()
-                    img.save(buf, format="JPEG", quality=70)
+                    img.save(buf, format="JPEG", quality=65)
                     b64_foto = "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode()
                 except Exception as e:
                     st.error(f"Gagal memproses gambar: {e}")
