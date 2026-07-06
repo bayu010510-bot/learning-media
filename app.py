@@ -452,10 +452,7 @@ with st.sidebar:
     if st.button("🚪 KELUAR AKADEMI"):
         st.session_state.logged_in = False
         st.rerun()
-    # 5. TOMBOL KELUAR
-    if st.button("🚪 KELUAR AKADEMI"):
-        st.session_state.logged_in = False
-        st.rerun()
+   
 
 
 # ==========================================
