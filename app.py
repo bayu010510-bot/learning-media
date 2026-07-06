@@ -340,41 +340,43 @@ tier_name, tier_color = get_tier(user_level)
 
 # --- SIDEBAR NAVIGASI ELEGAN ---
 with st.sidebar:
-    # 1. INJEKSI CSS MODERN (Revisi Teks Bunglon)
+    # 1. INJEKSI CSS MODERN (Light & Clean Theme - Bebas Warna Gelap)
     st.markdown("""
     <style>
-    /* Mengatur latar belakang sidebar menjadi cerah */
+    /* Background sidebar menjadi abu-abu terang yang bersih */
     [data-testid="stSidebar"] {
         background-color: #f8f9fa;
     }
     
-    /* Mengubah st.radio menjadi tombol navigasi modern */
+    /* Tombol navigasi menu dengan efek kartu modern */
     div[role="radiogroup"] > label {
         background: #ffffff;
         padding: 12px 20px;
-        border-radius: 12px;
-        margin-bottom: 8px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.02);
-        transition: all 0.3s ease;
-        border: 1px solid #edf2f7;
+        border-radius: 14px;
+        margin-bottom: 9px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.015);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid #eef2f6;
         cursor: pointer;
     }
     
-    /* PERBAIKAN TEKS BUNGLON: Memaksa teks radio button berwarna gelap */
+    /* Memaksa warna teks menu navigasi agar tidak menjadi bunglon */
     div[role="radiogroup"] > label p, 
     div[role="radiogroup"] > label div {
         color: #2d3436 !important; 
         font-weight: 600;
+        font-size: 14px;
     }
 
+    /* Efek hover ketika kursor menyentuh menu */
     div[role="radiogroup"] > label:hover {
-        transform: translateX(5px);
-        box-shadow: 0 4px 15px rgba(9, 132, 227, 0.1);
+        transform: translateX(6px);
+        box-shadow: 0 4px 20px rgba(9, 132, 227, 0.12);
         border-color: #0984e3;
         background: #f1faff;
     }
     
-    /* PERBAIKAN TEKS BUNGLON SAAT HOVER: Teks menjadi biru */
+    /* Mengubah warna teks menjadi biru cerah saat hover */
     div[role="radiogroup"] > label:hover p,
     div[role="radiogroup"] > label:hover div {
         color: #0984e3 !important;
@@ -384,7 +386,7 @@ with st.sidebar:
     .stButton > button {
         width: 100%;
         background: #ff7675;
-        color: white !important; /* Memastikan teks tombol keluar tetap putih */
+        color: white !important;
         border-radius: 12px;
         border: none;
         padding: 12px;
@@ -403,51 +405,53 @@ with st.sidebar:
 
     st.write("<br>", unsafe_allow_html=True)
     
-    # 2. AVATAR & PROFIL
+    # 2. AVATAR & PROFIL PANEL
     if custom_avatar_db:
         st.markdown(f"""
         <div style='text-align:center;'>
-            <img src='{custom_avatar_db}' style='width:130px; height:130px; border-radius:50%; object-fit:cover; border:4px solid #ffffff; box-shadow: 0 8px 25px rgba(9,132,227,0.2); margin-bottom:15px; transition: 0.3s;' onmouseover='this.style.transform="scale(1.05)"' onmouseout='this.style.transform="scale(1)"'>
+            <img src='{custom_avatar_db}' style='width:130px; height:130px; border-radius:50%; object-fit:cover; border:4px solid #ffffff; box-shadow: 0 8px 25px rgba(9,132,227,0.15); margin-bottom:15px; transition: 0.3s;' onmouseover='this.style.transform="scale(1.05)"' onmouseout='this.style.transform="scale(1)"'>
         </div>
         """, unsafe_allow_html=True)
     else:
         tampilkan_avatar("genius" if avatar_db == "Geni Us" else "smart")
         
-    st.markdown(f"<h2 style='text-align:center; margin-top:10px; margin-bottom:5px; font-weight:800; font-size:22px; color:#2d3436; text-shadow: 1px 1px 2px rgba(0,0,0,0.05);'>{display_name_db}</h2>", unsafe_allow_html=True)
+    st.markdown(f"<h2 style='text-align:center; margin-top:10px; margin-bottom:5px; font-weight:800; font-size:22px; color:#2d3436;'>{display_name_db}</h2>", unsafe_allow_html=True)
     
-    # Badge Title & Tier
+    # Badge Judul & Tingkatan
     st.markdown(f"<div style='text-align:center; margin-bottom:8px;'><span style='background:#e3f2fd; color:#0984e3; padding:6px 18px; border-radius:20px; font-weight:700; border:1px solid #bbdefb; font-size:12px; letter-spacing:0.5px;'>{title_db}</span></div>", unsafe_allow_html=True)
-    st.markdown(f"<div style='text-align:center; margin-bottom:20px;'><span style='background:{tier_color}15; color:{tier_color}; padding:5px 18px; border-radius:20px; font-weight:700; border:1px solid {tier_color}50; font-size:12px; letter-spacing:0.5px; box-shadow: 0 4px 10px {tier_color}20;'>{tier_name}</span></div>", unsafe_allow_html=True)
+    st.markdown(f"<div style='text-align:center; margin-bottom:20px;'><span style='background:{tier_color}15; color:{tier_color}; padding:5px 18px; border-radius:20px; font-weight:700; border:1px solid {tier_color}40; font-size:12px; letter-spacing:0.5px; box-shadow: 0 4px 10px {tier_color}15;'>{tier_name}</span></div>", unsafe_allow_html=True)
     
-    # 3. PROGRESS BAR
+    # 3. LEVEL PROGRESS BAR
     prog = points_db % 100
     st.markdown(f"""
-        <div style='background: #f1f2f6; border-radius: 10px; height: 10px; margin: 20px 0; overflow:hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #dfe6e9;'>
-            <div style='background: linear-gradient(90deg, #74b9ff 0%, #0984e3 100%); width: {prog}%; height: 100%; border-radius: 10px; box-shadow: 0 0 10px rgba(9,132,227,0.3);'></div>
+        <div style='background: #e9ecef; border-radius: 10px; height: 10px; margin: 20px 0; overflow:hidden; border: 1px solid #dee2e6;'>
+            <div style='background: linear-gradient(90deg, #74b9ff 0%, #0984e3 100%); width: {prog}%; height: 100%; border-radius: 10px; box-shadow: 0 0 10px rgba(9,132,227,0.25);'></div>
         </div>
         <div style='display:flex; justify-content:space-between; font-weight:700; color:#636e72; font-size:13px;'>
             <span>Lvl {user_level}</span><span style='color:#0984e3;'>✨ {points_db} Poin</span>
         </div>
     """, unsafe_allow_html=True)
     
-    # Pembatas Estetik
     st.markdown("<hr style='border:none; height:1px; background: linear-gradient(90deg, transparent, #dfe6e9, transparent); margin: 25px 0;'>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align:center; font-size:11px; font-weight:800; color:#b2bec3; letter-spacing:1.5px; margin-bottom:12px;'>MENU UTAMA</p>", unsafe_allow_html=True)
     
-    # Judul Navigasi Modern
-    st.markdown("<p style='text-align:center; font-size:12px; font-weight:800; color:#b2bec3; letter-spacing:1px; margin-bottom:10px;'>MENU NAVIGASI</p>", unsafe_allow_html=True)
-    
-    # 4. MENU NAVIGASI
+    # 4. RADIO MENU (Menambahkan Mading Pemberitahuan di Posisi Kedua)
     menu = st.radio("NAVIGASI INSTITUT", [
         "🏠 Dashboard Utama", 
+        "📢 Mading Pemberitahuan", 
         "⚡ Live Arena Quiz (NEW!)", 
         "⚔️ Mode Duel Ranked (PvP)", 
         "📖 Ruang Belajar & Modul", 
         "🛒 Black Market Profil", 
         "⚙️ Konsol Super Admin"
-    ], label_visibility="collapsed")
+    ], label_visibility="collapsed", key="navigasi_utama")
     
     st.markdown("<hr style='border:none; height:1px; background: linear-gradient(90deg, transparent, #dfe6e9, transparent); margin: 25px 0;'>", unsafe_allow_html=True)
     
+    # 5. TOMBOL LOGOUT
+    if st.button("🚪 KELUAR AKADEMI"):
+        st.session_state.logged_in = False
+        st.rerun()
     # 5. TOMBOL KELUAR
     if st.button("🚪 KELUAR AKADEMI"):
         st.session_state.logged_in = False
@@ -501,6 +505,158 @@ if menu == "🏠 Dashboard Utama":
             <h3 style='margin:0; color:#D4AF37; font-weight:900; text-shadow: 0 0 10px rgba(212,175,55,0.4);'>✨ {row.get("points", 0)}</h3>
         </div>
         """, unsafe_allow_html=True)
+        # ==============================================================================
+# 1. INJEKSI CSS GLOBAL UNTUK HALAMAN MADING (Letakkan di bagian atas blok menu mading)
+# ==============================================================================
+st.markdown("""
+<style>
+.mading-container {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+    border: 1px solid #f1f3f5;
+    margin-bottom: 30px;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+}
+.mading-container:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.06);
+}
+.mading-tag {
+    background: #e3f2fd;
+    color: #0984e3;
+    padding: 5px 14px;
+    border-radius: 30px;
+    font-size: 11px;
+    font-weight: 700;
+    display: inline-block;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.mading-title-text {
+    color: #2d3436;
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 6px;
+    line-height: 1.3;
+}
+.mading-meta {
+    color: #a4b0be;
+    font-size: 12px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.mading-body {
+    color: #57606f;
+    font-size: 14px;
+    line-height: 1.6;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# ==============================================================================
+# 2. FITUR MADING PEMBERITAHUAN INTERAKTIF
+# ==============================================================================
+if menu == "📢 Mading Pemberitahuan":
+    st.markdown("<h1 style='color: #2d3436; font-weight: 800; margin-bottom: 5px;'>📢 Mading Pemberitahuan</h1>", unsafe_allow_html=True)
+    st.markdown("<p style='color: #747d8c; font-size: 15px;'>Ruang informasi kreatif, pengumuman penting, dan galeri poster terupdate.</p>", unsafe_allow_html=True)
+    st.write("<br>", unsafe_allow_html=True)
+    
+    # Inisialisasi basis data mading sementara di Session State jika belum ada
+    if 'list_mading' not in st.session_state:
+        st.session_state.list_mading = [
+            {
+                "judul": "Grand Launching Fitur Live Arena Quiz!",
+                "kategori": "Event",
+                "tanggal": "06 Juli 2026",
+                "deskripsi": "Siapkan strategimu dan uji kemampuanmu langsung di menu Live Arena Quiz yang baru saja aktif. Kumpulkan poin sebanyak-banyaknya untuk menaikkan peringkat tier-mu!",
+                "gambar": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=800&auto=format&fit=crop"
+            },
+            {
+                "judul": "Tips & Trik Menguasai Modul Pembelajaran Efektif",
+                "kategori": "Edukasi",
+                "tanggal": "04 Juli 2026",
+                "deskripsi": "Buka menu Ruang Belajar & Modul secara berkala. Selesaikan kuis harian untuk mengklaim poin tambahan agar kamu bisa membuka item premium di Black Market Profil.",
+                "gambar": "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=800&auto=format&fit=crop"
+            }
+        ]
+        
+    # Pemisahan Halaman: Jelajahi Konten vs Tambah Konten Baru
+    tab_jelajah, tab_tambah = st.tabs(["🖼️ Jelajahi Mading", "✍️ Pasang Pengumuman Baru"])
+    
+    with tab_jelajah:
+        if not st.session_state.list_mading:
+            st.info("Saat ini mading sedang kosong bersih. Sila pasang poster pertamamu!")
+        else:
+            # Sistem layouting 2 kolom horizontal yang rapi dan responsif
+            kolom_mading = st.columns(2)
+            for indeks, item in enumerate(st.session_state.list_mading):
+                with kolom_mading[indeks % 2]:
+                    # Container pembungkus kartu mading
+                    st.markdown(f"""
+                    <div class="mading-container">
+                        <span class="mading-tag">{item['kategori']}</span>
+                        <div class="mading-title-text">{item['judul']}</div>
+                        <div class="mading-meta">📅 Rilis: {item['tanggal']}</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                    # Manajemen rendering gambar/poster agar pas di dalam frame kartu
+                    if item['gambar']:
+                        try:
+                            st.image(item['gambar'], use_container_width=True)
+                        except:
+                            st.caption("⚠️ Gagal memuat berkas gambar poster.")
+                            
+                    st.markdown(f"""
+                    <div style='background: #ffffff; padding: 10px 5px; border-radius: 0 0 14px 14px;'>
+                        <p class="mading-body">{item['deskripsi']}</p>
+                    </div>
+                    <div style='margin-bottom: 25px;'></div>
+                    """, unsafe_allow_html=True)
+                    
+    with tab_tambah:
+        st.markdown("<h3 style='color: #2d3436; font-weight: 700;'>Buat Poster Mading Baru</h3>", unsafe_allow_html=True)
+        
+        # Form interaktif untuk menambahkan pengumuman baru secara realtime
+        with st.form("form_tambah_mading", clear_on_submit=True):
+            judul_baru = st.text_input("Judul Poster / Pengumuman", placeholder="Ketik judul yang menarik perhatian...")
+            kategori_baru = st.selectbox("Pilih Label Kategori", ["Event", "Informasi", "Pembaruan", "Edukasi", "Prestasi"])
+            deskripsi_baru = st.text_area("Deskripsi / Isi Informasi", placeholder="Tulis rincian informasi, waktu, lokasi, atau arahan penting di sini...")
+            
+            pilihan_media = st.radio("Metode Pengunggahan Gambar", ["Gunakan Link URL Gambar", "Unggah Gambar dari Perangkat"])
+            tautan_gambar = ""
+            
+            if pilihan_media == "Gunakan Link URL Gambar":
+                tautan_gambar = st.text_input("Tautan URL Gambar (HTTPS)", placeholder="https://domain.com/gambar-kamu.jpg")
+            else:
+                berkas_unggah = st.file_uploader("Pilih Berkas Gambar (Format JPG, JPEG, PNG)", type=["jpg", "jpeg", "png"])
+                if berkas_unggah is not None:
+                    tautan_gambar = berkas_unggah
+                    
+            tombol_submit = st.form_submit_button("🚀 Tempelkan ke Mading")
+            
+            if tombol_submit:
+                if judul_baru.strip() != "" and deskripsi_baru.strip() != "":
+                    import datetime
+                    waktu_sekarang = datetime.date.today().strftime("%d %B %Y")
+                    
+                    # Menyisipkan pengumuman baru di urutan paling atas mading
+                    st.session_state.list_mading.insert(0, {
+                        "judul": judul_baru,
+                        "kategori": kategori_baru,
+                        "tanggal": waktu_sekarang,
+                        "deskripsi": deskripsi_baru,
+                        "gambar": tautan_gambar
+                    })
+                    st.success("Berhasil! Pengumuman barumu telah terpasang rapi di mading utama.")
+                    st.rerun()
+                else:
+                    st.error("Gagal memproses! Kolom Judul dan Deskripsi tidak boleh dikosongkan.")
 
 # ==========================================
 # HALAMAN 2: LIVE ARENA QUIZ (ROOMS + UGC)
