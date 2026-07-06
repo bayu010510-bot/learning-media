@@ -95,6 +95,83 @@ st.markdown("""
     .stProgress > div > div > div > div { background-image: linear-gradient(to right, #B89022, #D4AF37); box-shadow: 0 0 10px rgba(212, 175, 55, 0.5); }
     </style>
     """, unsafe_allow_html=True)
+/* --- MODERN NAVBAR STYLES --- */
+.modern-navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 5%;
+  background: rgba(255, 255, 255, 0.85); /* Warna cerah transparan */
+  backdrop-filter: blur(12px); /* Efek kaca modern */
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04); /* Bayangan sangat lembut */
+  position: sticky;
+  top: 0;
+  z-index: 9999;
+  transition: all 0.3s ease;
+}
+
+.nav-brand a {
+  font-size: 24px;
+  font-weight: 800;
+  color: #2b2b2b; /* Menghindari hitam pekat */
+  text-decoration: none;
+  letter-spacing: 0.5px;
+}
+
+.nav-menu {
+  display: flex;
+  list-style: none;
+  gap: 32px;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-link {
+  text-decoration: none;
+  color: #636e72;
+  font-size: 16px;
+  font-weight: 500;
+  transition: color 0.3s ease;
+  position: relative;
+}
+
+.nav-link:hover, .nav-link.active {
+  color: #0984e3; /* Aksen biru profesional */
+}
+
+/* Animasi garis bawah saat hover */
+.nav-link::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: -4px;
+  left: 0;
+  background-color: #0984e3;
+  transition: width 0.3s ease;
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+.btn-primary {
+  background: #0984e3;
+  color: #ffffff;
+  padding: 10px 24px;
+  border-radius: 30px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 15px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(9, 132, 227, 0.3);
+  color: white;
+}
 
 # ==========================================
 # 2. INISIALISASI MESIN CLOUD (SUPABASE)
@@ -340,28 +417,89 @@ tier_name, tier_color = get_tier(user_level)
 
 # --- SIDEBAR NAVIGASI ELEGAN ---
 with st.sidebar:
+    # 1. INJEKSI CSS MODERN (Terang, Bersih, Profesional)
+    st.markdown("""
+    <style>
+    /* Mengatur latar belakang sidebar menjadi cerah */
+    [data-testid="stSidebar"] {
+        background-color: #f8f9fa;
+    }
+    
+    /* Mengubah st.radio menjadi tombol navigasi modern */
+    div[role="radiogroup"] > label {
+        background: #ffffff;
+        padding: 12px 20px;
+        border-radius: 12px;
+        margin-bottom: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+        transition: all 0.3s ease;
+        border: 1px solid #edf2f7;
+        cursor: pointer;
+    }
+    div[role="radiogroup"] > label:hover {
+        transform: translateX(5px);
+        box-shadow: 0 4px 15px rgba(9, 132, 227, 0.1);
+        border-color: #0984e3;
+        background: #f1faff;
+    }
+    
+    /* Desain Tombol Keluar / Logout */
+    .stButton > button {
+        width: 100%;
+        background: #ff7675;
+        color: white;
+        border-radius: 12px;
+        border: none;
+        padding: 12px;
+        font-weight: 700;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(255, 118, 117, 0.2);
+    }
+    .stButton > button:hover {
+        background: #d63031;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 118, 117, 0.35);
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
     st.write("<br>", unsafe_allow_html=True)
     
+    # 2. AVATAR & PROFIL (Bercahaya & Elegan)
     if custom_avatar_db:
-        st.markdown(f"<div style='text-align:center;'><img src='{custom_avatar_db}' style='width:140px; height:140px; border-radius:50%; object-fit:cover; border:3px solid #D4AF37; box-shadow: 0 0 25px rgba(212,175,55,0.4); margin-bottom:15px; transition: 0.3s;' onmouseover='this.style.transform=\"scale(1.05)\"' onmouseout='this.style.transform=\"scale(1)\"'></div>", unsafe_allow_html=True)
+        st.markdown(f"""
+        <div style='text-align:center;'>
+            <img src='{custom_avatar_db}' style='width:130px; height:130px; border-radius:50%; object-fit:cover; border:4px solid #ffffff; box-shadow: 0 8px 25px rgba(9,132,227,0.2); margin-bottom:15px; transition: 0.3s;' onmouseover='this.style.transform="scale(1.05)"' onmouseout='this.style.transform="scale(1)"'>
+        </div>
+        """, unsafe_allow_html=True)
     else:
         tampilkan_avatar("genius" if avatar_db == "Geni Us" else "smart")
         
-    st.markdown(f"<h2 style='text-align:center; margin-top:10px; margin-bottom:5px; font-weight:900; font-size:24px;' class='gradient-text'>{display_name_db}</h2>", unsafe_allow_html=True)
-    st.markdown(f"<div style='text-align:center; margin-bottom:8px;'><span style='background:rgba(212,175,55,0.1); color:#D4AF37; padding:6px 18px; border-radius:8px; font-weight:800; border:1px solid rgba(212,175,55,0.4); font-size:12px; letter-spacing:1px; font-family:Cinzel,serif;'>{title_db}</span></div>", unsafe_allow_html=True)
-    st.markdown(f"<div style='text-align:center; margin-bottom:20px;'><span style='background:{tier_color}15; color:{tier_color}; padding:5px 18px; border-radius:8px; font-weight:800; border:1px solid {tier_color}; font-size:12px; letter-spacing:1px; box-shadow: 0 0 10px {tier_color}40;'>{tier_name}</span></div>", unsafe_allow_html=True)
+    st.markdown(f"<h2 style='text-align:center; margin-top:10px; margin-bottom:5px; font-weight:800; font-size:22px; color:#2d3436; text-shadow: 1px 1px 2px rgba(0,0,0,0.05);'>{display_name_db}</h2>", unsafe_allow_html=True)
     
+    # Badge Title & Tier
+    st.markdown(f"<div style='text-align:center; margin-bottom:8px;'><span style='background:#e3f2fd; color:#0984e3; padding:6px 18px; border-radius:20px; font-weight:700; border:1px solid #bbdefb; font-size:12px; letter-spacing:0.5px;'>{title_db}</span></div>", unsafe_allow_html=True)
+    st.markdown(f"<div style='text-align:center; margin-bottom:20px;'><span style='background:{tier_color}15; color:{tier_color}; padding:5px 18px; border-radius:20px; font-weight:700; border:1px solid {tier_color}50; font-size:12px; letter-spacing:0.5px; box-shadow: 0 4px 10px {tier_color}20;'>{tier_name}</span></div>", unsafe_allow_html=True)
+    
+    # 3. PROGRESS BAR (Gradasi Biru Cerah)
     prog = points_db % 100
     st.markdown(f"""
-        <div style='background: rgba(255,255,255,0.05); border-radius: 6px; height: 12px; margin: 20px 0; border: 1px solid rgba(212,175,55,0.2); overflow:hidden;'>
-            <div style='background: linear-gradient(90deg, #B89022 0%, #D4AF37 100%); width: {prog}%; height: 100%; border-radius: 6px; box-shadow: 0 0 10px #D4AF37;'></div>
+        <div style='background: #f1f2f6; border-radius: 10px; height: 10px; margin: 20px 0; overflow:hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #dfe6e9;'>
+            <div style='background: linear-gradient(90deg, #74b9ff 0%, #0984e3 100%); width: {prog}%; height: 100%; border-radius: 10px; box-shadow: 0 0 10px rgba(9,132,227,0.3);'></div>
         </div>
-        <div style='display:flex; justify-content:space-between; font-weight:bold; color:#94A3B8; font-size:14px;'>
-            <span>Lvl {user_level}</span><span style='color:#D4AF37;'>✨ {points_db} Poin</span>
+        <div style='display:flex; justify-content:space-between; font-weight:700; color:#636e72; font-size:13px;'>
+            <span>Lvl {user_level}</span><span style='color:#0984e3;'>✨ {points_db} Poin</span>
         </div>
     """, unsafe_allow_html=True)
     
-    st.markdown("<hr style='border:1px solid rgba(212,175,55,0.2); margin: 30px 0;'>", unsafe_allow_html=True)
+    # Pembatas Estetik
+    st.markdown("<hr style='border:none; height:1px; background: linear-gradient(90deg, transparent, #dfe6e9, transparent); margin: 25px 0;'>", unsafe_allow_html=True)
+    
+    # Judul Navigasi Modern
+    st.markdown("<p style='text-align:center; font-size:12px; font-weight:800; color:#b2bec3; letter-spacing:1px; margin-bottom:10px;'>MENU NAVIGASI</p>", unsafe_allow_html=True)
+    
+    # 4. MENU NAVIGASI (Otomatis terkena gaya CSS di atas)
     menu = st.radio("NAVIGASI INSTITUT", [
         "🏠 Dashboard Utama", 
         "⚡ Live Arena Quiz (NEW!)", 
@@ -369,14 +507,14 @@ with st.sidebar:
         "📖 Ruang Belajar & Modul", 
         "🛒 Black Market Profil", 
         "⚙️ Konsol Super Admin"
-    ])
-    st.markdown("<hr style='border:1px solid rgba(212,175,55,0.2); margin: 30px 0;'>", unsafe_allow_html=True)
+    ], label_visibility="collapsed")
     
-    st.markdown("<div class='btn-red'>", unsafe_allow_html=True)
+    st.markdown("<hr style='border:none; height:1px; background: linear-gradient(90deg, transparent, #dfe6e9, transparent); margin: 25px 0;'>", unsafe_allow_html=True)
+    
+    # 5. TOMBOL KELUAR (Tombol Streamlit asli, didesain ulang via CSS)
     if st.button("🚪 KELUAR AKADEMI"):
-        st.session_state.logged_in = False; st.rerun()
-    st.markdown("</div>", unsafe_allow_html=True)
-
+        st.session_state.logged_in = False
+        st.rerun()
 
 # ==========================================
 # HALAMAN 1: DASHBOARD UTAMA
