@@ -15,66 +15,41 @@ from PIL import Image
 # ==========================================
 st.set_page_config(page_title="Aksara | Platform Edukasi", page_icon="🎓", layout="wide", initial_sidebar_state="expanded")
 
-# CSS HYPER-MODERN, BRIGHT LUXURY & SPECTACULAR GLASSMORPHISM
+# CSS HYPER-MODERN, HIGH-CONTRAST LUXURY GLASSMORPHISM
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap');
+    /* Menggunakan Font "Outfit" yang sangat modern, elegan, dan tajam (Bebas Teks Bunglon) */
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
     
-    html, body, [class*="css"] { font-family: 'Plus Jakarta Sans', sans-serif; }
+    html, body, [class*="css"] { font-family: 'Outfit', sans-serif; }
     
-    /* Latar Belakang Animated Pastel Mesh (Spektakuler & Lembut di Mata) */
+    /* Latar Belakang Aurora Mesh (Terang, Halus, Nyaman di Mata) */
     .stApp { 
-        background: linear-gradient(-45deg, #F0F9FF, #E0E7FF, #F5F3FF, #F8FAFC);
-        background-size: 400% 400%;
-        animation: gradientMesh 15s ease infinite;
+        background: radial-gradient(circle at 0% 0%, #E0F2FE 0%, transparent 40%),
+                    radial-gradient(circle at 100% 0%, #EDE9FE 0%, transparent 40%),
+                    radial-gradient(circle at 100% 100%, #CCFBF1 0%, transparent 40%),
+                    radial-gradient(circle at 0% 100%, #F1F5F9 0%, transparent 40%),
+                    #F8FAFC;
         color: #0F172A; 
         overflow-x: hidden;
     }
     
-    @keyframes gradientMesh {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
-    }
+    /* Tipografi dengan Kontras Tinggi (Anti Teks Bunglon) */
+    h1, h2, h3 { font-family: 'Outfit', sans-serif !important; font-weight: 800; letter-spacing: -0.5px; color: #0F172A !important; }
+    h4, h5, p, span, label { color: #334155 !important; font-weight: 500; }
     
-    /* Ambient Glowing Orbs */
-    .stApp::before, .stApp::after {
-        content: ''; position: fixed; border-radius: 50%;
-        filter: blur(120px); -webkit-filter: blur(120px);
-        z-index: -1; opacity: 0.6;
-        animation: floatOrb 20s ease-in-out infinite alternate;
-    }
-    .stApp::before {
-        width: 60vw; height: 60vh;
-        background: radial-gradient(circle, rgba(167, 139, 250, 0.15), transparent 70%);
-        top: -10%; left: -10%;
-    }
-    .stApp::after {
-        width: 50vw; height: 50vh;
-        background: radial-gradient(circle, rgba(56, 189, 248, 0.15), transparent 70%);
-        bottom: -10%; right: -10%;
-        animation-delay: -10s;
-    }
-    @keyframes floatOrb {
-        0% { transform: translate(0, 0) scale(1); }
-        100% { transform: translate(50px, 80px) scale(1.1); }
-    }
-    
-    /* Tipografi Bersih & Mewah */
-    h1, h2, h3 { font-family: 'Plus Jakarta Sans', sans-serif !important; font-weight: 800; letter-spacing: -0.5px; color: #0F172A; }
-    h4, h5, p, span, label { color: #475569 !important; font-weight: 500; }
-    
-    /* Efek Teks Gradient (Ocean Blue to Majestic Violet) */
+    /* Efek Teks Gradient Spektakuler (Vibrant Tech Blue) */
     .gradient-text { 
-        background: linear-gradient(135deg, #2563EB 0%, #8B5CF6 100%);
+        background: linear-gradient(135deg, #2563EB 0%, #8B5CF6 50%, #D946EF 100%);
         -webkit-background-clip: text; 
         -webkit-text-fill-color: transparent; 
         font-weight: 900; 
         display: inline-block;
+        text-shadow: 0 8px 24px rgba(37, 99, 235, 0.2);
     }
     
     .vs-text { 
-        background: linear-gradient(to right, #334155 0%, #94A3B8 100%); 
+        background: linear-gradient(to right, #0F172A 0%, #64748B 100%); 
         -webkit-background-clip: text; 
         -webkit-text-fill-color: transparent; 
         font-weight: 900; font-size: 45px; 
@@ -83,34 +58,33 @@ st.markdown("""
     
     /* Animasi Masuk Super Halus */
     @keyframes fadeInUp { from {opacity: 0; transform: translateY(20px);} to {opacity: 1; transform: translateY(0);} }
-    .block-container { animation: fadeInUp 1s cubic-bezier(0.2, 0.8, 0.2, 1); padding-top: 2rem !important; }
+    .block-container { animation: fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); padding-top: 2rem !important; }
     
-    /* HYPER-GLASSMORPHISM KARTU (Premium Acrylic Panel) */
+    /* HYPER-GLASSMORPHISM KARTU (Opasitas Putih Tinggi = Anti Bunglon) */
     .glass-card { 
-        background: rgba(255, 255, 255, 0.65); 
-        backdrop-filter: blur(24px) saturate(180%); 
-        -webkit-backdrop-filter: blur(24px) saturate(180%);
+        background: rgba(255, 255, 255, 0.85); /* Putih pekat untuk keterbacaan maksimal */
+        backdrop-filter: blur(32px) saturate(200%); 
+        -webkit-backdrop-filter: blur(32px) saturate(200%);
         border-radius: 32px; 
-        border: 1px solid rgba(255, 255, 255, 0.9); 
-        box-shadow: 0 20px 50px rgba(15, 23, 42, 0.05), inset 0 2px 2px rgba(255, 255, 255, 1); 
+        border: 1px solid rgba(255, 255, 255, 1); 
+        box-shadow: 0 20px 40px rgba(15, 23, 42, 0.04), inset 0 2px 0 rgba(255, 255, 255, 1); 
         padding: 40px; 
         text-align: center; 
         transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); 
-        position: relative;
     }
     .glass-card:hover { 
-        transform: translateY(-5px); 
-        background: rgba(255, 255, 255, 0.8);
-        box-shadow: 0 30px 60px rgba(37, 99, 235, 0.08), inset 0 2px 2px rgba(255, 255, 255, 1); 
-        border-color: #E0E7FF;
+        transform: translateY(-4px); 
+        background: rgba(255, 255, 255, 0.95);
+        box-shadow: 0 25px 50px rgba(37, 99, 235, 0.08), inset 0 2px 0 rgba(255, 255, 255, 1); 
+        border-color: #DBEAFE;
     }
     
     /* Kartu Skor Kuis */
     .score-card { 
-        background: linear-gradient(135deg, rgba(239, 246, 255, 0.8) 0%, rgba(255, 255, 255, 0.6) 100%);
+        background: linear-gradient(135deg, rgba(239, 246, 255, 0.9) 0%, rgba(255, 255, 255, 0.9) 100%);
         backdrop-filter: blur(20px);
         border: 1px solid #BFDBFE; 
-        box-shadow: 0 15px 35px rgba(37, 99, 235, 0.06), inset 0 2px 2px rgba(255, 255, 255, 1);
+        box-shadow: 0 15px 35px rgba(37, 99, 235, 0.06), inset 0 2px 0 rgba(255, 255, 255, 1);
         border-radius: 28px; padding: 35px; text-align: center; 
         transition: 0.4s ease; 
     }
@@ -120,70 +94,69 @@ st.markdown("""
     .stButton>button { 
         background: linear-gradient(135deg, #2563EB 0%, #4F46E5 100%) !important;
         color: #FFFFFF !important; 
-        border-radius: 100px; /* Pill Shape Premium */
+        border-radius: 100px; /* Bentuk Kapsul Sempurna */
         border: none; 
         padding: 16px 32px; 
         font-weight: 700; 
-        font-size: 15px; 
+        font-size: 16px; 
         width: 100%; 
-        box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3), inset 0 1px 1px rgba(255,255,255,0.2); 
+        box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3), inset 0 2px 0 rgba(255,255,255,0.2); 
         transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); 
         letter-spacing: 0.5px;
     }
     .stButton>button:hover { 
         background: linear-gradient(135deg, #1D4ED8 0%, #4338CA 100%) !important; 
-        transform: translateY(-3px);
-        box-shadow: 0 15px 35px rgba(37, 99, 235, 0.4), inset 0 1px 1px rgba(255,255,255,0.3); 
+        transform: translateY(-3px) scale(1.01);
+        box-shadow: 0 15px 35px rgba(37, 99, 235, 0.4), inset 0 2px 0 rgba(255,255,255,0.3); 
     }
     .stButton>button:active { transform: translateY(1px); box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3); }
     
     /* Varian Button Glass Kuis */
-    .quiz-btn>button { background: rgba(255,255,255,0.8); border: 2px solid #E2E8F0; font-size: 16px; font-weight: 600; padding: 22px; border-radius: 24px; color: #0F172A !important; transition: 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.03); }
+    .quiz-btn>button { background: rgba(255,255,255,0.95); border: 2px solid #E2E8F0; font-size: 16px; font-weight: 600; padding: 22px; border-radius: 24px; color: #0F172A !important; transition: 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.03); }
     .quiz-btn>button:hover { background: #F0FDF4; border-color: #10B981; color: #059669 !important; box-shadow: 0 12px 30px rgba(16, 185, 129, 0.15); }
     
-    .btn-red>button { background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%) !important; box-shadow: 0 10px 25px rgba(239, 68, 68, 0.3), inset 0 1px 1px rgba(255,255,255,0.2); }
+    .btn-red>button { background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%) !important; box-shadow: 0 10px 25px rgba(239, 68, 68, 0.3), inset 0 2px 0 rgba(255,255,255,0.2); }
     .btn-red>button:hover { background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%) !important; box-shadow: 0 15px 35px rgba(239, 68, 68, 0.4); }
     
-    .btn-green>button { background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important; box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3), inset 0 1px 1px rgba(255,255,255,0.2); }
+    .btn-green>button { background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important; box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3), inset 0 2px 0 rgba(255,255,255,0.2); }
     .btn-green>button:hover { background: linear-gradient(135deg, #059669 0%, #047857 100%) !important; box-shadow: 0 15px 35px rgba(16, 185, 129, 0.4); }
     
-    /* Input Fields (Sangat Bersih & Elegan) */
+    /* Input Fields (Sangat Bersih, Mewah & Elegan) */
     div[data-baseweb="input"] > div, div[data-baseweb="select"] > div, div[data-baseweb="textarea"] > div { 
-        background-color: rgba(255, 255, 255, 0.7) !important; 
-        backdrop-filter: blur(10px);
-        border: 2px solid transparent !important; 
+        background-color: #FFFFFF !important; 
+        border: 2px solid #E2E8F0 !important; 
         border-radius: 20px; transition: 0.3s; 
-        box-shadow: inset 0 2px 4px rgba(0,0,0,0.02), 0 4px 10px rgba(0,0,0,0.02);
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
     }
     div[data-baseweb="input"] > div:focus-within, div[data-baseweb="select"] > div:focus-within, div[data-baseweb="textarea"] > div:focus-within { 
         border-color: #60A5FA !important; 
         background-color: #FFFFFF !important;
-        box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.15), inset 0 2px 4px rgba(0,0,0,0.01);
+        box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.2), inset 0 2px 4px rgba(0,0,0,0.01);
     }
     div[data-baseweb="input"] input, div[data-baseweb="select"] span, textarea { color: #0F172A !important; font-weight: 600; font-size: 15px; }
     
-    div[data-testid="stMetricValue"] { color: #3B82F6 !important; font-size: 42px !important; font-weight: 900 !important; text-shadow: none; letter-spacing: -1px; }
+    div[data-testid="stMetricValue"] { color: #2563EB !important; font-size: 42px !important; font-weight: 900 !important; text-shadow: none; letter-spacing: -1px; }
     #MainMenu {visibility: hidden;} footer {visibility: hidden;}
     
     /* Tab Styling Minimalist Mewah */
-    button[data-baseweb="tab"] { background: transparent !important; color: #94A3B8 !important; font-weight: 700; font-size: 15px; }
+    button[data-baseweb="tab"] { background: transparent !important; color: #64748B !important; font-weight: 700; font-size: 15px; }
     button[data-baseweb="tab"][aria-selected="true"] { color: #2563EB !important; }
     div[data-baseweb="tab-highlight"] { background-color: #2563EB !important; height: 4px; border-radius: 4px; }
 
-    /* FLOATING SIDEBAR (GLASSMORPHISM PANEL) */
+    /* FLOATING SIDEBAR (GLASSMORPHISM PANEL CERAH - ANTI BUNGLON) */
     [data-testid="stSidebar"] { 
         background-color: transparent !important; 
         border: none;
     }
     [data-testid="stSidebar"] > div:first-child {
-        background: rgba(255, 255, 255, 0.75) !important;
-        backdrop-filter: blur(30px) saturate(200%);
-        -webkit-backdrop-filter: blur(30px) saturate(200%);
-        border: 1px solid rgba(255, 255, 255, 0.9);
+        background: rgba(255, 255, 255, 0.95) !important;
+        backdrop-filter: blur(40px) saturate(200%);
+        -webkit-backdrop-filter: blur(40px) saturate(200%);
+        border: 1px solid rgba(255, 255, 255, 1);
         border-radius: 36px;
         margin: 1.5rem;
         height: calc(100vh - 3rem) !important;
-        box-shadow: 10px 10px 40px rgba(15, 23, 42, 0.05), inset 0 2px 2px rgba(255,255,255,1);
+        box-shadow: 10px 10px 40px rgba(15, 23, 42, 0.08), inset 0 2px 0 rgba(255,255,255,1);
         overflow: hidden;
     }
     [data-testid="stSidebarHeader"] { display: none; }
@@ -360,10 +333,10 @@ if not st.session_state.logged_in:
         st.markdown("<div style='text-align:center;'>", unsafe_allow_html=True)
         st.image(logo_path, width=110, output_format="auto")
         st.markdown("</div>", unsafe_allow_html=True)
-        st.markdown("<style>img { border-radius: 30px; box-shadow: 0 15px 40px rgba(0,0,0,0.06); border: 1px solid #E2E8F0; padding:8px; background:rgba(255,255,255,0.9); }</style>", unsafe_allow_html=True)
+        st.markdown("<style>img { border-radius: 30px; box-shadow: 0 15px 40px rgba(0,0,0,0.06); border: 1px solid #E2E8F0; padding:8px; background:#FFFFFF; }</style>", unsafe_allow_html=True)
     
-    st.markdown("<h1 style='text-align:center; font-size:70px; font-weight:900; margin-bottom: 0; letter-spacing:-2px;'><span class='gradient-text'>AKSARA</span></h1>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align:center; color:#64748B; margin-bottom:50px; font-size:15px; letter-spacing:6px; font-weight:700;'>INSTITUT EDUKASI INTERAKTIF</p>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align:center; font-size:75px; font-weight:900; margin-bottom: 0; letter-spacing:-2px;'><span class='gradient-text'>AKSARA</span></h1>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align:center; color:#64748B; margin-bottom:50px; font-size:16px; letter-spacing:6px; font-weight:700;'>INSTITUT EDUKASI INTERAKTIF</p>", unsafe_allow_html=True)
     
     col_space1, col_form, col_space3 = st.columns([1, 1.2, 1])
     with col_form:
@@ -435,7 +408,7 @@ def get_tier(lvl):
     else: return "🌌 Mahaguru", "#8B5CF6" 
 tier_name, tier_color = get_tier(user_level)
 
-# --- SIDEBAR NAVIGASI MENGAMBANG (GLASSMORPHISM PANEL) ---
+# --- SIDEBAR NAVIGASI MENGAMBANG (GLASSMORPHISM PANEL BERSIH & JELAS) ---
 with st.sidebar:
     st.markdown("""
     <style>
@@ -450,17 +423,18 @@ with st.sidebar:
         cursor: pointer;
     }
 
+    /* Warna Teks Default Sidebar - Sangat Kontras */
     div[role="radiogroup"] > label p, 
     div[role="radiogroup"] > label div {
-        color: #475569 !important; 
+        color: #334155 !important; 
         font-weight: 700;
         font-size: 14px;
         letter-spacing: 0.3px;
     }
 
     div[role="radiogroup"] > label:hover {
-        background: linear-gradient(90deg, rgba(37,99,235,0.08) 0%, rgba(37,99,235,0.02) 100%) !important;
-        border: 1px solid rgba(37,99,235,0.2);
+        background: #EFF6FF !important;
+        border: 1px solid #BFDBFE;
         transform: translateX(8px);
         box-shadow: 0 4px 15px rgba(37, 99, 235, 0.05);
     }
@@ -492,22 +466,22 @@ with st.sidebar:
     st.markdown(f"<h2 style='text-align:center; margin-top:10px; margin-bottom:4px; font-weight:800; font-size:22px; color:#0F172A;'>{display_name_db}</h2>", unsafe_allow_html=True)
     
     # Badge Judul & Tingkatan
-    st.markdown(f"<div style='text-align:center; margin-bottom:10px;'><span style='background:rgba(241,245,249,0.8); backdrop-filter:blur(10px); color:#475569; padding:6px 18px; border-radius:100px; font-weight:700; font-size:11px; letter-spacing:0.5px; border:1px solid #E2E8F0; box-shadow: 0 2px 10px rgba(0,0,0,0.02);'>{title_db}</span></div>", unsafe_allow_html=True)
+    st.markdown(f"<div style='text-align:center; margin-bottom:10px;'><span style='background:#F1F5F9; color:#475569; padding:6px 18px; border-radius:100px; font-weight:700; font-size:11px; letter-spacing:0.5px; border:1px solid #E2E8F0;'>{title_db}</span></div>", unsafe_allow_html=True)
     st.markdown(f"<div style='text-align:center; margin-bottom:30px;'><span style='color:{tier_color}; background:#FFFFFF; padding:6px 18px; border-radius:100px; font-weight:800; border:1px solid {tier_color}55; font-size:11px; letter-spacing:0.5px; box-shadow: 0 4px 15px {tier_color}22;'>{tier_name}</span></div>", unsafe_allow_html=True)
     
     # 3. LEVEL PROGRESS BAR
     prog = points_db % 100
     st.markdown(f"""
-        <div style='background: rgba(226,232,240,0.6); backdrop-filter:blur(5px); border-radius: 100px; height: 10px; margin: 15px 0; overflow:hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);'>
+        <div style='background: #E2E8F0; border-radius: 100px; height: 10px; margin: 15px 0; overflow:hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);'>
             <div style='background: linear-gradient(90deg, #60A5FA, #8B5CF6); width: {prog}%; height: 100%; border-radius: 100px; box-shadow: 0 0 10px rgba(139,92,246,0.5);'></div>
         </div>
-        <div style='display:flex; justify-content:space-between; font-weight:700; color:#64748B; font-size:13px;'>
+        <div style='display:flex; justify-content:space-between; font-weight:800; color:#475569; font-size:13px;'>
             <span>Lvl {user_level}</span><span style='color:#6366F1;'>✨ {points_db} Pts</span>
         </div>
     """, unsafe_allow_html=True)
     
-    st.markdown("<hr style='border:none; height:1px; background: linear-gradient(90deg, transparent, rgba(226,232,240,0.8), transparent); margin: 30px 0;'>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align:center; font-size:11px; font-weight:800; color:#94A3B8; letter-spacing:3px; margin-bottom:15px;'>MENU UTAMA</p>", unsafe_allow_html=True)
+    st.markdown("<hr style='border:none; height:1px; background: #E2E8F0; margin: 30px 0;'>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align:center; font-size:11px; font-weight:800; color:#64748B; letter-spacing:3px; margin-bottom:15px;'>MENU UTAMA</p>", unsafe_allow_html=True)
     
     # 4. RADIO MENU
     menu = st.radio("NAVIGASI INSTITUT", [
@@ -520,7 +494,7 @@ with st.sidebar:
         "⚙️ Konsol Super Admin"
     ], label_visibility="collapsed", key="navigasi_utama")
     
-    st.markdown("<hr style='border:none; height:1px; background: linear-gradient(90deg, transparent, rgba(226,232,240,0.8), transparent); margin: 30px 0;'>", unsafe_allow_html=True)
+    st.markdown("<hr style='border:none; height:1px; background: #E2E8F0; margin: 30px 0;'>", unsafe_allow_html=True)
     
     # 5. TOMBOL LOGOUT
     st.markdown("<div class='btn-red'>", unsafe_allow_html=True)
@@ -539,7 +513,7 @@ if menu == "🏠 Dashboard Utama":
     st.write("<br>", unsafe_allow_html=True)
     
     if not st.session_state.gacha_claimed:
-        st.markdown("<div class='glass-card' style='padding:35px; text-align:center; background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(239,246,255,0.8)); border-color:rgba(191,219,254,0.6);'>", unsafe_allow_html=True)
+        st.markdown("<div class='glass-card' style='padding:35px; text-align:center; background: linear-gradient(135deg, rgba(239,246,255,0.9), rgba(255,255,255,0.9)); border-color:rgba(191,219,254,0.8);'>", unsafe_allow_html=True)
         st.markdown("<h2 style='color:#2563EB; margin-top:0; font-size:24px; font-weight:800; letter-spacing:-0.5px;'>✨ Daily Honor Roll</h2>", unsafe_allow_html=True)
         st.write("<br>", unsafe_allow_html=True)
         if st.button("Buka Scroll Keberuntungan"):
@@ -554,59 +528,59 @@ if menu == "🏠 Dashboard Utama":
         st.markdown("</div><br>", unsafe_allow_html=True)
 
     c1, c2, c3 = st.columns(3)
-    c1.markdown(f"<div class='glass-card'><div style='font-size:45px; margin-bottom:15px; opacity:0.9; filter:drop-shadow(0 8px 15px rgba(0,0,0,0.05));'>⏳</div><h2 style='margin:0; font-size:40px; font-weight:900; color:#0F172A;'>{streak_db}</h2><p style='color:#64748B; font-weight:700; letter-spacing:1.5px; margin:0; font-size:13px; margin-top:5px;'>HARI AKTIF</p></div>", unsafe_allow_html=True)
-    c2.markdown(f"<div class='glass-card'><div style='font-size:45px; margin-bottom:15px; opacity:0.9; filter:drop-shadow(0 8px 15px rgba(0,0,0,0.05));'>📚</div><h2 style='margin:0; font-size:40px; font-weight:900; color:#0F172A;'>{len(learned_db)}</h2><p style='color:#64748B; font-weight:700; letter-spacing:1.5px; margin:0; font-size:13px; margin-top:5px;'>MODUL SELESAI</p></div>", unsafe_allow_html=True)
-    c3.markdown(f"<div class='glass-card' style='border-bottom: 5px solid {tier_color}; box-shadow: 0 20px 50px {tier_color}11, inset 0 2px 2px rgba(255,255,255,1);'><div style='font-size:45px; margin-bottom:15px; filter:drop-shadow(0 8px 15px {tier_color}44);'>🏛️</div><h2 style='color:{tier_color}; margin:0; font-size:40px; font-weight:900;'>Lvl {user_level}</h2><p style='color:#64748B; font-weight:700; letter-spacing:1.5px; margin:0; font-size:13px; margin-top:5px;'>STATUS AKADEMI</p></div>", unsafe_allow_html=True)
+    c1.markdown(f"<div class='glass-card'><div style='font-size:45px; margin-bottom:15px; filter:drop-shadow(0 8px 15px rgba(0,0,0,0.05));'>⏳</div><h2 style='margin:0; font-size:40px; font-weight:900; color:#0F172A;'>{streak_db}</h2><p style='color:#475569; font-weight:700; letter-spacing:1.5px; margin:0; font-size:13px; margin-top:5px;'>HARI AKTIF</p></div>", unsafe_allow_html=True)
+    c2.markdown(f"<div class='glass-card'><div style='font-size:45px; margin-bottom:15px; filter:drop-shadow(0 8px 15px rgba(0,0,0,0.05));'>📚</div><h2 style='margin:0; font-size:40px; font-weight:900; color:#0F172A;'>{len(learned_db)}</h2><p style='color:#475569; font-weight:700; letter-spacing:1.5px; margin:0; font-size:13px; margin-top:5px;'>MODUL SELESAI</p></div>", unsafe_allow_html=True)
+    c3.markdown(f"<div class='glass-card' style='border-bottom: 5px solid {tier_color}; box-shadow: 0 20px 50px {tier_color}22, inset 0 2px 0 rgba(255,255,255,1);'><div style='font-size:45px; margin-bottom:15px; filter:drop-shadow(0 8px 15px {tier_color}66);'>🏛️</div><h2 style='color:{tier_color}; margin:0; font-size:40px; font-weight:900;'>Lvl {user_level}</h2><p style='color:#475569; font-weight:700; letter-spacing:1.5px; margin:0; font-size:13px; margin-top:5px;'>STATUS AKADEMI</p></div>", unsafe_allow_html=True)
         
     st.write("<br><br>", unsafe_allow_html=True)
     st.markdown("<h3 style='font-size:26px; margin-bottom:25px; font-weight:900;'><span class='gradient-text'>Hall of Scholars</span> (Top 10)</h3>", unsafe_allow_html=True)
     
     ranking_data = db_get_leaderboard()
     for i, row in enumerate(ranking_data):
-        if i == 0: medali, bg_color, bdr_color = "👑", "linear-gradient(90deg, rgba(254,243,199,0.8), rgba(255,255,255,0.5))", "rgba(252,211,77,0.5)"
-        elif i == 1: medali, bg_color, bdr_color = "🥈", "linear-gradient(90deg, rgba(241,245,249,0.8), rgba(255,255,255,0.5))", "rgba(203,213,225,0.5)"
-        elif i == 2: medali, bg_color, bdr_color = "🥉", "linear-gradient(90deg, rgba(255,237,213,0.8), rgba(255,255,255,0.5))", "rgba(253,186,116,0.5)"
-        else: medali, bg_color, bdr_color = f"#{i+1}", "rgba(255,255,255,0.5)", "rgba(255,255,255,0.8)"
+        if i == 0: medali, bg_color, bdr_color = "👑", "linear-gradient(90deg, #FEF3C7, #FFFBEB)", "#FCD34D"
+        elif i == 1: medali, bg_color, bdr_color = "🥈", "linear-gradient(90deg, #F1F5F9, #FFFFFF)", "#CBD5E1"
+        elif i == 2: medali, bg_color, bdr_color = "🥉", "linear-gradient(90deg, #FFEDD5, #FFF7ED)", "#FDBA74"
+        else: medali, bg_color, bdr_color = f"#{i+1}", "rgba(255,255,255,0.8)", "#E2E8F0"
         
         d_name = row.get("display_name")
         if not d_name: d_name = row.get("username", "Anonim")
         
         st.markdown(f"""
-        <div style='background: {bg_color}; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid {bdr_color}; border-radius: 24px; padding: 22px 35px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); box-shadow: 0 10px 30px rgba(0,0,0,0.02), inset 0 2px 2px rgba(255,255,255,0.8);' onmouseover='this.style.transform=\"translateY(-3px) scale(1.01)\"; this.style.boxShadow=\"0 20px 40px rgba(37,99,235,0.06), inset 0 2px 2px rgba(255,255,255,1)\"' onmouseout='this.style.transform=\"translateY(0) scale(1)\"; this.style.boxShadow=\"0 10px 30px rgba(0,0,0,0.02), inset 0 2px 2px rgba(255,255,255,0.8)\"'>
-            <h3 style='margin:0; font-size:18px; font-weight:700; color:#334155;'>{medali} <span style='color:#0F172A; margin-left:15px;'>{d_name}</span> <span style='font-size:11px; font-weight:700; color:#4F46E5; background:rgba(224,231,255,0.8); padding:6px 14px; border-radius:100px; margin-left:15px; border:1px solid rgba(199,210,254,0.6); letter-spacing:0.5px;'>{row.get("title", "")}</span></h3>
+        <div style='background: {bg_color}; backdrop-filter: blur(15px); border: 1px solid {bdr_color}; border-radius: 24px; padding: 22px 35px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); box-shadow: 0 10px 30px rgba(0,0,0,0.02), inset 0 2px 0 rgba(255,255,255,1);' onmouseover='this.style.transform=\"translateY(-3px) scale(1.01)\"; this.style.boxShadow=\"0 20px 40px rgba(37,99,235,0.08), inset 0 2px 0 rgba(255,255,255,1)\"' onmouseout='this.style.transform=\"translateY(0) scale(1)\"; this.style.boxShadow=\"0 10px 30px rgba(0,0,0,0.02), inset 0 2px 0 rgba(255,255,255,1)\"'>
+            <h3 style='margin:0; font-size:18px; font-weight:800; color:#1E293B;'>{medali} <span style='color:#0F172A; margin-left:15px;'>{d_name}</span> <span style='font-size:11px; font-weight:800; color:#4F46E5; background:#E0E7FF; padding:6px 14px; border-radius:100px; margin-left:15px; border:1px solid #C7D2FE; letter-spacing:0.5px;'>{row.get("title", "")}</span></h3>
             <h3 style='margin:0; color:#2563EB; font-weight:900; font-size:20px;'>✨ {row.get("points", 0)}</h3>
         </div>
         """, unsafe_allow_html=True)
 
 
 # ==============================================================================
-# HALAMAN 2: MADING PEMBERITAHUAN (HYPER-GLASS LIGHT)
+# HALAMAN 2: MADING PEMBERITAHUAN
 # ==============================================================================
 st.markdown("""
 <style>
 .mading-container {
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(24px) saturate(200%);
+    -webkit-backdrop-filter: blur(24px) saturate(200%);
     border-radius: 32px;
     padding: 35px;
-    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.05), inset 0 2px 2px rgba(255,255,255,1);
-    border: 1px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.04), inset 0 2px 0 rgba(255,255,255,1);
+    border: 1px solid rgba(255, 255, 255, 1);
     margin-bottom: 40px;
     transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 .mading-container:hover {
     transform: translateY(-6px);
-    background: rgba(255, 255, 255, 0.9);
-    border-color: rgba(191, 219, 254, 0.8);
-    box-shadow: 0 30px 60px rgba(37, 99, 235, 0.08), inset 0 2px 2px rgba(255,255,255,1);
+    background: rgba(255, 255, 255, 0.95);
+    border-color: #BFDBFE;
+    box-shadow: 0 30px 60px rgba(37, 99, 235, 0.08), inset 0 2px 0 rgba(255,255,255,1);
 }
 .mading-tag {
-    background: rgba(239, 246, 255, 0.8);
+    background: #EFF6FF;
     color: #2563EB;
     padding: 6px 18px;
     border-radius: 100px;
-    border: 1px solid rgba(191, 219, 254, 0.6);
+    border: 1px solid #BFDBFE;
     font-size: 11px;
     font-weight: 800;
     display: inline-block;
@@ -640,7 +614,7 @@ st.markdown("""
 
 if menu == "📢 Mading Pemberitahuan":
     st.markdown("<h1 style='font-size:42px; margin-bottom: 5px; font-weight:900;'>Bulletin Board</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='font-size: 16px; color:#64748B; font-weight:500;'>Informasi kreatif, pengumuman penting, dan galeri poster institut.</p>", unsafe_allow_html=True)
+    st.markdown("<p style='font-size: 16px; color:#475569; font-weight:500;'>Informasi kreatif, pengumuman penting, dan galeri poster institut.</p>", unsafe_allow_html=True)
     st.write("<br>", unsafe_allow_html=True)
     
     if 'list_mading' not in st.session_state:
@@ -680,7 +654,7 @@ if menu == "📢 Mading Pemberitahuan":
                     
                     if item['gambar']:
                         try:
-                            st.markdown(f"<div style='margin-top:-25px; padding:0 30px;'><img src='{item['gambar']}' style='width:100%; border-radius:20px; border:2px solid #FFFFFF; box-shadow:0 15px 35px rgba(0,0,0,0.08);'></div>", unsafe_allow_html=True)
+                            st.markdown(f"<div style='margin-top:-25px; padding:0 30px;'><img src='{item['gambar']}' style='width:100%; border-radius:20px; border:4px solid #FFFFFF; box-shadow:0 15px 35px rgba(0,0,0,0.08);'></div>", unsafe_allow_html=True)
                         except:
                             st.caption("⚠️ Gagal memuat berkas gambar poster.")
                             
@@ -782,8 +756,8 @@ elif menu == "⚡ Live Arena Quiz (NEW!)":
             if active_rooms:
                 for room in active_rooms:
                     st.markdown(f"""
-                    <div style='background:rgba(255,255,255,0.7); border:1px solid #E2E8F0; border-radius:24px; padding:25px 35px; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 10px 30px rgba(0,0,0,0.03), inset 0 2px 2px rgba(255,255,255,1);'>
-                        <div><h4 style='margin:0; color:#0F172A; font-size:18px; font-weight:800;'>{room['mapel']}</h4><span style='font-size:13px; color:#64748B; font-weight:600;'>Host: {room['host_username']} &nbsp;|&nbsp; Kode: <span style='color:#2563EB;'>{room['session_code']}</span></span></div>
+                    <div style='background:rgba(255,255,255,0.9); border:1px solid #E2E8F0; border-radius:24px; padding:25px 35px; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 10px 30px rgba(0,0,0,0.03), inset 0 2px 0 rgba(255,255,255,1);'>
+                        <div><h4 style='margin:0; color:#0F172A; font-size:18px; font-weight:800;'>{room['mapel']}</h4><span style='font-size:13px; color:#475569; font-weight:600;'>Host: {room['host_username']} &nbsp;|&nbsp; Kode: <span style='color:#2563EB;'>{room['session_code']}</span></span></div>
                     </div>
                     """, unsafe_allow_html=True)
                     if st.button(f"Masuk Aula Ini", key=f"join_{room['session_code']}"):
@@ -794,7 +768,7 @@ elif menu == "⚡ Live Arena Quiz (NEW!)":
             else:
                 st.caption("Tidak ada aula terbuka saat ini.")
                 
-            st.markdown("<hr style='border:1px solid rgba(255,255,255,0.8); margin: 40px 0;'>", unsafe_allow_html=True)
+            st.markdown("<hr style='border:1px solid #E2E8F0; margin: 40px 0;'>", unsafe_allow_html=True)
             st.caption("Atau masukkan PIN Privat:")
             kode_input = st.text_input("PIN 6 Digit (Akses Privat):", max_chars=6).strip()
             st.write("<br>", unsafe_allow_html=True)
@@ -829,7 +803,7 @@ elif menu == "⚡ Live Arena Quiz (NEW!)":
             st.markdown("<h3 style='font-size:22px;'>MANUFAKTUR SOAL</h3>", unsafe_allow_html=True)
             judul_baru = st.text_input("Label / Judul Ujian Custom:").strip()
             
-            st.markdown("<hr style='border:1px solid rgba(255,255,255,0.8); margin: 35px 0;'>", unsafe_allow_html=True)
+            st.markdown("<hr style='border:1px solid #E2E8F0; margin: 35px 0;'>", unsafe_allow_html=True)
             for i, q in enumerate(st.session_state.temp_q):
                 st.caption(f"✓ Terarsip: {q['soal']} (Jawaban: {q['jawaban']})")
                 
@@ -872,14 +846,14 @@ elif menu == "⚡ Live Arena Quiz (NEW!)":
         players = db_get_session_players(code)
         
         st.markdown(f"<div class='glass-card' style='padding:70px;'>", unsafe_allow_html=True)
-        st.markdown(f"<h4 style='font-size:20px; color:#64748B;'>Sesi Modul: <span style='color:#0F172A; font-weight:800;'>{room_info['mapel']}</span></h4>", unsafe_allow_html=True)
-        st.markdown(f"<p style='font-size:15px; color:#94A3B8; margin-top:40px; font-weight:800; letter-spacing:5px;'>KODE AKSES PRIVAT</p>", unsafe_allow_html=True)
+        st.markdown(f"<h4 style='font-size:20px; color:#475569;'>Sesi Modul: <span style='color:#0F172A; font-weight:800;'>{room_info['mapel']}</span></h4>", unsafe_allow_html=True)
+        st.markdown(f"<p style='font-size:15px; color:#64748B; margin-top:40px; font-weight:800; letter-spacing:5px;'>KODE AKSES PRIVAT</p>", unsafe_allow_html=True)
         st.markdown(f"<h1 style='font-size:90px; font-weight:900; color:#3B82F6; letter-spacing:15px; margin:0;'>{code}</h1>", unsafe_allow_html=True)
         st.markdown(f"<p style='margin-top:40px; font-size:16px; font-weight:700; color:#334155;'>Partisipan Hadir: {len(players)}</p>", unsafe_allow_html=True)
         
         if players:
             names = ", ".join([p["username"] for p in players])
-            st.markdown(f"<div style='background:rgba(255,255,255,0.8); padding:25px; border-radius:20px; color:#0F172A; font-size:16px; font-weight:700; border:1px solid rgba(255,255,255,1); box-shadow:0 10px 25px rgba(0,0,0,0.03);'>{names}</div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='background:#F8FAFC; padding:25px; border-radius:20px; color:#0F172A; font-size:16px; font-weight:700; border:1px solid #E2E8F0; box-shadow:inset 0 2px 4px rgba(0,0,0,0.02);'>{names}</div>", unsafe_allow_html=True)
         else:
             st.caption("Menunggu koneksi partisipan...")
             
@@ -932,7 +906,7 @@ elif menu == "⚡ Live Arena Quiz (NEW!)":
             for rank, p in enumerate(players):
                 status_icon = "Selesai" if p["status"] == "finished" else "Mengerjakan"
                 st.markdown(f"""
-                <div style='background:rgba(255,255,255,0.8); border:1px solid #FFFFFF; border-radius:20px; padding:25px 35px; margin-bottom:15px; display:flex; justify-content:space-between; font-size:16px; font-weight:700; color:#0F172A; box-shadow:0 10px 25px rgba(0,0,0,0.03);'>
+                <div style='background:rgba(255,255,255,0.9); border:1px solid #E2E8F0; border-radius:20px; padding:25px 35px; margin-bottom:15px; display:flex; justify-content:space-between; font-size:16px; font-weight:700; color:#0F172A; box-shadow:0 10px 25px rgba(0,0,0,0.03);'>
                     <span>{rank+1}. {p['username']} <span style='font-size:13px; color:#64748B; margin-left:15px; font-weight:600;'>[{status_icon}]</span></span>
                     <span style='color:#3B82F6; font-weight:900;'>{p['score']} Pts</span>
                 </div>
@@ -1000,7 +974,7 @@ elif menu == "⚡ Live Arena Quiz (NEW!)":
         
         c1, c2 = st.columns(2)
         c1.markdown(f"<div class='score-card'><h3 style='color:#3B82F6; font-size:16px; letter-spacing:1.5px; margin-bottom:15px;'>Akurasi Logika</h3><h1 style='color:#0F172A; font-size:70px; margin:0; font-weight:900;'>{akurasi}%</h1></div>", unsafe_allow_html=True)
-        c2.markdown(f"<div class='score-card' style='background:linear-gradient(135deg, rgba(220, 252, 231, 0.8), rgba(255, 255, 255, 0.6)); border-color:#86EFAC;'><h3 style='color:#16A34A; font-size:16px; letter-spacing:1.5px; margin-bottom:15px;'>Poin Diperoleh</h3><h1 style='color:#15803D; font-size:70px; margin:0; font-weight:900;'>+{final_xp}</h1></div>", unsafe_allow_html=True)
+        c2.markdown(f"<div class='score-card' style='background:linear-gradient(135deg, #DCFCE7, #F0FDF4); border-color:#86EFAC;'><h3 style='color:#16A34A; font-size:16px; letter-spacing:1.5px; margin-bottom:15px;'>Poin Diperoleh</h3><h1 style='color:#15803D; font-size:70px; margin:0; font-weight:900;'>+{final_xp}</h1></div>", unsafe_allow_html=True)
         
         st.write("<br><br>", unsafe_allow_html=True)
         if st.button("Simpan & Kembali ke Lobby"):
@@ -1054,17 +1028,17 @@ elif menu == "⚔️ Mode Duel Ranked (PvP)":
             
     if st.session_state.lawan_duel and st.session_state.kuis_duel and st.session_state.soal_pvp_aktif:
         l_user, l_nama, l_pts = st.session_state.lawan_duel
-        st.markdown("<hr style='border:1px solid rgba(255,255,255,0.8); margin: 45px 0;'>", unsafe_allow_html=True)
+        st.markdown("<hr style='border:1px solid #E2E8F0; margin: 45px 0;'>", unsafe_allow_html=True)
         
         c_p1, c_vs, c_p2 = st.columns([2,1,2])
-        with c_p1: st.markdown(f"<div class='glass-card' style='padding:35px; border-color:#BFDBFE; background:linear-gradient(135deg, rgba(239,246,255,0.9), rgba(255,255,255,0.8)); box-shadow:0 15px 35px rgba(37,99,235,0.08);'><h2 style='color:#1D4ED8; margin:0; font-size:26px;'>{display_name_db}</h2><p style='font-size:16px; font-weight:700; color:#3B82F6; margin:0; margin-top:8px;'>✨ {points_db} Pts</p></div>", unsafe_allow_html=True)
+        with c_p1: st.markdown(f"<div class='glass-card' style='padding:35px; border-color:#BFDBFE; background:linear-gradient(135deg, #EFF6FF, #FFFFFF); box-shadow:0 15px 35px rgba(37,99,235,0.08);'><h2 style='color:#1D4ED8; margin:0; font-size:26px;'>{display_name_db}</h2><p style='font-size:16px; font-weight:800; color:#3B82F6; margin:0; margin-top:8px;'>✨ {points_db} Pts</p></div>", unsafe_allow_html=True)
         with c_vs: st.markdown("<div style='text-align:center; margin-top:30px;'><span class='vs-text'>VS</span></div>", unsafe_allow_html=True)
-        with c_p2: st.markdown(f"<div class='glass-card' style='padding:35px; border-color:#FECACA; background:linear-gradient(135deg, rgba(254,242,242,0.9), rgba(255,255,255,0.8)); box-shadow:0 15px 35px rgba(239,68,68,0.08);'><h2 style='color:#B91C1C; margin:0; font-size:26px;'>{l_nama}</h2><p style='font-size:16px; font-weight:700; color:#EF4444; margin:0; margin-top:8px;'>✨ {l_pts} Pts</p></div>", unsafe_allow_html=True)
+        with c_p2: st.markdown(f"<div class='glass-card' style='padding:35px; border-color:#FECACA; background:linear-gradient(135deg, #FEF2F2, #FFFFFF); box-shadow:0 15px 35px rgba(239,68,68,0.08);'><h2 style='color:#B91C1C; margin:0; font-size:26px;'>{l_nama}</h2><p style='font-size:16px; font-weight:800; color:#EF4444; margin:0; margin-top:8px;'>✨ {l_pts} Pts</p></div>", unsafe_allow_html=True)
         
         st.write("<br><br>", unsafe_allow_html=True)
         st.markdown("<div class='glass-card' style='text-align:left; padding:60px;'>", unsafe_allow_html=True)
         ds = st.session_state.soal_pvp_aktif
-        st.markdown(f"<h3 style='font-size:24px; font-weight:700; color:#0F172A; line-height:1.7;'>{ds['soal']}</h3>", unsafe_allow_html=True)
+        st.markdown(f"<h3 style='font-size:24px; font-weight:800; color:#0F172A; line-height:1.7;'>{ds['soal']}</h3>", unsafe_allow_html=True)
         st.write("<br>", unsafe_allow_html=True)
         j_user = st.radio("Pilih Argumen Anda:", ds['opsi'], key="duel_ans")
         
@@ -1131,7 +1105,7 @@ elif menu == "📖 Ruang Belajar & Modul":
                 file_path = os.path.join(folder_t, f)
                 
                 if ext in ['jpg', 'jpeg', 'png']:
-                    st.markdown("<div style='padding:25px; border-radius:24px; background:rgba(255,255,255,0.8); border:1px solid #FFFFFF; margin-bottom:25px; box-shadow:0 10px 30px rgba(0,0,0,0.05);'>", unsafe_allow_html=True)
+                    st.markdown("<div style='padding:25px; border-radius:24px; background:#FFFFFF; border:1px solid #E2E8F0; margin-bottom:25px; box-shadow:0 10px 30px rgba(0,0,0,0.05);'>", unsafe_allow_html=True)
                     st.image(file_path, caption=f"🖼️ {f}", use_container_width=True)
                     st.markdown("</div>", unsafe_allow_html=True)
                 else:
@@ -1174,11 +1148,11 @@ elif menu == "🛒 Black Market Profil":
     with tab_gl:
         st.markdown("<div class='glass-card' style='text-align:left;'><h3 style='font-size:24px;'>Marketplace Kredensial</h3>", unsafe_allow_html=True)
         st.write(f"Saldo Tersedia: ✨ **{points_db} Pts**")
-        st.markdown("<hr style='border:1px solid rgba(255,255,255,0.8); margin: 40px 0;'>", unsafe_allow_html=True)
+        st.markdown("<hr style='border:1px solid #E2E8F0; margin: 40px 0;'>", unsafe_allow_html=True)
         for gelar, harga in DAFTAR_GELAR.items():
             cg1, cg2, cg3 = st.columns([3, 1, 1])
             cg1.markdown(f"<h4 style='font-size:17px; color:#0F172A; font-weight:800;'>{gelar}</h4>", unsafe_allow_html=True)
-            cg2.markdown(f"<p style='color:#3B82F6; font-weight:800; font-size:17px; margin:0;'>✨ {harga}</p>", unsafe_allow_html=True)
+            cg2.markdown(f"<p style='color:#3B82F6; font-weight:900; font-size:17px; margin:0;'>✨ {harga}</p>", unsafe_allow_html=True)
             with cg3:
                 if title_db == gelar: st.button("Tersemat", key=f"ak_{gelar}", disabled=True)
                 else:
