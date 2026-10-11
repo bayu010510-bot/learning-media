@@ -15,153 +15,417 @@ from PIL import Image
 # ==========================================
 st.set_page_config(page_title="Aksara | Platform Edukasi", page_icon="🎓", layout="wide", initial_sidebar_state="expanded")
 
-# CSS HYPER-MODERN, HIGH-CONTRAST LUXURY GLASSMORPHISM
+# CSS GLASSMORPHISM PREMIUM — AURORA MESH, KACA BERLAPIS, KONTRAS TINGGI
 st.markdown("""
     <style>
-    /* Menggunakan Font "Outfit" yang sangat modern, elegan, dan tajam (Bebas Teks Bunglon) */
     @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
-    
-    html, body, [class*="css"] { font-family: 'Outfit', sans-serif; }
-    
-    /* Latar Belakang Aurora Mesh (Terang, Halus, Nyaman di Mata) */
-    .stApp { 
-        background: radial-gradient(circle at 0% 0%, #E0F2FE 0%, transparent 40%),
-                    radial-gradient(circle at 100% 0%, #EDE9FE 0%, transparent 40%),
-                    radial-gradient(circle at 100% 100%, #CCFBF1 0%, transparent 40%),
-                    radial-gradient(circle at 0% 100%, #F1F5F9 0%, transparent 40%),
-                    #F8FAFC;
-        color: #0F172A; 
-        overflow-x: hidden;
-    }
-    
-    /* Tipografi dengan Kontras Tinggi (Anti Teks Bunglon) */
-    h1, h2, h3 { font-family: 'Outfit', sans-serif !important; font-weight: 800; letter-spacing: -0.5px; color: #0F172A !important; }
-    h4, h5, p, span, label { color: #334155 !important; font-weight: 500; }
-    
-    /* Efek Teks Gradient Spektakuler (Vibrant Tech Blue) */
-    .gradient-text { 
-        background: linear-gradient(135deg, #2563EB 0%, #8B5CF6 50%, #D946EF 100%);
-        -webkit-background-clip: text; 
-        -webkit-text-fill-color: transparent; 
-        font-weight: 900; 
-        display: inline-block;
-        text-shadow: 0 8px 24px rgba(37, 99, 235, 0.2);
-    }
-    
-    .vs-text { 
-        background: linear-gradient(to right, #0F172A 0%, #64748B 100%); 
-        -webkit-background-clip: text; 
-        -webkit-text-fill-color: transparent; 
-        font-weight: 900; font-size: 45px; 
-        letter-spacing: 2px;
-    }
-    
-    /* Animasi Masuk Super Halus */
-    @keyframes fadeInUp { from {opacity: 0; transform: translateY(20px);} to {opacity: 1; transform: translateY(0);} }
-    .block-container { animation: fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); padding-top: 2rem !important; }
-    
-    /* HYPER-GLASSMORPHISM KARTU (Opasitas Putih Tinggi = Anti Bunglon) */
-    .glass-card { 
-        background: rgba(255, 255, 255, 0.85); /* Putih pekat untuk keterbacaan maksimal */
-        backdrop-filter: blur(32px) saturate(200%); 
-        -webkit-backdrop-filter: blur(32px) saturate(200%);
-        border-radius: 32px; 
-        border: 1px solid rgba(255, 255, 255, 1); 
-        box-shadow: 0 20px 40px rgba(15, 23, 42, 0.04), inset 0 2px 0 rgba(255, 255, 255, 1); 
-        padding: 40px; 
-        text-align: center; 
-        transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); 
-    }
-    .glass-card:hover { 
-        transform: translateY(-4px); 
-        background: rgba(255, 255, 255, 0.95);
-        box-shadow: 0 25px 50px rgba(37, 99, 235, 0.08), inset 0 2px 0 rgba(255, 255, 255, 1); 
-        border-color: #DBEAFE;
-    }
-    
-    /* Kartu Skor Kuis */
-    .score-card { 
-        background: linear-gradient(135deg, rgba(239, 246, 255, 0.9) 0%, rgba(255, 255, 255, 0.9) 100%);
-        backdrop-filter: blur(20px);
-        border: 1px solid #BFDBFE; 
-        box-shadow: 0 15px 35px rgba(37, 99, 235, 0.06), inset 0 2px 0 rgba(255, 255, 255, 1);
-        border-radius: 28px; padding: 35px; text-align: center; 
-        transition: 0.4s ease; 
-    }
-    .score-card:hover { transform: translateY(-5px) scale(1.02); box-shadow: 0 20px 45px rgba(37, 99, 235, 0.12); }
-    
-    /* Buttons: Spektakuler Pill-Shaped Gradient */
-    .stButton>button { 
-        background: linear-gradient(135deg, #2563EB 0%, #4F46E5 100%) !important;
-        color: #FFFFFF !important; 
-        border-radius: 100px; /* Bentuk Kapsul Sempurna */
-        border: none; 
-        padding: 16px 32px; 
-        font-weight: 700; 
-        font-size: 16px; 
-        width: 100%; 
-        box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3), inset 0 2px 0 rgba(255,255,255,0.2); 
-        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); 
-        letter-spacing: 0.5px;
-    }
-    .stButton>button:hover { 
-        background: linear-gradient(135deg, #1D4ED8 0%, #4338CA 100%) !important; 
-        transform: translateY(-3px) scale(1.01);
-        box-shadow: 0 15px 35px rgba(37, 99, 235, 0.4), inset 0 2px 0 rgba(255,255,255,0.3); 
-    }
-    .stButton>button:active { transform: translateY(1px); box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3); }
-    
-    /* Varian Button Glass Kuis */
-    .quiz-btn>button { background: rgba(255,255,255,0.95); border: 2px solid #E2E8F0; font-size: 16px; font-weight: 600; padding: 22px; border-radius: 24px; color: #0F172A !important; transition: 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.03); }
-    .quiz-btn>button:hover { background: #F0FDF4; border-color: #10B981; color: #059669 !important; box-shadow: 0 12px 30px rgba(16, 185, 129, 0.15); }
-    
-    .btn-red>button { background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%) !important; box-shadow: 0 10px 25px rgba(239, 68, 68, 0.3), inset 0 2px 0 rgba(255,255,255,0.2); }
-    .btn-red>button:hover { background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%) !important; box-shadow: 0 15px 35px rgba(239, 68, 68, 0.4); }
-    
-    .btn-green>button { background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important; box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3), inset 0 2px 0 rgba(255,255,255,0.2); }
-    .btn-green>button:hover { background: linear-gradient(135deg, #059669 0%, #047857 100%) !important; box-shadow: 0 15px 35px rgba(16, 185, 129, 0.4); }
-    
-    /* Input Fields (Sangat Bersih, Mewah & Elegan) */
-    div[data-baseweb="input"] > div, div[data-baseweb="select"] > div, div[data-baseweb="textarea"] > div { 
-        background-color: #FFFFFF !important; 
-        border: 2px solid #E2E8F0 !important; 
-        border-radius: 20px; transition: 0.3s; 
-        box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
-    }
-    div[data-baseweb="input"] > div:focus-within, div[data-baseweb="select"] > div:focus-within, div[data-baseweb="textarea"] > div:focus-within { 
-        border-color: #60A5FA !important; 
-        background-color: #FFFFFF !important;
-        box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.2), inset 0 2px 4px rgba(0,0,0,0.01);
-    }
-    div[data-baseweb="input"] input, div[data-baseweb="select"] span, textarea { color: #0F172A !important; font-weight: 600; font-size: 15px; }
-    
-    div[data-testid="stMetricValue"] { color: #2563EB !important; font-size: 42px !important; font-weight: 900 !important; text-shadow: none; letter-spacing: -1px; }
-    #MainMenu {visibility: hidden;} footer {visibility: hidden;}
-    
-    /* Tab Styling Minimalist Mewah */
-    button[data-baseweb="tab"] { background: transparent !important; color: #64748B !important; font-weight: 700; font-size: 15px; }
-    button[data-baseweb="tab"][aria-selected="true"] { color: #2563EB !important; }
-    div[data-baseweb="tab-highlight"] { background-color: #2563EB !important; height: 4px; border-radius: 4px; }
 
-    /* FLOATING SIDEBAR (GLASSMORPHISM PANEL CERAH - ANTI BUNGLON) */
-    [data-testid="stSidebar"] { 
-        background-color: transparent !important; 
-        border: none;
+    /* =====================================================
+       1. DESIGN TOKENS
+       ===================================================== */
+    :root {
+        --ink: #0B1220;
+        --ink-soft: #334155;
+        --muted: #64748B;
+        --blue: #2563EB;
+        --indigo: #4F46E5;
+        --violet: #8B5CF6;
+        --fuchsia: #D946EF;
+        --emerald: #10B981;
+        --rose: #EF4444;
+
+        --glass-sheen: linear-gradient(135deg, rgba(255,255,255,0.88) 0%, rgba(255,255,255,0.58) 50%, rgba(255,255,255,0.76) 100%);
+        --glass-edge: rgba(255, 255, 255, 0.92);
+        --glass-blur: blur(26px) saturate(190%);
+
+        --shadow-sm: 0 6px 18px rgba(30, 41, 90, 0.06);
+        --shadow-md: 0 16px 40px rgba(30, 41, 90, 0.09), 0 2px 6px rgba(15, 23, 42, 0.03);
+        --shadow-lg: 0 30px 64px rgba(55, 70, 180, 0.16), 0 4px 12px rgba(15, 23, 42, 0.04);
+        --inner-light: inset 0 1px 0 rgba(255,255,255,1), inset 0 -1px 0 rgba(255,255,255,0.4);
+        --ease: cubic-bezier(0.22, 0.9, 0.3, 1);
     }
+
+    /* =====================================================
+       2. TIPOGRAFI (Outfit) & WARNA TEKS KONTRAS TINGGI
+       ===================================================== */
+    html, body, .stApp { font-family: 'Outfit', sans-serif !important; }
+    .stApp p, .stApp h1, .stApp h2, .stApp h3, .stApp h4, .stApp h5, .stApp h6,
+    .stApp label, .stApp li, .stApp a, .stApp button, .stApp input, .stApp textarea, .stApp td, .stApp th {
+        font-family: 'Outfit', sans-serif !important;
+    }
+
+    .stApp h1, .stApp h2, .stApp h3 { font-weight: 800; letter-spacing: -0.5px; }
+    /* Warna dipaksa HANYA untuk elemen tanpa warna inline, supaya warna kustom tetap tampil */
+    .stApp h1:not([style*="color:"]), .stApp h2:not([style*="color:"]), .stApp h3:not([style*="color:"]) { color: var(--ink) !important; }
+    .stApp h4:not([style*="color:"]), .stApp h5:not([style*="color:"]), .stApp h6:not([style*="color:"]),
+    .stApp p:not([style*="color:"]), .stApp label:not([style*="color:"]), .stApp li:not([style*="color:"]) {
+        color: var(--ink-soft) !important; font-weight: 500;
+    }
+    .stApp [data-testid="stWidgetLabel"] p { font-weight: 700; font-size: 14px; letter-spacing: 0.2px; }
+    .stApp [data-testid="stCaptionContainer"] p { color: var(--muted) !important; font-weight: 500; }
+    .stApp a { color: var(--blue); font-weight: 600; }
+    ::selection { background: rgba(99, 102, 241, 0.25); }
+
+    .gradient-text {
+        background: linear-gradient(120deg, #2563EB 0%, #7C3AED 35%, #D946EF 65%, #2563EB 100%);
+        background-size: 200% auto;
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 900;
+        display: inline-block;
+        filter: drop-shadow(0 6px 16px rgba(99, 102, 241, 0.28));
+        animation: gradient-flow 9s linear infinite;
+    }
+    .vs-text {
+        background: linear-gradient(135deg, #0F172A 0%, #6366F1 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 900; font-size: 45px;
+        letter-spacing: 2px;
+        filter: drop-shadow(0 6px 14px rgba(99, 102, 241, 0.25));
+    }
+
+    @keyframes gradient-flow { to { background-position: 200% center; } }
+    @keyframes fadeInUp { from {opacity: 0; transform: translateY(20px);} to {opacity: 1; transform: translateY(0);} }
+    @keyframes aurora-drift {
+        0%   { transform: translate3d(0, 0, 0) scale(1) rotate(0deg); }
+        50%  { transform: translate3d(2%, -3%, 0) scale(1.08) rotate(3deg); }
+        100% { transform: translate3d(-3%, 2%, 0) scale(1.04) rotate(-3deg); }
+    }
+
+    /* =====================================================
+       3. LATAR AURORA MESH (BERGERAK HALUS)
+       ===================================================== */
+    .stApp {
+        background:
+            radial-gradient(1200px 700px at 0% 0%, rgba(186, 230, 253, 0.95) 0%, transparent 60%),
+            radial-gradient(1000px 700px at 100% 0%, rgba(221, 214, 254, 0.95) 0%, transparent 60%),
+            radial-gradient(1100px 800px at 100% 100%, rgba(167, 243, 208, 0.80) 0%, transparent 60%),
+            radial-gradient(900px 700px at 0% 100%, rgba(251, 207, 232, 0.65) 0%, transparent 60%),
+            #F4F7FF !important;
+        background-attachment: fixed !important;
+        color: var(--ink);
+        overflow-x: hidden;
+        isolation: isolate;
+    }
+    .stApp::before {
+        content: ""; position: fixed; inset: -10%; z-index: -1; pointer-events: none;
+        background:
+            radial-gradient(34% 34% at 18% 22%, rgba(96, 165, 250, 0.40), transparent 70%),
+            radial-gradient(30% 30% at 82% 18%, rgba(167, 139, 250, 0.38), transparent 70%),
+            radial-gradient(32% 32% at 74% 82%, rgba(45, 212, 191, 0.30), transparent 70%),
+            radial-gradient(28% 28% at 22% 80%, rgba(244, 114, 182, 0.24), transparent 70%);
+        filter: blur(42px);
+        animation: aurora-drift 26s ease-in-out infinite alternate;
+    }
+    .stApp::after {
+        content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+        background-image: radial-gradient(rgba(99, 102, 241, 0.16) 1px, transparent 1.3px);
+        background-size: 30px 30px;
+        -webkit-mask-image: radial-gradient(ellipse at 50% 25%, #000 0%, transparent 78%);
+        mask-image: radial-gradient(ellipse at 50% 25%, #000 0%, transparent 78%);
+    }
+    [data-testid="stAppViewContainer"], [data-testid="stMain"], section.main, .main { background: transparent !important; }
+    header[data-testid="stHeader"] { background: transparent !important; }
+    [data-testid="stDecoration"] { display: none; }
+    #MainMenu {visibility: hidden;} footer {visibility: hidden;}
+
+    /* Blok <style> murni tidak boleh menyisakan jarak kosong */
+    :is(.element-container, [data-testid="stElementContainer"]):has(style):not(:has(p, h1, h2, h3, h4, img, audio, button, input)) { display: none !important; }
+
+    .block-container { animation: fadeInUp 0.8s var(--ease); padding-top: 2rem !important; padding-bottom: 4rem !important; }
+
+    /* =====================================================
+       4. KARTU KACA (GLASS CARD)
+       ===================================================== */
+    .glass-card {
+        position: relative;
+        background: var(--glass-sheen);
+        backdrop-filter: var(--glass-blur);
+        -webkit-backdrop-filter: var(--glass-blur);
+        border-radius: 32px;
+        border: 1px solid var(--glass-edge);
+        box-shadow: var(--shadow-md), var(--inner-light);
+        padding: 40px;
+        text-align: center;
+        transition: transform 0.45s var(--ease), box-shadow 0.45s var(--ease), border-color 0.45s ease;
+    }
+    .glass-card:hover {
+        transform: translateY(-5px);
+        border-color: rgba(191, 219, 254, 1);
+        box-shadow: var(--shadow-lg), var(--inner-light);
+    }
+    /* Pembuka kartu yang tidak berisi (penutupnya ada di elemen lain) disembunyikan agar tidak jadi kotak kosong */
+    .glass-card:empty { display: none; }
+
+    .score-card {
+        background: linear-gradient(135deg, rgba(239, 246, 255, 0.92) 0%, rgba(255, 255, 255, 0.78) 100%);
+        backdrop-filter: blur(22px) saturate(180%);
+        -webkit-backdrop-filter: blur(22px) saturate(180%);
+        border: 1px solid rgba(191, 219, 254, 0.95);
+        box-shadow: var(--shadow-md), var(--inner-light);
+        border-radius: 28px; padding: 35px; text-align: center;
+        transition: transform 0.45s var(--ease), box-shadow 0.45s var(--ease);
+    }
+    .score-card:hover { transform: translateY(-6px) scale(1.015); box-shadow: var(--shadow-lg), var(--inner-light); }
+
+    /* Wadah tab = panel kaca besar */
+    .stTabs, [data-testid="stTabs"] {
+        background: linear-gradient(180deg, rgba(255,255,255,0.80) 0%, rgba(255,255,255,0.62) 100%);
+        border: 1px solid var(--glass-edge);
+        border-radius: 32px;
+        padding: 14px 24px 28px 24px;
+        box-shadow: var(--shadow-md), var(--inner-light);
+    }
+    [data-testid="stForm"] {
+        background: rgba(255, 255, 255, 0.55);
+        border: 1px solid var(--glass-edge) !important;
+        border-radius: 28px !important;
+        padding: 28px !important;
+        box-shadow: var(--shadow-sm), var(--inner-light);
+    }
+
+    /* =====================================================
+       5. TOMBOL (PILL GRADIENT + KILAU)
+       ===================================================== */
+    .stButton > button, [data-testid="stButton"] > button,
+    .stDownloadButton > button, [data-testid="stDownloadButton"] > button,
+    [data-testid="stFormSubmitButton"] > button {
+        position: relative; overflow: hidden;
+        width: 100%; min-height: 3.1rem;
+        padding: 14px 32px !important;
+        background: linear-gradient(135deg, #2563EB 0%, #4F46E5 55%, #7C3AED 100%) !important;
+        color: #FFFFFF !important;
+        border: 1px solid rgba(255, 255, 255, 0.38) !important;
+        border-radius: 100px !important;
+        font-weight: 700; font-size: 16px; letter-spacing: 0.4px;
+        box-shadow: 0 14px 30px rgba(79, 70, 229, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease), filter 0.35s ease;
+    }
+    .stButton > button::after, [data-testid="stButton"] > button::after,
+    .stDownloadButton > button::after, [data-testid="stDownloadButton"] > button::after,
+    [data-testid="stFormSubmitButton"] > button::after {
+        content: ""; position: absolute; top: 0; left: -120%; width: 55%; height: 100%;
+        background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+        transform: skewX(-20deg); transition: left 0.8s ease; pointer-events: none;
+    }
+    .stButton > button:hover, [data-testid="stButton"] > button:hover,
+    .stDownloadButton > button:hover, [data-testid="stDownloadButton"] > button:hover,
+    [data-testid="stFormSubmitButton"] > button:hover {
+        transform: translateY(-3px) scale(1.01);
+        filter: brightness(1.07) saturate(1.1);
+        box-shadow: 0 20px 40px rgba(79, 70, 229, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    }
+    .stButton > button:hover::after, [data-testid="stButton"] > button:hover::after,
+    .stDownloadButton > button:hover::after, [data-testid="stDownloadButton"] > button:hover::after,
+    [data-testid="stFormSubmitButton"] > button:hover::after { left: 140%; }
+    .stButton > button:active, [data-testid="stButton"] > button:active,
+    .stDownloadButton > button:active, [data-testid="stFormSubmitButton"] > button:active {
+        transform: translateY(1px) scale(0.99);
+        box-shadow: 0 6px 16px rgba(79, 70, 229, 0.3);
+    }
+    .stButton > button:focus-visible, [data-testid="stButton"] > button:focus-visible,
+    [data-testid="stFormSubmitButton"] > button:focus-visible { outline: 3px solid rgba(99, 102, 241, 0.45); outline-offset: 3px; }
+    .stButton > button:disabled, [data-testid="stButton"] > button:disabled {
+        background: rgba(241, 245, 249, 0.95) !important;
+        color: #64748B !important;
+        border: 1px solid #E2E8F0 !important;
+        box-shadow: none; filter: none; transform: none; cursor: not-allowed;
+    }
+    .stButton > button:disabled::after, [data-testid="stButton"] > button:disabled::after { display: none; }
+
+    /* Teks di dalam tombol selalu mengikuti warna tombol */
+    .stApp .stButton > button p, .stApp [data-testid="stButton"] > button p,
+    .stApp .stDownloadButton > button p, .stApp [data-testid="stDownloadButton"] > button p,
+    .stApp [data-testid="stFormSubmitButton"] > button p { color: inherit !important; font-weight: inherit; margin: 0; }
+
+    /* Varian merah: tombol tepat setelah penanda .btn-red */
+    :is(.element-container, [data-testid="stElementContainer"]):has(.btn-red) + :is(.element-container, [data-testid="stElementContainer"]) button {
+        background: linear-gradient(135deg, #F43F5E 0%, #DC2626 100%) !important;
+        box-shadow: 0 14px 30px rgba(239, 68, 68, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    }
+    :is(.element-container, [data-testid="stElementContainer"]):has(.btn-red) + :is(.element-container, [data-testid="stElementContainer"]) button:hover {
+        box-shadow: 0 20px 40px rgba(239, 68, 68, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    }
+    /* Varian hijau */
+    :is(.element-container, [data-testid="stElementContainer"]):has(.btn-green) + :is(.element-container, [data-testid="stElementContainer"]) button {
+        background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important;
+        box-shadow: 0 14px 30px rgba(16, 185, 129, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    }
+    :is(.element-container, [data-testid="stElementContainer"]):has(.btn-green) + :is(.element-container, [data-testid="stElementContainer"]) button:hover {
+        box-shadow: 0 20px 40px rgba(16, 185, 129, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    }
+    /* Varian pilihan kuis: kartu kaca putih */
+    :is(.element-container, [data-testid="stElementContainer"]):has(.quiz-btn) ~ [data-testid="stHorizontalBlock"] button {
+        min-height: 5.4rem; padding: 20px 26px !important;
+        border-radius: 26px !important;
+        background: linear-gradient(180deg, rgba(255,255,255,0.97), rgba(248,250,252,0.90)) !important;
+        border: 2px solid rgba(226, 232, 240, 0.95) !important;
+        color: var(--ink) !important;
+        font-size: 16px; font-weight: 600; line-height: 1.4; white-space: normal;
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05), inset 0 1px 0 #FFFFFF;
+    }
+    :is(.element-container, [data-testid="stElementContainer"]):has(.quiz-btn) ~ [data-testid="stHorizontalBlock"] button:hover {
+        background: linear-gradient(135deg, #ECFDF5, #F0FDF4) !important;
+        border-color: #10B981 !important; color: #047857 !important;
+        box-shadow: 0 18px 36px rgba(16, 185, 129, 0.20);
+        filter: none;
+    }
+    :is(.element-container, [data-testid="stElementContainer"]):has(.quiz-btn) ~ [data-testid="stHorizontalBlock"] button::after { display: none; }
+
+    /* =====================================================
+       6. INPUT, SELECT, TEXTAREA, UPLOADER
+       ===================================================== */
+    div[data-baseweb="input"], div[data-baseweb="textarea"], div[data-baseweb="select"] > div {
+        background: rgba(255, 255, 255, 0.92) !important;
+        border: 2px solid #E2E8F0 !important;
+        border-radius: 20px !important;
+        box-shadow: inset 0 2px 4px rgba(15, 23, 42, 0.03);
+        transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+    }
+    div[data-baseweb="input"] > div, div[data-baseweb="textarea"] > div { background: transparent !important; border: none !important; box-shadow: none !important; }
+    div[data-baseweb="input"]:hover, div[data-baseweb="textarea"]:hover, div[data-baseweb="select"] > div:hover { border-color: #BFDBFE !important; }
+    div[data-baseweb="input"]:focus-within, div[data-baseweb="textarea"]:focus-within, div[data-baseweb="select"] > div:focus-within {
+        border-color: #60A5FA !important;
+        background: #FFFFFF !important;
+        box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.22), inset 0 2px 4px rgba(15, 23, 42, 0.01) !important;
+    }
+    div[data-baseweb="input"] input, div[data-baseweb="select"] span, textarea, input { color: var(--ink) !important; font-weight: 600; font-size: 15px; }
+    input::placeholder, textarea::placeholder { color: #94A3B8 !important; opacity: 1; font-weight: 500; }
+
+    /* Daftar dropdown (select) */
+    div[data-baseweb="popover"] > div { border-radius: 20px !important; }
+    div[data-baseweb="popover"] ul[role="listbox"], div[data-baseweb="popover"] [data-baseweb="menu"] {
+        background: rgba(255, 255, 255, 0.97) !important;
+        border: 1px solid #E2E8F0; border-radius: 20px; padding: 6px;
+        box-shadow: var(--shadow-lg);
+    }
+    div[data-baseweb="popover"] li { color: var(--ink-soft) !important; font-family: 'Outfit', sans-serif !important; font-weight: 600; border-radius: 14px; margin: 2px 0; transition: background 0.2s ease; }
+    div[data-baseweb="popover"] li:hover, div[data-baseweb="popover"] li[aria-selected="true"] { background: #EFF6FF !important; color: var(--blue) !important; }
+
+    [data-testid="stFileUploaderDropzone"] {
+        background: rgba(255, 255, 255, 0.72) !important;
+        border: 2px dashed #BFDBFE !important;
+        border-radius: 24px !important;
+        padding: 26px !important;
+        transition: border-color 0.3s ease, background 0.3s ease;
+    }
+    [data-testid="stFileUploaderDropzone"]:hover { border-color: #60A5FA !important; background: rgba(239, 246, 255, 0.92) !important; }
+    [data-testid="stFileUploader"] button {
+        border-radius: 100px !important; padding: 8px 22px !important;
+        background: #FFFFFF !important; border: 1px solid #BFDBFE !important;
+        color: var(--blue) !important; font-weight: 700;
+    }
+
+    /* =====================================================
+       7. TAB (SEGMENTED CONTROL KACA)
+       ===================================================== */
+    div[data-baseweb="tab-list"] {
+        gap: 6px; padding: 6px;
+        background: rgba(241, 245, 249, 0.75);
+        border: 1px solid var(--glass-edge);
+        border-radius: 100px;
+        box-shadow: inset 0 2px 6px rgba(15, 23, 42, 0.05);
+    }
+    button[data-baseweb="tab"] {
+        background: transparent !important;
+        color: var(--muted) !important;
+        font-weight: 700; font-size: 15px;
+        border-radius: 100px !important;
+        padding: 10px 22px !important; height: auto !important;
+        transition: background 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .stApp button[data-baseweb="tab"] p { color: inherit !important; font-weight: 700; margin: 0; }
+    button[data-baseweb="tab"]:hover { color: var(--blue) !important; background: rgba(255, 255, 255, 0.55) !important; }
+    button[data-baseweb="tab"][aria-selected="true"] {
+        color: var(--blue) !important;
+        background: #FFFFFF !important;
+        box-shadow: 0 8px 20px rgba(37, 99, 235, 0.16), inset 0 1px 0 #FFFFFF;
+    }
+    div[data-baseweb="tab-highlight"], div[data-baseweb="tab-border"] { display: none !important; }
+    div[data-baseweb="tab-panel"] { padding-top: 1.4rem; }
+
+    /* =====================================================
+       8. METRIC, TABEL, ALERT, TOAST, PROGRESS
+       ===================================================== */
+    [data-testid="stMetric"] {
+        background: var(--glass-sheen);
+        border: 1px solid var(--glass-edge);
+        border-radius: 28px; padding: 26px 28px;
+        box-shadow: var(--shadow-md), var(--inner-light);
+        text-align: center; align-items: center;
+    }
+    [data-testid="stMetricLabel"] { justify-content: center; }
+    [data-testid="stMetricLabel"] p { font-weight: 800; letter-spacing: 1.5px; font-size: 12px; color: var(--muted) !important; }
+    div[data-testid="stMetricValue"] {
+        background: linear-gradient(135deg, #2563EB, #7C3AED);
+        -webkit-background-clip: text; background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-size: 42px !important; font-weight: 900 !important; letter-spacing: -1px;
+        justify-content: center;
+    }
+    [data-testid="stDataFrame"] {
+        border-radius: 24px; overflow: hidden;
+        border: 1px solid var(--glass-edge);
+        box-shadow: var(--shadow-md);
+    }
+    [data-testid="stAlert"], [data-testid="stAlertContainer"] { border-radius: 20px !important; box-shadow: var(--shadow-sm); }
+    [data-testid="stToast"] {
+        border-radius: 22px !important;
+        background: rgba(255, 255, 255, 0.94) !important;
+        border: 1px solid var(--glass-edge);
+        box-shadow: var(--shadow-lg);
+        backdrop-filter: blur(18px);
+    }
+    .stProgress > div > div > div { background-color: rgba(148, 163, 184, 0.22) !important; border-radius: 100px; }
+    .stProgress > div > div > div > div {
+        background-image: linear-gradient(90deg, #38BDF8, #6366F1, #D946EF);
+        border-radius: 100px;
+        box-shadow: 0 2px 12px rgba(99, 102, 241, 0.45);
+    }
+    hr { border-color: rgba(148, 163, 184, 0.28); }
+    ::-webkit-scrollbar { width: 10px; height: 10px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #93C5FD, #A5B4FC); border-radius: 100px; border: 2px solid rgba(255,255,255,0.6); }
+
+    /* =====================================================
+       9. SIDEBAR MENGAMBANG (KACA)
+       ===================================================== */
+    [data-testid="stSidebar"] { background-color: transparent !important; border: none !important; }
     [data-testid="stSidebar"] > div:first-child {
-        background: rgba(255, 255, 255, 0.95) !important;
+        background: linear-gradient(160deg, rgba(255,255,255,0.90) 0%, rgba(255,255,255,0.68) 100%) !important;
         backdrop-filter: blur(40px) saturate(200%);
         -webkit-backdrop-filter: blur(40px) saturate(200%);
-        border: 1px solid rgba(255, 255, 255, 1);
+        border: 1px solid rgba(255, 255, 255, 0.95);
         border-radius: 36px;
-        margin: 1.5rem;
-        height: calc(100vh - 3rem) !important;
-        box-shadow: 10px 10px 40px rgba(15, 23, 42, 0.08), inset 0 2px 0 rgba(255,255,255,1);
-        overflow: hidden;
+        margin: 1.2rem;
+        height: calc(100vh - 2.4rem) !important;
+        box-shadow: 18px 24px 60px rgba(30, 41, 120, 0.14), inset 0 1px 0 rgba(255,255,255,1);
+        overflow-y: auto; overflow-x: hidden;
     }
-    [data-testid="stSidebarHeader"] { display: none; }
-    
-    .stProgress > div > div > div > div { background-image: linear-gradient(to right, #60A5FA, #8B5CF6); border-radius: 10px; box-shadow: 0 2px 10px rgba(96, 165, 250, 0.4); }
+    [data-testid="stSidebarContent"] { background: transparent !important; }
+    [data-testid="stSidebarHeader"] { background: transparent; min-height: 0; height: auto; padding: 0.8rem 1rem 0 1rem; margin: 0; }
+    [data-testid="stSidebarHeader"] img, [data-testid="stLogo"] { display: none; }
+    [data-testid="collapsedControl"], [data-testid="stSidebarCollapsedControl"], [data-testid="stExpandSidebarButton"] {
+        background: rgba(255, 255, 255, 0.85); border-radius: 16px;
+        box-shadow: var(--shadow-sm); border: 1px solid var(--glass-edge);
+    }
+
+    /* =====================================================
+       10. RESPONSIF & AKSESIBILITAS
+       ===================================================== */
+    @media (max-width: 768px) {
+        .glass-card { padding: 22px !important; border-radius: 24px; }
+        .stTabs, [data-testid="stTabs"] { padding: 10px 14px 20px 14px; border-radius: 24px; }
+        button[data-baseweb="tab"] { padding: 8px 14px !important; font-size: 13px; }
+        [data-testid="stSidebar"] > div:first-child { margin: 0.5rem; height: calc(100vh - 1rem) !important; border-radius: 28px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .stApp::before, .gradient-text, .block-container { animation: none !important; }
+        .glass-card, .score-card, .stButton > button { transition: none !important; }
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -313,7 +577,7 @@ except ImportError:
     st.warning("⚠️ File database lokal (Akademik) belum terpasang sempurna.")
 
 if not st.session_state.logged_in:
-    st.markdown("""<style>[data-testid="collapsedControl"] {display: none;} [data-testid="stSidebar"] {display: none;}</style>""", unsafe_allow_html=True)
+    st.markdown("""<style>[data-testid="collapsedControl"], [data-testid="stSidebarCollapsedControl"], [data-testid="stExpandSidebarButton"] {display: none !important;} [data-testid="stSidebar"] {display: none !important;}</style>""", unsafe_allow_html=True)
 
 def tampilkan_avatar(keyword):
     st.markdown(f"<div style='text-align:center; font-size:80px; filter: drop-shadow(0 15px 25px rgba(37,99,235,0.2)); animation: fadeInUp 1s ease;'>{'🎓' if keyword=='genius' else '📚'}</div>", unsafe_allow_html=True)
@@ -333,7 +597,7 @@ if not st.session_state.logged_in:
         st.markdown("<div style='text-align:center;'>", unsafe_allow_html=True)
         st.image(logo_path, width=110, output_format="auto")
         st.markdown("</div>", unsafe_allow_html=True)
-        st.markdown("<style>img { border-radius: 30px; box-shadow: 0 15px 40px rgba(0,0,0,0.06); border: 1px solid #E2E8F0; padding:8px; background:#FFFFFF; }</style>", unsafe_allow_html=True)
+        st.markdown("<style>[data-testid='stImage'] img, .stImage img { border-radius: 30px; box-shadow: 0 18px 44px rgba(37,99,235,0.18), inset 0 1px 0 rgba(255,255,255,1); border: 1px solid rgba(255,255,255,0.95); padding:8px; background:rgba(255,255,255,0.85); }</style>", unsafe_allow_html=True)
     
     st.markdown("<h1 style='text-align:center; font-size:75px; font-weight:900; margin-bottom: 0; letter-spacing:-2px;'><span class='gradient-text'>AKSARA</span></h1>", unsafe_allow_html=True)
     st.markdown("<p style='text-align:center; color:#64748B; margin-bottom:50px; font-size:16px; letter-spacing:6px; font-weight:700;'>INSTITUT EDUKASI INTERAKTIF</p>", unsafe_allow_html=True)
@@ -412,18 +676,16 @@ tier_name, tier_color = get_tier(user_level)
 with st.sidebar:
     st.markdown("""
     <style>
-    /* Radio Menu Navigasi (Pill-Shaped Hover Effect Mewah) */
+    /* Radio (umum): kapsul kaca lembut */
     div[role="radiogroup"] > label {
-        background: transparent !important;
-        padding: 14px 24px;
-        border-radius: 100px; /* Sempurna Melengkung */
+        background: rgba(255, 255, 255, 0.66) !important;
+        padding: 12px 18px;
+        border-radius: 18px;
         margin-bottom: 8px;
-        border: 1px solid transparent;
-        transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        border: 1px solid rgba(226, 232, 240, 0.9);
+        transition: all 0.35s cubic-bezier(0.22, 0.9, 0.3, 1);
         cursor: pointer;
     }
-
-    /* Warna Teks Default Sidebar - Sangat Kontras */
     div[role="radiogroup"] > label p, 
     div[role="radiogroup"] > label div {
         color: #334155 !important; 
@@ -431,17 +693,47 @@ with st.sidebar:
         font-size: 14px;
         letter-spacing: 0.3px;
     }
-
     div[role="radiogroup"] > label:hover {
         background: #EFF6FF !important;
         border: 1px solid #BFDBFE;
-        transform: translateX(8px);
-        box-shadow: 0 4px 15px rgba(37, 99, 235, 0.05);
+        transform: translateX(6px);
+        box-shadow: 0 6px 18px rgba(37, 99, 235, 0.08);
     }
-    
     div[role="radiogroup"] > label:hover p,
     div[role="radiogroup"] > label:hover div {
         color: #2563EB !important;
+    }
+    div[role="radiogroup"] > label:has(input:checked) {
+        background: #EEF2FF !important;
+        border: 1px solid #A5B4FC;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.14);
+    }
+
+    /* Menu navigasi sidebar: kapsul penuh, tanpa titik radio, item aktif bergradasi */
+    [data-testid="stSidebar"] div[role="radiogroup"] { gap: 2px; }
+    [data-testid="stSidebar"] div[role="radiogroup"] > label {
+        background: transparent !important;
+        padding: 13px 22px;
+        border-radius: 100px;
+        margin-bottom: 6px;
+        border: 1px solid transparent;
+    }
+    [data-testid="stSidebar"] div[role="radiogroup"] > label > :first-child:not(:has(p)) { display: none; }
+    [data-testid="stSidebar"] div[role="radiogroup"] > label:hover {
+        background: rgba(239, 246, 255, 0.95) !important;
+        border: 1px solid #BFDBFE;
+        transform: translateX(8px);
+        box-shadow: 0 8px 20px rgba(37, 99, 235, 0.08);
+    }
+    [data-testid="stSidebar"] div[role="radiogroup"] > label:has(input:checked) {
+        background: linear-gradient(135deg, #2563EB 0%, #7C3AED 100%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.45);
+        box-shadow: 0 12px 26px rgba(79, 70, 229, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        transform: translateX(4px);
+    }
+    [data-testid="stSidebar"] div[role="radiogroup"] > label:has(input:checked) p,
+    [data-testid="stSidebar"] div[role="radiogroup"] > label:has(input:checked) div {
+        color: #FFFFFF !important;
     }
     
     /* Tombol Logout Minimalis Pill */
@@ -558,29 +850,42 @@ if menu == "🏠 Dashboard Utama":
 # ==============================================================================
 st.markdown("""
 <style>
+/* Kartu mading = tiga potongan kaca yang menyatu (judul, gambar, isi) */
 .mading-container {
-    background: rgba(255, 255, 255, 0.85);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.88) 0%, rgba(255, 255, 255, 0.72) 100%);
     backdrop-filter: blur(24px) saturate(200%);
     -webkit-backdrop-filter: blur(24px) saturate(200%);
-    border-radius: 32px;
-    padding: 35px;
-    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.04), inset 0 2px 0 rgba(255,255,255,1);
+    border-radius: 32px 32px 0 0;
+    padding: 32px 35px 40px 35px;
+    box-shadow: 0 -2px 0 rgba(255,255,255,0.6) inset, 0 20px 50px rgba(30, 41, 90, 0.07);
     border: 1px solid rgba(255, 255, 255, 1);
-    margin-bottom: 40px;
-    transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+    border-bottom: none;
+    margin-bottom: 0;
+    transition: box-shadow 0.5s cubic-bezier(0.22, 0.9, 0.3, 1);
 }
 .mading-container:hover {
-    transform: translateY(-6px);
-    background: rgba(255, 255, 255, 0.95);
-    border-color: #BFDBFE;
-    box-shadow: 0 30px 60px rgba(37, 99, 235, 0.08), inset 0 2px 0 rgba(255,255,255,1);
+    box-shadow: 0 -2px 0 rgba(255,255,255,0.6) inset, 0 30px 60px rgba(37, 99, 235, 0.12);
+}
+:is(.element-container, [data-testid="stElementContainer"]):has(.mading-container) + :is(.element-container, [data-testid="stElementContainer"]),
+:is(.element-container, [data-testid="stElementContainer"]):has(.mading-body) {
+    background: rgba(255, 255, 255, 0.72);
+    border-left: 1px solid rgba(255, 255, 255, 1);
+    border-right: 1px solid rgba(255, 255, 255, 1);
+    margin-top: -1rem;
+}
+:is(.element-container, [data-testid="stElementContainer"]):has(.mading-body) {
+    border-bottom: 1px solid rgba(255, 255, 255, 1);
+    border-radius: 0 0 32px 32px;
+    box-shadow: 0 24px 50px rgba(30, 41, 90, 0.08);
+    margin-bottom: 1.5rem;
 }
 .mading-tag {
-    background: #EFF6FF;
+    background: linear-gradient(135deg, #EFF6FF, #EEF2FF);
     color: #2563EB;
     padding: 6px 18px;
     border-radius: 100px;
     border: 1px solid #BFDBFE;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08);
     font-size: 11px;
     font-weight: 800;
     display: inline-block;
