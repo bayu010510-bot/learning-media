@@ -15,141 +15,180 @@ from PIL import Image
 # ==========================================
 st.set_page_config(page_title="Aksara | Platform Edukasi", page_icon="🎓", layout="wide", initial_sidebar_state="expanded")
 
-# CSS MODERN, BRIGHT, & SPECTACULAR (Onyx.doctor Inspired)
+# CSS HYPER-MODERN, BRIGHT LUXURY & SPECTACULAR GLASSMORPHISM
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap');
     
     html, body, [class*="css"] { font-family: 'Plus Jakarta Sans', sans-serif; }
     
-    /* Latar Belakang Clean & Bright (Off-White/Soft Slate) */
+    /* Latar Belakang Animated Pastel Mesh (Spektakuler & Lembut di Mata) */
     .stApp { 
-        background-color: #F8FAFC; 
+        background: linear-gradient(-45deg, #F0F9FF, #E0E7FF, #F5F3FF, #F8FAFC);
+        background-size: 400% 400%;
+        animation: gradientMesh 15s ease infinite;
         color: #0F172A; 
         overflow-x: hidden;
     }
     
-    /* Tipografi Bersih, Ramah, dan Terbaca Jelas */
-    h1, h2, h3 { font-family: 'Plus Jakarta Sans', sans-serif !important; font-weight: 800; letter-spacing: -0.5px; color: #0F172A; }
-    h4, h5, p, span, label { color: #334155 !important; font-weight: 500; }
+    @keyframes gradientMesh {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
     
-    /* Efek Teks Gradient (Modern Tech Blue/Teal) */
+    /* Ambient Glowing Orbs */
+    .stApp::before, .stApp::after {
+        content: ''; position: fixed; border-radius: 50%;
+        filter: blur(120px); -webkit-filter: blur(120px);
+        z-index: -1; opacity: 0.6;
+        animation: floatOrb 20s ease-in-out infinite alternate;
+    }
+    .stApp::before {
+        width: 60vw; height: 60vh;
+        background: radial-gradient(circle, rgba(167, 139, 250, 0.15), transparent 70%);
+        top: -10%; left: -10%;
+    }
+    .stApp::after {
+        width: 50vw; height: 50vh;
+        background: radial-gradient(circle, rgba(56, 189, 248, 0.15), transparent 70%);
+        bottom: -10%; right: -10%;
+        animation-delay: -10s;
+    }
+    @keyframes floatOrb {
+        0% { transform: translate(0, 0) scale(1); }
+        100% { transform: translate(50px, 80px) scale(1.1); }
+    }
+    
+    /* Tipografi Bersih & Mewah */
+    h1, h2, h3 { font-family: 'Plus Jakarta Sans', sans-serif !important; font-weight: 800; letter-spacing: -0.5px; color: #0F172A; }
+    h4, h5, p, span, label { color: #475569 !important; font-weight: 500; }
+    
+    /* Efek Teks Gradient (Ocean Blue to Majestic Violet) */
     .gradient-text { 
-        background: linear-gradient(135deg, #2563EB 0%, #06B6D4 100%);
+        background: linear-gradient(135deg, #2563EB 0%, #8B5CF6 100%);
         -webkit-background-clip: text; 
         -webkit-text-fill-color: transparent; 
         font-weight: 900; 
+        display: inline-block;
     }
     
     .vs-text { 
         background: linear-gradient(to right, #334155 0%, #94A3B8 100%); 
         -webkit-background-clip: text; 
         -webkit-text-fill-color: transparent; 
-        font-weight: 800; font-size: 40px; 
+        font-weight: 900; font-size: 45px; 
         letter-spacing: 2px;
     }
     
-    /* Animasi Masuk Halus */
-    @keyframes fadeInUp { from {opacity: 0; transform: translateY(15px);} to {opacity: 1; transform: translateY(0);} }
-    .block-container { animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1); padding-top: 2rem !important; }
+    /* Animasi Masuk Super Halus */
+    @keyframes fadeInUp { from {opacity: 0; transform: translateY(20px);} to {opacity: 1; transform: translateY(0);} }
+    .block-container { animation: fadeInUp 1s cubic-bezier(0.2, 0.8, 0.2, 1); padding-top: 2rem !important; }
     
-    /* KARTU MODERN: Putih Bersih dengan Soft Shadow */
+    /* HYPER-GLASSMORPHISM KARTU (Premium Acrylic Panel) */
     .glass-card { 
-        background: #FFFFFF; 
-        border-radius: 24px; 
-        border: 1px solid #E2E8F0; 
-        box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.05); 
+        background: rgba(255, 255, 255, 0.65); 
+        backdrop-filter: blur(24px) saturate(180%); 
+        -webkit-backdrop-filter: blur(24px) saturate(180%);
+        border-radius: 32px; 
+        border: 1px solid rgba(255, 255, 255, 0.9); 
+        box-shadow: 0 20px 50px rgba(15, 23, 42, 0.05), inset 0 2px 2px rgba(255, 255, 255, 1); 
         padding: 40px; 
         text-align: center; 
-        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
+        transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); 
         position: relative;
     }
     .glass-card:hover { 
-        transform: translateY(-4px); 
-        box-shadow: 0 20px 40px -10px rgba(37, 99, 235, 0.1); 
-        border-color: #BFDBFE;
+        transform: translateY(-5px); 
+        background: rgba(255, 255, 255, 0.8);
+        box-shadow: 0 30px 60px rgba(37, 99, 235, 0.08), inset 0 2px 2px rgba(255, 255, 255, 1); 
+        border-color: #E0E7FF;
     }
     
     /* Kartu Skor Kuis */
     .score-card { 
-        background: #EFF6FF; 
+        background: linear-gradient(135deg, rgba(239, 246, 255, 0.8) 0%, rgba(255, 255, 255, 0.6) 100%);
+        backdrop-filter: blur(20px);
         border: 1px solid #BFDBFE; 
-        border-radius: 24px; padding: 35px; text-align: center; 
+        box-shadow: 0 15px 35px rgba(37, 99, 235, 0.06), inset 0 2px 2px rgba(255, 255, 255, 1);
+        border-radius: 28px; padding: 35px; text-align: center; 
         transition: 0.4s ease; 
-        box-shadow: 0 10px 30px rgba(37, 99, 235, 0.05);
     }
-    .score-card:hover { transform: translateY(-5px) scale(1.02); box-shadow: 0 15px 35px rgba(37, 99, 235, 0.15); }
+    .score-card:hover { transform: translateY(-5px) scale(1.02); box-shadow: 0 20px 45px rgba(37, 99, 235, 0.12); }
     
-    /* Buttons: Pill-Shaped, Bold, Solid Modern Colors */
+    /* Buttons: Spektakuler Pill-Shaped Gradient */
     .stButton>button { 
-        background: #2563EB !important;
+        background: linear-gradient(135deg, #2563EB 0%, #4F46E5 100%) !important;
         color: #FFFFFF !important; 
-        border-radius: 100px; /* Pill Shape */
+        border-radius: 100px; /* Pill Shape Premium */
         border: none; 
-        padding: 14px 28px; 
+        padding: 16px 32px; 
         font-weight: 700; 
         font-size: 15px; 
         width: 100%; 
-        box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25); 
-        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); 
+        box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3), inset 0 1px 1px rgba(255,255,255,0.2); 
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); 
         letter-spacing: 0.5px;
-        text-transform: none;
     }
     .stButton>button:hover { 
-        background: #1D4ED8 !important; 
-        color: #FFFFFF !important; 
-        transform: translateY(-2px);
-        box-shadow: 0 12px 25px rgba(37, 99, 235, 0.35); 
+        background: linear-gradient(135deg, #1D4ED8 0%, #4338CA 100%) !important; 
+        transform: translateY(-3px);
+        box-shadow: 0 15px 35px rgba(37, 99, 235, 0.4), inset 0 1px 1px rgba(255,255,255,0.3); 
     }
+    .stButton>button:active { transform: translateY(1px); box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3); }
     
     /* Varian Button Glass Kuis */
-    .quiz-btn>button { background: #FFFFFF; border: 1px solid #E2E8F0; font-size: 16px; font-weight: 600; padding: 20px; border-radius: 20px; color: #0F172A !important; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.02); }
-    .quiz-btn>button:hover { background: #F0FDF4; border-color: #22C55E; color: #15803D !important; box-shadow: 0 10px 25px rgba(34,197,94,0.15); }
+    .quiz-btn>button { background: rgba(255,255,255,0.8); border: 2px solid #E2E8F0; font-size: 16px; font-weight: 600; padding: 22px; border-radius: 24px; color: #0F172A !important; transition: 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.03); }
+    .quiz-btn>button:hover { background: #F0FDF4; border-color: #10B981; color: #059669 !important; box-shadow: 0 12px 30px rgba(16, 185, 129, 0.15); }
     
-    .btn-red>button { background: #FEF2F2 !important; border-color: #FECACA !important; color: #DC2626 !important; box-shadow: none; }
-    .btn-red>button:hover { background: #EF4444 !important; border-color: #EF4444 !important; color: #FFFFFF !important; box-shadow: 0 10px 25px rgba(239, 68, 68, 0.25); }
+    .btn-red>button { background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%) !important; box-shadow: 0 10px 25px rgba(239, 68, 68, 0.3), inset 0 1px 1px rgba(255,255,255,0.2); }
+    .btn-red>button:hover { background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%) !important; box-shadow: 0 15px 35px rgba(239, 68, 68, 0.4); }
     
-    .btn-green>button { background: #10B981 !important; border-color: transparent !important; color: #FFFFFF !important; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.25); }
-    .btn-green>button:hover { background: #059669 !important; box-shadow: 0 12px 25px rgba(16, 185, 129, 0.35); }
+    .btn-green>button { background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important; box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3), inset 0 1px 1px rgba(255,255,255,0.2); }
+    .btn-green>button:hover { background: linear-gradient(135deg, #059669 0%, #047857 100%) !important; box-shadow: 0 15px 35px rgba(16, 185, 129, 0.4); }
     
-    /* Input Fields (Soft & Clean) */
+    /* Input Fields (Sangat Bersih & Elegan) */
     div[data-baseweb="input"] > div, div[data-baseweb="select"] > div, div[data-baseweb="textarea"] > div { 
-        background-color: #F1F5F9 !important; 
+        background-color: rgba(255, 255, 255, 0.7) !important; 
+        backdrop-filter: blur(10px);
         border: 2px solid transparent !important; 
-        border-radius: 16px; transition: 0.3s; 
+        border-radius: 20px; transition: 0.3s; 
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.02), 0 4px 10px rgba(0,0,0,0.02);
     }
     div[data-baseweb="input"] > div:focus-within, div[data-baseweb="select"] > div:focus-within, div[data-baseweb="textarea"] > div:focus-within { 
-        border-color: #3B82F6 !important; 
+        border-color: #60A5FA !important; 
         background-color: #FFFFFF !important;
-        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+        box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.15), inset 0 2px 4px rgba(0,0,0,0.01);
     }
     div[data-baseweb="input"] input, div[data-baseweb="select"] span, textarea { color: #0F172A !important; font-weight: 600; font-size: 15px; }
     
-    div[data-testid="stMetricValue"] { color: #2563EB !important; font-size: 40px !important; font-weight: 800 !important; text-shadow: none; }
+    div[data-testid="stMetricValue"] { color: #3B82F6 !important; font-size: 42px !important; font-weight: 900 !important; text-shadow: none; letter-spacing: -1px; }
     #MainMenu {visibility: hidden;} footer {visibility: hidden;}
     
-    /* Tab Styling Minimalist Bright */
-    button[data-baseweb="tab"] { background: transparent !important; color: #64748B !important; font-weight: 600; }
+    /* Tab Styling Minimalist Mewah */
+    button[data-baseweb="tab"] { background: transparent !important; color: #94A3B8 !important; font-weight: 700; font-size: 15px; }
     button[data-baseweb="tab"][aria-selected="true"] { color: #2563EB !important; }
-    div[data-baseweb="tab-highlight"] { background-color: #2563EB !important; height: 3px; border-radius: 3px; }
+    div[data-baseweb="tab-highlight"] { background-color: #2563EB !important; height: 4px; border-radius: 4px; }
 
-    /* FLOATING SIDEBAR (CLEAN WHITE PANEL) */
+    /* FLOATING SIDEBAR (GLASSMORPHISM PANEL) */
     [data-testid="stSidebar"] { 
         background-color: transparent !important; 
         border: none;
     }
     [data-testid="stSidebar"] > div:first-child {
-        background: #FFFFFF !important;
-        border: 1px solid #E2E8F0;
-        border-radius: 30px;
+        background: rgba(255, 255, 255, 0.75) !important;
+        backdrop-filter: blur(30px) saturate(200%);
+        -webkit-backdrop-filter: blur(30px) saturate(200%);
+        border: 1px solid rgba(255, 255, 255, 0.9);
+        border-radius: 36px;
         margin: 1.5rem;
         height: calc(100vh - 3rem) !important;
-        box-shadow: 0 20px 50px rgba(0,0,0,0.06);
+        box-shadow: 10px 10px 40px rgba(15, 23, 42, 0.05), inset 0 2px 2px rgba(255,255,255,1);
         overflow: hidden;
     }
     [data-testid="stSidebarHeader"] { display: none; }
     
-    .stProgress > div > div > div > div { background-image: linear-gradient(to right, #60A5FA, #2563EB); border-radius: 10px; }
+    .stProgress > div > div > div > div { background-image: linear-gradient(to right, #60A5FA, #8B5CF6); border-radius: 10px; box-shadow: 0 2px 10px rgba(96, 165, 250, 0.4); }
     </style>
     """, unsafe_allow_html=True)
 
@@ -304,7 +343,7 @@ if not st.session_state.logged_in:
     st.markdown("""<style>[data-testid="collapsedControl"] {display: none;} [data-testid="stSidebar"] {display: none;}</style>""", unsafe_allow_html=True)
 
 def tampilkan_avatar(keyword):
-    st.markdown(f"<div style='text-align:center; font-size:80px; text-shadow: 0 10px 20px rgba(37,99,235,0.15); animation: fadeInUp 1s ease;'>{'🎓' if keyword=='genius' else '📚'}</div>", unsafe_allow_html=True)
+    st.markdown(f"<div style='text-align:center; font-size:80px; filter: drop-shadow(0 15px 25px rgba(37,99,235,0.2)); animation: fadeInUp 1s ease;'>{'🎓' if keyword=='genius' else '📚'}</div>", unsafe_allow_html=True)
 
 # ==========================================
 # 5. PORTAL LOGIN / REGISTER (GERBANG AKADEMI)
@@ -319,12 +358,12 @@ if not st.session_state.logged_in:
     
     if logo_path:
         st.markdown("<div style='text-align:center;'>", unsafe_allow_html=True)
-        st.image(logo_path, width=120, output_format="auto")
+        st.image(logo_path, width=110, output_format="auto")
         st.markdown("</div>", unsafe_allow_html=True)
-        st.markdown("<style>img { border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: 1px solid #E2E8F0; padding:10px; background:#FFFFFF; }</style>", unsafe_allow_html=True)
+        st.markdown("<style>img { border-radius: 30px; box-shadow: 0 15px 40px rgba(0,0,0,0.06); border: 1px solid #E2E8F0; padding:8px; background:rgba(255,255,255,0.9); }</style>", unsafe_allow_html=True)
     
-    st.markdown("<h1 style='text-align:center; font-size:65px; font-weight:900; margin-bottom: 0; letter-spacing:-2px;'><span class='gradient-text'>AKSARA</span></h1>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align:center; color:#64748B; margin-bottom:50px; font-size:16px; letter-spacing:4px; font-weight:600;'>INSTITUT EDUKASI INTERAKTIF</p>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align:center; font-size:70px; font-weight:900; margin-bottom: 0; letter-spacing:-2px;'><span class='gradient-text'>AKSARA</span></h1>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align:center; color:#64748B; margin-bottom:50px; font-size:15px; letter-spacing:6px; font-weight:700;'>INSTITUT EDUKASI INTERAKTIF</p>", unsafe_allow_html=True)
     
     col_space1, col_form, col_space3 = st.columns([1, 1.2, 1])
     with col_form:
@@ -389,44 +428,46 @@ learned_db = db_get_learned_history(player)
 user_level = (points_db // 100) + 1
 
 def get_tier(lvl):
-    if lvl < 3: return "🥉 Tingkat Dasar", "#D97706" # Bright Bronze/Orange
-    elif lvl < 6: return "🥈 Tingkat Menengah", "#64748B" # Slate Gray
-    elif lvl < 10: return "🥇 Tingkat Atas", "#EAB308" # Vibrant Gold
-    elif lvl < 15: return "💎 Sarjana", "#06B6D4" # Cyan
-    else: return "🌌 Mahaguru", "#8B5CF6" # Violet
+    if lvl < 3: return "🥉 Tingkat Dasar", "#D97706" 
+    elif lvl < 6: return "🥈 Tingkat Menengah", "#64748B"
+    elif lvl < 10: return "🥇 Tingkat Atas", "#EAB308"
+    elif lvl < 15: return "💎 Sarjana", "#06B6D4" 
+    else: return "🌌 Mahaguru", "#8B5CF6" 
 tier_name, tier_color = get_tier(user_level)
 
-# --- SIDEBAR NAVIGASI MENGAMBANG (CLEAN WHITE PANEL) ---
+# --- SIDEBAR NAVIGASI MENGAMBANG (GLASSMORPHISM PANEL) ---
 with st.sidebar:
     st.markdown("""
     <style>
-    /* Radio Menu Navigasi (Pill-Shaped Light Hover Effect) */
+    /* Radio Menu Navigasi (Pill-Shaped Hover Effect Mewah) */
     div[role="radiogroup"] > label {
         background: transparent !important;
         padding: 14px 24px;
-        border-radius: 100px; /* Pill Shape */
+        border-radius: 100px; /* Sempurna Melengkung */
         margin-bottom: 8px;
         border: 1px solid transparent;
-        transition: all 0.3s ease;
+        transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
         cursor: pointer;
     }
 
     div[role="radiogroup"] > label p, 
     div[role="radiogroup"] > label div {
         color: #475569 !important; 
-        font-weight: 600;
+        font-weight: 700;
         font-size: 14px;
+        letter-spacing: 0.3px;
     }
 
     div[role="radiogroup"] > label:hover {
-        background: #EFF6FF !important;
-        border: 1px solid #BFDBFE;
-        transform: translateX(6px);
+        background: linear-gradient(90deg, rgba(37,99,235,0.08) 0%, rgba(37,99,235,0.02) 100%) !important;
+        border: 1px solid rgba(37,99,235,0.2);
+        transform: translateX(8px);
+        box-shadow: 0 4px 15px rgba(37, 99, 235, 0.05);
     }
     
     div[role="radiogroup"] > label:hover p,
     div[role="radiogroup"] > label:hover div {
-        color: #1D4ED8 !important;
+        color: #2563EB !important;
     }
     
     /* Tombol Logout Minimalis Pill */
@@ -442,31 +483,31 @@ with st.sidebar:
     if custom_avatar_db:
         st.markdown(f"""
         <div style='text-align:center;'>
-            <img src='{custom_avatar_db}' style='width:110px; height:110px; border-radius:50%; object-fit:cover; border:4px solid #FFFFFF; padding:2px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-bottom:15px; transition: 0.4s;' onmouseover='this.style.transform="scale(1.05)"' onmouseout='this.style.transform="scale(1)"'>
+            <img src='{custom_avatar_db}' style='width:120px; height:120px; border-radius:50%; object-fit:cover; border:4px solid #FFFFFF; padding:2px; box-shadow: 0 15px 35px rgba(15,23,42,0.1), inset 0 2px 4px rgba(0,0,0,0.05); margin-bottom:15px; transition: 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);' onmouseover='this.style.transform="scale(1.08) translateY(-5px)"; this.style.boxShadow="0 25px 45px rgba(37,99,235,0.15)"' onmouseout='this.style.transform="scale(1) translateY(0)"'>
         </div>
         """, unsafe_allow_html=True)
     else:
         tampilkan_avatar("genius" if avatar_db == "Geni Us" else "smart")
         
-    st.markdown(f"<h2 style='text-align:center; margin-top:10px; margin-bottom:4px; font-weight:800; font-size:20px; color:#0F172A;'>{display_name_db}</h2>", unsafe_allow_html=True)
+    st.markdown(f"<h2 style='text-align:center; margin-top:10px; margin-bottom:4px; font-weight:800; font-size:22px; color:#0F172A;'>{display_name_db}</h2>", unsafe_allow_html=True)
     
     # Badge Judul & Tingkatan
-    st.markdown(f"<div style='text-align:center; margin-bottom:10px;'><span style='background:#F1F5F9; color:#475569; padding:6px 16px; border-radius:100px; font-weight:600; font-size:11px; letter-spacing:0.5px;'>{title_db}</span></div>", unsafe_allow_html=True)
-    st.markdown(f"<div style='text-align:center; margin-bottom:30px;'><span style='color:{tier_color}; background:#FFFFFF; padding:6px 16px; border-radius:100px; font-weight:700; border:1px solid {tier_color}; font-size:11px; letter-spacing:0.5px; box-shadow: 0 4px 10px {tier_color}33;'>{tier_name}</span></div>", unsafe_allow_html=True)
+    st.markdown(f"<div style='text-align:center; margin-bottom:10px;'><span style='background:rgba(241,245,249,0.8); backdrop-filter:blur(10px); color:#475569; padding:6px 18px; border-radius:100px; font-weight:700; font-size:11px; letter-spacing:0.5px; border:1px solid #E2E8F0; box-shadow: 0 2px 10px rgba(0,0,0,0.02);'>{title_db}</span></div>", unsafe_allow_html=True)
+    st.markdown(f"<div style='text-align:center; margin-bottom:30px;'><span style='color:{tier_color}; background:#FFFFFF; padding:6px 18px; border-radius:100px; font-weight:800; border:1px solid {tier_color}55; font-size:11px; letter-spacing:0.5px; box-shadow: 0 4px 15px {tier_color}22;'>{tier_name}</span></div>", unsafe_allow_html=True)
     
     # 3. LEVEL PROGRESS BAR
     prog = points_db % 100
     st.markdown(f"""
-        <div style='background: #E2E8F0; border-radius: 100px; height: 8px; margin: 15px 0; overflow:hidden;'>
-            <div style='background: linear-gradient(90deg, #3B82F6, #06B6D4); width: {prog}%; height: 100%; border-radius: 100px;'></div>
+        <div style='background: rgba(226,232,240,0.6); backdrop-filter:blur(5px); border-radius: 100px; height: 10px; margin: 15px 0; overflow:hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);'>
+            <div style='background: linear-gradient(90deg, #60A5FA, #8B5CF6); width: {prog}%; height: 100%; border-radius: 100px; box-shadow: 0 0 10px rgba(139,92,246,0.5);'></div>
         </div>
-        <div style='display:flex; justify-content:space-between; font-weight:600; color:#64748B; font-size:13px;'>
-            <span>Lvl {user_level}</span><span style='color:#2563EB;'>✨ {points_db} Pts</span>
+        <div style='display:flex; justify-content:space-between; font-weight:700; color:#64748B; font-size:13px;'>
+            <span>Lvl {user_level}</span><span style='color:#6366F1;'>✨ {points_db} Pts</span>
         </div>
     """, unsafe_allow_html=True)
     
-    st.markdown("<hr style='border:none; height:1px; background: #E2E8F0; margin: 30px 0;'>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align:center; font-size:11px; font-weight:700; color:#94A3B8; letter-spacing:2px; margin-bottom:15px;'>MENU UTAMA</p>", unsafe_allow_html=True)
+    st.markdown("<hr style='border:none; height:1px; background: linear-gradient(90deg, transparent, rgba(226,232,240,0.8), transparent); margin: 30px 0;'>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align:center; font-size:11px; font-weight:800; color:#94A3B8; letter-spacing:3px; margin-bottom:15px;'>MENU UTAMA</p>", unsafe_allow_html=True)
     
     # 4. RADIO MENU
     menu = st.radio("NAVIGASI INSTITUT", [
@@ -479,7 +520,7 @@ with st.sidebar:
         "⚙️ Konsol Super Admin"
     ], label_visibility="collapsed", key="navigasi_utama")
     
-    st.markdown("<hr style='border:none; height:1px; background: #E2E8F0; margin: 30px 0;'>", unsafe_allow_html=True)
+    st.markdown("<hr style='border:none; height:1px; background: linear-gradient(90deg, transparent, rgba(226,232,240,0.8), transparent); margin: 30px 0;'>", unsafe_allow_html=True)
     
     # 5. TOMBOL LOGOUT
     st.markdown("<div class='btn-red'>", unsafe_allow_html=True)
@@ -493,13 +534,13 @@ with st.sidebar:
 # HALAMAN 1: DASHBOARD UTAMA
 # ==========================================
 if menu == "🏠 Dashboard Utama":
-    st.markdown(f"<h1 style='font-size:42px; margin-bottom:5px; font-weight:800; letter-spacing:-1px;'>Welcome back, <span class='gradient-text'>{display_name_db}</span></h1>", unsafe_allow_html=True)
+    st.markdown(f"<h1 style='font-size:46px; margin-bottom:5px; font-weight:900; letter-spacing:-1.5px;'>Welcome back, <span class='gradient-text'>{display_name_db}</span></h1>", unsafe_allow_html=True)
     st.caption("Akses semua catatan akademi dan pantau perkembangan belajarmu hari ini.")
     st.write("<br>", unsafe_allow_html=True)
     
     if not st.session_state.gacha_claimed:
-        st.markdown("<div class='glass-card' style='padding:30px; text-align:center; background: linear-gradient(135deg, #EFF6FF, #FFFFFF); border-color:#BFDBFE;'>", unsafe_allow_html=True)
-        st.markdown("<h2 style='color:#1D4ED8; margin-top:0; font-size:22px; font-weight:700;'>✨ Daily Honor Roll</h2>", unsafe_allow_html=True)
+        st.markdown("<div class='glass-card' style='padding:35px; text-align:center; background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(239,246,255,0.8)); border-color:rgba(191,219,254,0.6);'>", unsafe_allow_html=True)
+        st.markdown("<h2 style='color:#2563EB; margin-top:0; font-size:24px; font-weight:800; letter-spacing:-0.5px;'>✨ Daily Honor Roll</h2>", unsafe_allow_html=True)
         st.write("<br>", unsafe_allow_html=True)
         if st.button("Buka Scroll Keberuntungan"):
             bonus = random.choice([20, 50, 100, 150, 200])
@@ -513,89 +554,93 @@ if menu == "🏠 Dashboard Utama":
         st.markdown("</div><br>", unsafe_allow_html=True)
 
     c1, c2, c3 = st.columns(3)
-    c1.markdown(f"<div class='glass-card'><div style='font-size:40px; margin-bottom:15px; opacity:0.9;'>⏳</div><h2 style='margin:0; font-size:36px; font-weight:800; color:#0F172A;'>{streak_db}</h2><p style='color:#64748B; font-weight:600; letter-spacing:1px; margin:0; font-size:13px; margin-top:5px;'>HARI AKTIF</p></div>", unsafe_allow_html=True)
-    c2.markdown(f"<div class='glass-card'><div style='font-size:40px; margin-bottom:15px; opacity:0.9;'>📚</div><h2 style='margin:0; font-size:36px; font-weight:800; color:#0F172A;'>{len(learned_db)}</h2><p style='color:#64748B; font-weight:600; letter-spacing:1px; margin:0; font-size:13px; margin-top:5px;'>MODUL SELESAI</p></div>", unsafe_allow_html=True)
-    c3.markdown(f"<div class='glass-card' style='border-bottom: 4px solid {tier_color};'><div style='font-size:40px; margin-bottom:15px;'>🏛️</div><h2 style='color:{tier_color}; margin:0; font-size:36px; font-weight:800;'>Lvl {user_level}</h2><p style='color:#64748B; font-weight:600; letter-spacing:1px; margin:0; font-size:13px; margin-top:5px;'>STATUS AKADEMI</p></div>", unsafe_allow_html=True)
+    c1.markdown(f"<div class='glass-card'><div style='font-size:45px; margin-bottom:15px; opacity:0.9; filter:drop-shadow(0 8px 15px rgba(0,0,0,0.05));'>⏳</div><h2 style='margin:0; font-size:40px; font-weight:900; color:#0F172A;'>{streak_db}</h2><p style='color:#64748B; font-weight:700; letter-spacing:1.5px; margin:0; font-size:13px; margin-top:5px;'>HARI AKTIF</p></div>", unsafe_allow_html=True)
+    c2.markdown(f"<div class='glass-card'><div style='font-size:45px; margin-bottom:15px; opacity:0.9; filter:drop-shadow(0 8px 15px rgba(0,0,0,0.05));'>📚</div><h2 style='margin:0; font-size:40px; font-weight:900; color:#0F172A;'>{len(learned_db)}</h2><p style='color:#64748B; font-weight:700; letter-spacing:1.5px; margin:0; font-size:13px; margin-top:5px;'>MODUL SELESAI</p></div>", unsafe_allow_html=True)
+    c3.markdown(f"<div class='glass-card' style='border-bottom: 5px solid {tier_color}; box-shadow: 0 20px 50px {tier_color}11, inset 0 2px 2px rgba(255,255,255,1);'><div style='font-size:45px; margin-bottom:15px; filter:drop-shadow(0 8px 15px {tier_color}44);'>🏛️</div><h2 style='color:{tier_color}; margin:0; font-size:40px; font-weight:900;'>Lvl {user_level}</h2><p style='color:#64748B; font-weight:700; letter-spacing:1.5px; margin:0; font-size:13px; margin-top:5px;'>STATUS AKADEMI</p></div>", unsafe_allow_html=True)
         
     st.write("<br><br>", unsafe_allow_html=True)
-    st.markdown("<h3 style='font-size:24px; margin-bottom:25px; font-weight:800;'><span class='gradient-text'>Hall of Scholars</span> (Top 10)</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='font-size:26px; margin-bottom:25px; font-weight:900;'><span class='gradient-text'>Hall of Scholars</span> (Top 10)</h3>", unsafe_allow_html=True)
     
     ranking_data = db_get_leaderboard()
     for i, row in enumerate(ranking_data):
-        if i == 0: medali, bg_color, bdr_color = "👑", "#FEF3C7", "#FCD34D"
-        elif i == 1: medali, bg_color, bdr_color = "🥈", "#F1F5F9", "#CBD5E1"
-        elif i == 2: medali, bg_color, bdr_color = "🥉", "#FFEDD5", "#FDBA74"
-        else: medali, bg_color, bdr_color = f"#{i+1}", "#FFFFFF", "#E2E8F0"
+        if i == 0: medali, bg_color, bdr_color = "👑", "linear-gradient(90deg, rgba(254,243,199,0.8), rgba(255,255,255,0.5))", "rgba(252,211,77,0.5)"
+        elif i == 1: medali, bg_color, bdr_color = "🥈", "linear-gradient(90deg, rgba(241,245,249,0.8), rgba(255,255,255,0.5))", "rgba(203,213,225,0.5)"
+        elif i == 2: medali, bg_color, bdr_color = "🥉", "linear-gradient(90deg, rgba(255,237,213,0.8), rgba(255,255,255,0.5))", "rgba(253,186,116,0.5)"
+        else: medali, bg_color, bdr_color = f"#{i+1}", "rgba(255,255,255,0.5)", "rgba(255,255,255,0.8)"
         
         d_name = row.get("display_name")
         if not d_name: d_name = row.get("username", "Anonim")
         
         st.markdown(f"""
-        <div style='background: {bg_color}; border: 1px solid {bdr_color}; border-radius: 20px; padding: 20px 30px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.02);' onmouseover='this.style.transform=\"translateY(-2px)\"; this.style.boxShadow=\"0 8px 20px rgba(0,0,0,0.06)\"' onmouseout='this.style.transform=\"translateY(0)\"; this.style.boxShadow=\"0 4px 15px rgba(0,0,0,0.02)\"'>
-            <h3 style='margin:0; font-size:18px; font-weight:700; color:#334155;'>{medali} <span style='color:#0F172A; margin-left:15px;'>{d_name}</span> <span style='font-size:11px; font-weight:600; color:#2563EB; background:#EFF6FF; padding:4px 12px; border-radius:100px; margin-left:15px; border:1px solid #BFDBFE; letter-spacing:0.5px;'>{row.get("title", "")}</span></h3>
-            <h3 style='margin:0; color:#0F172A; font-weight:800; font-size:18px;'>✨ {row.get("points", 0)}</h3>
+        <div style='background: {bg_color}; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid {bdr_color}; border-radius: 24px; padding: 22px 35px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); box-shadow: 0 10px 30px rgba(0,0,0,0.02), inset 0 2px 2px rgba(255,255,255,0.8);' onmouseover='this.style.transform=\"translateY(-3px) scale(1.01)\"; this.style.boxShadow=\"0 20px 40px rgba(37,99,235,0.06), inset 0 2px 2px rgba(255,255,255,1)\"' onmouseout='this.style.transform=\"translateY(0) scale(1)\"; this.style.boxShadow=\"0 10px 30px rgba(0,0,0,0.02), inset 0 2px 2px rgba(255,255,255,0.8)\"'>
+            <h3 style='margin:0; font-size:18px; font-weight:700; color:#334155;'>{medali} <span style='color:#0F172A; margin-left:15px;'>{d_name}</span> <span style='font-size:11px; font-weight:700; color:#4F46E5; background:rgba(224,231,255,0.8); padding:6px 14px; border-radius:100px; margin-left:15px; border:1px solid rgba(199,210,254,0.6); letter-spacing:0.5px;'>{row.get("title", "")}</span></h3>
+            <h3 style='margin:0; color:#2563EB; font-weight:900; font-size:20px;'>✨ {row.get("points", 0)}</h3>
         </div>
         """, unsafe_allow_html=True)
 
 
 # ==============================================================================
-# HALAMAN 2: MADING PEMBERITAHUAN (MODERN BRIGHT)
+# HALAMAN 2: MADING PEMBERITAHUAN (HYPER-GLASS LIGHT)
 # ==============================================================================
 st.markdown("""
 <style>
 .mading-container {
-    background: #FFFFFF;
-    border-radius: 24px;
-    padding: 30px;
-    box-shadow: 0 10px 40px -10px rgba(0,0,0,0.06);
-    border: 1px solid #E2E8F0;
-    margin-bottom: 35px;
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border-radius: 32px;
+    padding: 35px;
+    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.05), inset 0 2px 2px rgba(255,255,255,1);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    margin-bottom: 40px;
+    transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 .mading-container:hover {
     transform: translateY(-6px);
-    border-color: #BFDBFE;
-    box-shadow: 0 20px 40px -10px rgba(37, 99, 235, 0.1);
+    background: rgba(255, 255, 255, 0.9);
+    border-color: rgba(191, 219, 254, 0.8);
+    box-shadow: 0 30px 60px rgba(37, 99, 235, 0.08), inset 0 2px 2px rgba(255,255,255,1);
 }
 .mading-tag {
-    background: #EFF6FF;
+    background: rgba(239, 246, 255, 0.8);
     color: #2563EB;
-    padding: 6px 16px;
+    padding: 6px 18px;
     border-radius: 100px;
-    border: 1px solid #BFDBFE;
+    border: 1px solid rgba(191, 219, 254, 0.6);
     font-size: 11px;
-    font-weight: 700;
+    font-weight: 800;
     display: inline-block;
-    margin-bottom: 18px;
+    margin-bottom: 20px;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
 }
 .mading-title-text {
     color: #0F172A;
-    font-size: 22px;
-    font-weight: 800;
-    margin-bottom: 8px;
+    font-size: 24px;
+    font-weight: 900;
+    margin-bottom: 10px;
     line-height: 1.4;
     letter-spacing: -0.5px;
 }
 .mading-meta {
     color: #64748B;
     font-size: 12px;
-    margin-bottom: 22px;
-    font-weight: 500;
+    margin-bottom: 24px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
 }
 .mading-body {
     color: #334155;
     font-size: 15px;
-    line-height: 1.7;
-    font-weight: 400;
+    line-height: 1.8;
+    font-weight: 500;
 }
 </style>
 """, unsafe_allow_html=True)
 
 if menu == "📢 Mading Pemberitahuan":
-    st.markdown("<h1 style='font-size:38px; margin-bottom: 5px;'>Bulletin Board</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='font-size: 16px; color:#64748B;'>Informasi kreatif, pengumuman penting, dan galeri poster institut.</p>", unsafe_allow_html=True)
+    st.markdown("<h1 style='font-size:42px; margin-bottom: 5px; font-weight:900;'>Bulletin Board</h1>", unsafe_allow_html=True)
+    st.markdown("<p style='font-size: 16px; color:#64748B; font-weight:500;'>Informasi kreatif, pengumuman penting, dan galeri poster institut.</p>", unsafe_allow_html=True)
     st.write("<br>", unsafe_allow_html=True)
     
     if 'list_mading' not in st.session_state:
@@ -635,20 +680,20 @@ if menu == "📢 Mading Pemberitahuan":
                     
                     if item['gambar']:
                         try:
-                            st.markdown(f"<div style='margin-top:-20px; padding:0 30px;'><img src='{item['gambar']}' style='width:100%; border-radius:16px; border:1px solid #E2E8F0; box-shadow:0 8px 20px rgba(0,0,0,0.05);'></div>", unsafe_allow_html=True)
+                            st.markdown(f"<div style='margin-top:-25px; padding:0 30px;'><img src='{item['gambar']}' style='width:100%; border-radius:20px; border:2px solid #FFFFFF; box-shadow:0 15px 35px rgba(0,0,0,0.08);'></div>", unsafe_allow_html=True)
                         except:
                             st.caption("⚠️ Gagal memuat berkas gambar poster.")
                             
                     st.markdown(f"""
-                    <div style='background: transparent; padding: 20px 30px 30px 30px;'>
+                    <div style='background: transparent; padding: 25px 35px 35px 35px;'>
                         <p class="mading-body">{item['deskripsi']}</p>
                     </div>
                     <div style='margin-bottom: 10px;'></div>
                     """, unsafe_allow_html=True)
                     
     with tab_tambah:
-        st.markdown("<div class='glass-card' style='text-align:left; padding:40px;'>", unsafe_allow_html=True)
-        st.markdown("<h3 style='font-size:22px; margin-bottom:20px;'>Buat Poster Mading Baru</h3>", unsafe_allow_html=True)
+        st.markdown("<div class='glass-card' style='text-align:left;'>", unsafe_allow_html=True)
+        st.markdown("<h3 style='font-size:24px; margin-bottom:25px; font-weight:800;'>Buat Poster Mading Baru</h3>", unsafe_allow_html=True)
         
         with st.form("form_tambah_mading", clear_on_submit=True):
             judul_baru = st.text_input("Judul Poster / Pengumuman")
@@ -727,7 +772,7 @@ elif menu == "⚡ Live Arena Quiz (NEW!)":
             
         with tab_join:
             st.markdown("<div class='glass-card' style='text-align:left;'>", unsafe_allow_html=True)
-            st.markdown("<h3 style='font-size:20px;'>AULA AKTIF</h3>", unsafe_allow_html=True)
+            st.markdown("<h3 style='font-size:22px;'>AULA AKTIF</h3>", unsafe_allow_html=True)
             c_ref, _ = st.columns([1, 3])
             with c_ref:
                 if st.button("Refresh Server"): st.rerun()
@@ -737,8 +782,8 @@ elif menu == "⚡ Live Arena Quiz (NEW!)":
             if active_rooms:
                 for room in active_rooms:
                     st.markdown(f"""
-                    <div style='background:#FFFFFF; border:1px solid #E2E8F0; border-radius:16px; padding:20px 30px; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 4px 10px rgba(0,0,0,0.02);'>
-                        <div><h4 style='margin:0; color:#0F172A; font-size:18px; font-weight:700;'>{room['mapel']}</h4><span style='font-size:13px; color:#64748B; font-weight:500;'>Host: {room['host_username']} &nbsp;|&nbsp; Kode: <span style='color:#2563EB;'>{room['session_code']}</span></span></div>
+                    <div style='background:rgba(255,255,255,0.7); border:1px solid #E2E8F0; border-radius:24px; padding:25px 35px; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 10px 30px rgba(0,0,0,0.03), inset 0 2px 2px rgba(255,255,255,1);'>
+                        <div><h4 style='margin:0; color:#0F172A; font-size:18px; font-weight:800;'>{room['mapel']}</h4><span style='font-size:13px; color:#64748B; font-weight:600;'>Host: {room['host_username']} &nbsp;|&nbsp; Kode: <span style='color:#2563EB;'>{room['session_code']}</span></span></div>
                     </div>
                     """, unsafe_allow_html=True)
                     if st.button(f"Masuk Aula Ini", key=f"join_{room['session_code']}"):
@@ -749,7 +794,7 @@ elif menu == "⚡ Live Arena Quiz (NEW!)":
             else:
                 st.caption("Tidak ada aula terbuka saat ini.")
                 
-            st.markdown("<hr style='border:1px solid #E2E8F0; margin: 35px 0;'>", unsafe_allow_html=True)
+            st.markdown("<hr style='border:1px solid rgba(255,255,255,0.8); margin: 40px 0;'>", unsafe_allow_html=True)
             st.caption("Atau masukkan PIN Privat:")
             kode_input = st.text_input("PIN 6 Digit (Akses Privat):", max_chars=6).strip()
             st.write("<br>", unsafe_allow_html=True)
@@ -768,7 +813,7 @@ elif menu == "⚡ Live Arena Quiz (NEW!)":
             
         with tab_host:
             st.markdown("<div class='glass-card' style='text-align:left;'>", unsafe_allow_html=True)
-            st.markdown("<h3 style='font-size:20px;'>BUKA AULA BARU</h3>", unsafe_allow_html=True)
+            st.markdown("<h3 style='font-size:22px;'>BUKA AULA BARU</h3>", unsafe_allow_html=True)
             mapel_guru = st.selectbox("Materi Ujian:", pilihan_mapel_gabungan, key="guru_m")
             st.write("<br>", unsafe_allow_html=True)
             if st.button("Buka Server Baru"):
@@ -781,10 +826,10 @@ elif menu == "⚡ Live Arena Quiz (NEW!)":
 
         with tab_create:
             st.markdown("<div class='glass-card' style='text-align:left;'>", unsafe_allow_html=True)
-            st.markdown("<h3 style='font-size:20px;'>MANUFAKTUR SOAL</h3>", unsafe_allow_html=True)
+            st.markdown("<h3 style='font-size:22px;'>MANUFAKTUR SOAL</h3>", unsafe_allow_html=True)
             judul_baru = st.text_input("Label / Judul Ujian Custom:").strip()
             
-            st.markdown("<hr style='border:1px solid #E2E8F0; margin: 30px 0;'>", unsafe_allow_html=True)
+            st.markdown("<hr style='border:1px solid rgba(255,255,255,0.8); margin: 35px 0;'>", unsafe_allow_html=True)
             for i, q in enumerate(st.session_state.temp_q):
                 st.caption(f"✓ Terarsip: {q['soal']} (Jawaban: {q['jawaban']})")
                 
@@ -826,15 +871,15 @@ elif menu == "⚡ Live Arena Quiz (NEW!)":
         room_info = db_get_quiz_session(code)
         players = db_get_session_players(code)
         
-        st.markdown(f"<div class='glass-card' style='padding:60px;'>", unsafe_allow_html=True)
-        st.markdown(f"<h4 style='font-size:18px; color:#64748B;'>Sesi Modul: <span style='color:#0F172A; font-weight:700;'>{room_info['mapel']}</span></h4>", unsafe_allow_html=True)
-        st.markdown(f"<p style='font-size:14px; color:#94A3B8; margin-top:30px; font-weight:700; letter-spacing:4px;'>KODE AKSES PRIVAT</p>", unsafe_allow_html=True)
-        st.markdown(f"<h1 style='font-size:85px; font-weight:900; color:#2563EB; letter-spacing:15px; margin:0;'>{code}</h1>", unsafe_allow_html=True)
-        st.markdown(f"<p style='margin-top:40px; font-size:16px; font-weight:600; color:#334155;'>Partisipan Hadir: {len(players)}</p>", unsafe_allow_html=True)
+        st.markdown(f"<div class='glass-card' style='padding:70px;'>", unsafe_allow_html=True)
+        st.markdown(f"<h4 style='font-size:20px; color:#64748B;'>Sesi Modul: <span style='color:#0F172A; font-weight:800;'>{room_info['mapel']}</span></h4>", unsafe_allow_html=True)
+        st.markdown(f"<p style='font-size:15px; color:#94A3B8; margin-top:40px; font-weight:800; letter-spacing:5px;'>KODE AKSES PRIVAT</p>", unsafe_allow_html=True)
+        st.markdown(f"<h1 style='font-size:90px; font-weight:900; color:#3B82F6; letter-spacing:15px; margin:0;'>{code}</h1>", unsafe_allow_html=True)
+        st.markdown(f"<p style='margin-top:40px; font-size:16px; font-weight:700; color:#334155;'>Partisipan Hadir: {len(players)}</p>", unsafe_allow_html=True)
         
         if players:
             names = ", ".join([p["username"] for p in players])
-            st.markdown(f"<div style='background:#F1F5F9; padding:20px; border-radius:16px; color:#0F172A; font-size:15px; font-weight:600; border:1px solid #E2E8F0;'>{names}</div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='background:rgba(255,255,255,0.8); padding:25px; border-radius:20px; color:#0F172A; font-size:16px; font-weight:700; border:1px solid rgba(255,255,255,1); box-shadow:0 10px 25px rgba(0,0,0,0.03);'>{names}</div>", unsafe_allow_html=True)
         else:
             st.caption("Menunggu koneksi partisipan...")
             
@@ -883,13 +928,13 @@ elif menu == "⚡ Live Arena Quiz (NEW!)":
 
         if st.session_state.is_host and room_info["status"] == "active":
             st.write("<br><br>", unsafe_allow_html=True)
-            st.markdown("<h3 style='text-align:left; font-size:20px;'>LIVE TELEMETRY</h3>", unsafe_allow_html=True)
+            st.markdown("<h3 style='text-align:left; font-size:22px;'>LIVE TELEMETRY</h3>", unsafe_allow_html=True)
             for rank, p in enumerate(players):
                 status_icon = "Selesai" if p["status"] == "finished" else "Mengerjakan"
                 st.markdown(f"""
-                <div style='background:#FFFFFF; border:1px solid #E2E8F0; border-radius:16px; padding:20px 30px; margin-bottom:12px; display:flex; justify-content:space-between; font-size:15px; font-weight:600; color:#0F172A; box-shadow:0 4px 10px rgba(0,0,0,0.02);'>
-                    <span>{rank+1}. {p['username']} <span style='font-size:12px; color:#64748B; margin-left:15px; font-weight:500;'>[{status_icon}]</span></span>
-                    <span style='color:#2563EB; font-weight:800;'>{p['score']} Pts</span>
+                <div style='background:rgba(255,255,255,0.8); border:1px solid #FFFFFF; border-radius:20px; padding:25px 35px; margin-bottom:15px; display:flex; justify-content:space-between; font-size:16px; font-weight:700; color:#0F172A; box-shadow:0 10px 25px rgba(0,0,0,0.03);'>
+                    <span>{rank+1}. {p['username']} <span style='font-size:13px; color:#64748B; margin-left:15px; font-weight:600;'>[{status_icon}]</span></span>
+                    <span style='color:#3B82F6; font-weight:900;'>{p['score']} Pts</span>
                 </div>
                 """, unsafe_allow_html=True)
 
@@ -899,14 +944,14 @@ elif menu == "⚡ Live Arena Quiz (NEW!)":
         
         progress_val = int((idx / total_soal) * 100)
         st.progress(progress_val)
-        st.markdown(f"<div style='text-align:right; color:#64748B; font-weight:700; font-size:13px; margin-top:12px; letter-spacing:1px;'>PAGE {idx+1} OF {total_soal}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div style='text-align:right; color:#64748B; font-weight:800; font-size:14px; margin-top:15px; letter-spacing:1px;'>PAGE {idx+1} OF {total_soal}</div>", unsafe_allow_html=True)
         
         soal_aktif = st.session_state.qz_soal[idx]
         opsi_acak = soal_aktif["opsi"].copy()
         random.shuffle(opsi_acak)
         
         st.write("<br>", unsafe_allow_html=True)
-        st.markdown(f"<div class='glass-card' style='font-size:24px; font-weight:600; padding:60px 50px; line-height:1.6; color:#0F172A;'>{soal_aktif['soal']}</div><br><br>", unsafe_allow_html=True)
+        st.markdown(f"<div class='glass-card' style='font-size:26px; font-weight:700; padding:70px 60px; line-height:1.6; color:#0F172A;'>{soal_aktif['soal']}</div><br><br>", unsafe_allow_html=True)
         
         st.markdown("<div class='quiz-btn'>", unsafe_allow_html=True)
         c1, c2 = st.columns(2)
@@ -950,12 +995,12 @@ elif menu == "⚡ Live Arena Quiz (NEW!)":
         if akurasi > 70: st.balloons()
         
         st.write("<br><br>", unsafe_allow_html=True)
-        st.markdown("<h1 style='text-align:center; font-size:48px;'><span class='gradient-text'>Sesi Selesai</span></h1>", unsafe_allow_html=True)
+        st.markdown("<h1 style='text-align:center; font-size:55px;'><span class='gradient-text'>Sesi Selesai</span></h1>", unsafe_allow_html=True)
         st.write("<br>", unsafe_allow_html=True)
         
         c1, c2 = st.columns(2)
-        c1.markdown(f"<div class='score-card'><h3 style='color:#3B82F6; font-size:15px; letter-spacing:1px; margin-bottom:15px;'>Akurasi Logika</h3><h1 style='color:#0F172A; font-size:60px; margin:0; font-weight:800;'>{akurasi}%</h1></div>", unsafe_allow_html=True)
-        c2.markdown(f"<div class='score-card' style='background:#F0FDF4; border-color:#86EFAC;'><h3 style='color:#16A34A; font-size:15px; letter-spacing:1px; margin-bottom:15px;'>Poin Diperoleh</h3><h1 style='color:#15803D; font-size:60px; margin:0; font-weight:800;'>+{final_xp}</h1></div>", unsafe_allow_html=True)
+        c1.markdown(f"<div class='score-card'><h3 style='color:#3B82F6; font-size:16px; letter-spacing:1.5px; margin-bottom:15px;'>Akurasi Logika</h3><h1 style='color:#0F172A; font-size:70px; margin:0; font-weight:900;'>{akurasi}%</h1></div>", unsafe_allow_html=True)
+        c2.markdown(f"<div class='score-card' style='background:linear-gradient(135deg, rgba(220, 252, 231, 0.8), rgba(255, 255, 255, 0.6)); border-color:#86EFAC;'><h3 style='color:#16A34A; font-size:16px; letter-spacing:1.5px; margin-bottom:15px;'>Poin Diperoleh</h3><h1 style='color:#15803D; font-size:70px; margin:0; font-weight:900;'>+{final_xp}</h1></div>", unsafe_allow_html=True)
         
         st.write("<br><br>", unsafe_allow_html=True)
         if st.button("Simpan & Kembali ke Lobby"):
@@ -1009,17 +1054,17 @@ elif menu == "⚔️ Mode Duel Ranked (PvP)":
             
     if st.session_state.lawan_duel and st.session_state.kuis_duel and st.session_state.soal_pvp_aktif:
         l_user, l_nama, l_pts = st.session_state.lawan_duel
-        st.markdown("<hr style='border:1px solid #E2E8F0; margin: 40px 0;'>", unsafe_allow_html=True)
+        st.markdown("<hr style='border:1px solid rgba(255,255,255,0.8); margin: 45px 0;'>", unsafe_allow_html=True)
         
         c_p1, c_vs, c_p2 = st.columns([2,1,2])
-        with c_p1: st.markdown(f"<div class='glass-card' style='padding:30px; border-color:#BFDBFE; background:#EFF6FF;'><h2 style='color:#1D4ED8; margin:0; font-size:24px;'>{display_name_db}</h2><p style='font-size:15px; font-weight:600; color:#3B82F6; margin:0; margin-top:5px;'>✨ {points_db} Pts</p></div>", unsafe_allow_html=True)
-        with c_vs: st.markdown("<div style='text-align:center; margin-top:25px;'><span class='vs-text'>VS</span></div>", unsafe_allow_html=True)
-        with c_p2: st.markdown(f"<div class='glass-card' style='padding:30px; border-color:#FECACA; background:#FEF2F2;'><h2 style='color:#B91C1C; margin:0; font-size:24px;'>{l_nama}</h2><p style='font-size:15px; font-weight:600; color:#EF4444; margin:0; margin-top:5px;'>✨ {l_pts} Pts</p></div>", unsafe_allow_html=True)
+        with c_p1: st.markdown(f"<div class='glass-card' style='padding:35px; border-color:#BFDBFE; background:linear-gradient(135deg, rgba(239,246,255,0.9), rgba(255,255,255,0.8)); box-shadow:0 15px 35px rgba(37,99,235,0.08);'><h2 style='color:#1D4ED8; margin:0; font-size:26px;'>{display_name_db}</h2><p style='font-size:16px; font-weight:700; color:#3B82F6; margin:0; margin-top:8px;'>✨ {points_db} Pts</p></div>", unsafe_allow_html=True)
+        with c_vs: st.markdown("<div style='text-align:center; margin-top:30px;'><span class='vs-text'>VS</span></div>", unsafe_allow_html=True)
+        with c_p2: st.markdown(f"<div class='glass-card' style='padding:35px; border-color:#FECACA; background:linear-gradient(135deg, rgba(254,242,242,0.9), rgba(255,255,255,0.8)); box-shadow:0 15px 35px rgba(239,68,68,0.08);'><h2 style='color:#B91C1C; margin:0; font-size:26px;'>{l_nama}</h2><p style='font-size:16px; font-weight:700; color:#EF4444; margin:0; margin-top:8px;'>✨ {l_pts} Pts</p></div>", unsafe_allow_html=True)
         
         st.write("<br><br>", unsafe_allow_html=True)
-        st.markdown("<div class='glass-card' style='text-align:left; padding:50px;'>", unsafe_allow_html=True)
+        st.markdown("<div class='glass-card' style='text-align:left; padding:60px;'>", unsafe_allow_html=True)
         ds = st.session_state.soal_pvp_aktif
-        st.markdown(f"<h3 style='font-size:22px; font-weight:600; color:#0F172A; line-height:1.6;'>{ds['soal']}</h3>", unsafe_allow_html=True)
+        st.markdown(f"<h3 style='font-size:24px; font-weight:700; color:#0F172A; line-height:1.7;'>{ds['soal']}</h3>", unsafe_allow_html=True)
         st.write("<br>", unsafe_allow_html=True)
         j_user = st.radio("Pilih Argumen Anda:", ds['opsi'], key="duel_ans")
         
@@ -1070,12 +1115,12 @@ elif menu == "📖 Ruang Belajar & Modul":
     tab_mat, tab_doc = st.tabs(["📌 Ekstrak Data", "📂 Lampiran Dokumen"])
     
     with tab_mat:
-        try: st.markdown(f"<div class='glass-card' style='text-align:left; line-height:1.9; font-size:16px; font-weight:400; color:#334155; padding:50px;'>{DATA_MATERI[p_mapel][p_kelas][p_bab]['rangkuman']}</div>", unsafe_allow_html=True)
+        try: st.markdown(f"<div class='glass-card' style='text-align:left; line-height:2; font-size:17px; font-weight:500; color:#334155; padding:60px;'>{DATA_MATERI[p_mapel][p_kelas][p_bab]['rangkuman']}</div>", unsafe_allow_html=True)
         except: st.info("Sektor data ini kosong atau belum dialokasikan.")
 
     with tab_doc:
         st.markdown("<div class='glass-card' style='text-align:left;'>", unsafe_allow_html=True)
-        st.markdown("<h3 style='font-size:20px;'>📂 Repositori Eksternal</h3>", unsafe_allow_html=True)
+        st.markdown("<h3 style='font-size:22px;'>📂 Repositori Eksternal</h3>", unsafe_allow_html=True)
         st.caption("Referensi visual pendukung akan dirujuk di partisi ini.")
         st.write("<br>", unsafe_allow_html=True)
         
@@ -1086,7 +1131,7 @@ elif menu == "📖 Ruang Belajar & Modul":
                 file_path = os.path.join(folder_t, f)
                 
                 if ext in ['jpg', 'jpeg', 'png']:
-                    st.markdown("<div style='padding:20px; border-radius:20px; background:#F8FAFC; border:1px solid #E2E8F0; margin-bottom:20px;'>", unsafe_allow_html=True)
+                    st.markdown("<div style='padding:25px; border-radius:24px; background:rgba(255,255,255,0.8); border:1px solid #FFFFFF; margin-bottom:25px; box-shadow:0 10px 30px rgba(0,0,0,0.05);'>", unsafe_allow_html=True)
                     st.image(file_path, caption=f"🖼️ {f}", use_container_width=True)
                     st.markdown("</div>", unsafe_allow_html=True)
                 else:
@@ -1108,7 +1153,7 @@ elif menu == "🛒 Black Market Profil":
     with tab_av:
         c1, c2 = st.columns(2)
         with c1:
-            st.markdown("<div class='glass-card'><h2 style='font-size:20px; margin-bottom:20px;'>Geni Us</h2>", unsafe_allow_html=True)
+            st.markdown("<div class='glass-card'><h2 style='font-size:22px; margin-bottom:25px;'>Geni Us</h2>", unsafe_allow_html=True)
             tampilkan_avatar("genius")
             st.write("<br>", unsafe_allow_html=True)
             if st.button("INISIALISASI: GENI US"):
@@ -1117,7 +1162,7 @@ elif menu == "🛒 Black Market Profil":
                 st.toast("Paket Tampilan Diterapkan.", icon="🖼️"); st.rerun()
             st.markdown("</div>", unsafe_allow_html=True)
         with c2:
-            st.markdown("<div class='glass-card'><h2 style='font-size:20px; margin-bottom:20px;'>Smar T</h2>", unsafe_allow_html=True)
+            st.markdown("<div class='glass-card'><h2 style='font-size:22px; margin-bottom:25px;'>Smar T</h2>", unsafe_allow_html=True)
             tampilkan_avatar("smart")
             st.write("<br>", unsafe_allow_html=True)
             if st.button("INISIALISASI: SMAR T"):
@@ -1127,13 +1172,13 @@ elif menu == "🛒 Black Market Profil":
             st.markdown("</div>", unsafe_allow_html=True)
             
     with tab_gl:
-        st.markdown("<div class='glass-card' style='text-align:left;'><h3 style='font-size:22px;'>Marketplace Kredensial</h3>", unsafe_allow_html=True)
+        st.markdown("<div class='glass-card' style='text-align:left;'><h3 style='font-size:24px;'>Marketplace Kredensial</h3>", unsafe_allow_html=True)
         st.write(f"Saldo Tersedia: ✨ **{points_db} Pts**")
-        st.markdown("<hr style='border:1px solid #E2E8F0; margin: 35px 0;'>", unsafe_allow_html=True)
+        st.markdown("<hr style='border:1px solid rgba(255,255,255,0.8); margin: 40px 0;'>", unsafe_allow_html=True)
         for gelar, harga in DAFTAR_GELAR.items():
             cg1, cg2, cg3 = st.columns([3, 1, 1])
-            cg1.markdown(f"<h4 style='font-size:16px; color:#0F172A; font-weight:700;'>{gelar}</h4>", unsafe_allow_html=True)
-            cg2.markdown(f"<p style='color:#2563EB; font-weight:700; font-size:16px; margin:0;'>✨ {harga}</p>", unsafe_allow_html=True)
+            cg1.markdown(f"<h4 style='font-size:17px; color:#0F172A; font-weight:800;'>{gelar}</h4>", unsafe_allow_html=True)
+            cg2.markdown(f"<p style='color:#3B82F6; font-weight:800; font-size:17px; margin:0;'>✨ {harga}</p>", unsafe_allow_html=True)
             with cg3:
                 if title_db == gelar: st.button("Tersemat", key=f"ak_{gelar}", disabled=True)
                 else:
@@ -1146,7 +1191,7 @@ elif menu == "🛒 Black Market Profil":
         
     with tab_edit:
         st.markdown("<div class='glass-card' style='text-align:left;'>", unsafe_allow_html=True)
-        st.markdown("<h3 style='font-size:22px;'>Kustomisasi Modul Visual</h3>", unsafe_allow_html=True)
+        st.markdown("<h3 style='font-size:24px;'>Kustomisasi Modul Visual</h3>", unsafe_allow_html=True)
         st.caption("Ubah nama tampilan dan unggah file avatar (JPG/PNG).")
         st.write("<br>", unsafe_allow_html=True)
         
@@ -1182,13 +1227,14 @@ elif menu == "🛒 Black Market Profil":
 elif menu == "⚙️ Konsol Super Admin":
     st.markdown("<h1><span class='gradient-text'>SYSTEM ROOT ACCESS</span></h1>", unsafe_allow_html=True)
     if not st.session_state.is_admin:
-        st.markdown("<div class='glass-card' style='padding:50px;'><h2 style='font-size:22px; margin-bottom:25px;'>ENCRYPTED PORTAL</h2>", unsafe_allow_html=True)
+        st.markdown("<div class='glass-card' style='padding:50px;'><h2 style='font-size:24px; margin-bottom:30px;'>ENCRYPTED PORTAL</h2>", unsafe_allow_html=True)
         pwd = st.text_input("Masukan Kernel Password:", type="password")
         st.write("<br>", unsafe_allow_html=True)
+        st.markdown("<div class='btn-red'>", unsafe_allow_html=True)
         if st.button("Bypass Protocol"):
             if pwd == PASSWORD_ADMIN: st.session_state.is_admin = True; st.rerun()
             else: st.error("Akses Ditolak. Protokol pertahanan aktif.")
-        st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown("</div></div>", unsafe_allow_html=True)
     else:
         st.success("Akses Root diizinkan.")
         tab_stat, tab_db, tab_upload = st.tabs(["📈 Log Sistem", "👥 Skema Pengguna", "📤 Distribusi Aset"])
@@ -1197,7 +1243,7 @@ elif menu == "⚙️ Konsol Super Admin":
         df = pd.DataFrame(users_admin) if users_admin else pd.DataFrame()
         
         with tab_stat:
-            st.markdown("<h3 style='font-size:20px; margin-top:20px;'>Statistik Global Server</h3>", unsafe_allow_html=True)
+            st.markdown("<h3 style='font-size:22px; margin-top:25px;'>Statistik Global Server</h3>", unsafe_allow_html=True)
             if not df.empty:
                 c1, c2, c3 = st.columns(3)
                 c1.metric("Node Klien Aktif", f"{len(df)}")
@@ -1205,7 +1251,7 @@ elif menu == "⚙️ Konsol Super Admin":
                 c3.metric("Rerata Skor Global", f"{int(df['points'].mean())} Pts")
                 
                 st.write("<br>", unsafe_allow_html=True)
-                st.markdown("<div class='glass-card' style='padding:40px;'><h4 style='font-size:16px; margin-bottom:20px;'>Distribusi Kekayaan Poin</h4>", unsafe_allow_html=True)
+                st.markdown("<div class='glass-card' style='padding:45px;'><h4 style='font-size:18px; margin-bottom:25px;'>Distribusi Kekayaan Poin</h4>", unsafe_allow_html=True)
                 chart_data = df.set_index("username")["points"]
                 st.bar_chart(chart_data, use_container_width=True)
                 st.markdown("</div>", unsafe_allow_html=True)
@@ -1219,7 +1265,7 @@ elif menu == "⚙️ Konsol Super Admin":
             
         with tab_upload:
             st.markdown("<div class='glass-card' style='text-align:left;'>", unsafe_allow_html=True)
-            st.markdown("<h3 style='font-size:20px; margin-bottom:20px;'>Manajemen Aset Statis</h3>", unsafe_allow_html=True)
+            st.markdown("<h3 style='font-size:22px; margin-bottom:25px;'>Manajemen Aset Statis</h3>", unsafe_allow_html=True)
             c1, c2 = st.columns(2)
             with c1: up_mapel = st.selectbox("Target Folder (Mapel):", list(DATA_MATERI.keys()), key="adm_m")
             k_list = list(DATA_MATERI.get(up_mapel, {}).keys())
@@ -1235,6 +1281,7 @@ elif menu == "⚙️ Konsol Super Admin":
             up_file = st.file_uploader("Pilih Berkas Payload (PDF/IMG):")
             st.write("<br>", unsafe_allow_html=True)
             
+            st.markdown("<div class='btn-green'>", unsafe_allow_html=True)
             if up_file and st.button("Injeksi ke Lokal Server"):
                 try:
                     folder_t = os.path.join("uploads", bersihkan_nama(up_mapel), bersihkan_nama(up_kelas), bersihkan_nama(up_bab), bersihkan_nama(up_sub))
@@ -1242,7 +1289,7 @@ elif menu == "⚙️ Konsol Super Admin":
                     with open(os.path.join(folder_t, up_file.name), "wb") as f: f.write(up_file.getbuffer())
                     st.success("File sukses diunggah ke server lokal.")
                 except Exception as e: st.error(f"Injeksi gagal: {e}")
-            st.markdown("</div>", unsafe_allow_html=True)
+            st.markdown("</div></div>", unsafe_allow_html=True)
 
         st.write("<br><br>", unsafe_allow_html=True)
         st.markdown("<div class='btn-red'>", unsafe_allow_html=True)
